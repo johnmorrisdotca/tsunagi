@@ -137,6 +137,53 @@ the same run writes the same files. A board already published keeps its
 number unless a size is grown, and then `/renumbered` says where each old
 level went.
 
+## Architecture
+
+The rules, the solver and the generator are plain functions over short codes,
+with no DOM. Each size's levels is an entry of its own, so a page loads only
+the size it shows.
+
+```text
+src/
+├── index.ts          the main entry: everything below but the levels themselves
+├── code.ts           layouts and answers as short codes, and the board each stands for
+├── steps.ts          where a line may go next on a board: walls, bridges, wrap, hexagons
+├── lines.ts          the lines a player has drawn, and what a press and a drag do to them
+├── check.ts          whether an answer joins every pair as the rules allow
+├── solve.ts          the solver, which counts a board's answers up to a limit
+├── generate.ts       new boards from a seed: lines laid at random, cut back to their ends
+├── twists.ts         boards with a twist: walls, bridges, waypoints, wrap, hexagons
+├── sparse.ts         sparse boards: few marbles and long lines
+├── explosions.ts     explosions that break a line, and a limit on strokes
+├── difficulty.ts     how hard a level is, measured from its board and its answer
+├── ladder.ts         what a level asks of a player, read from its board
+├── ladder.types.ts   the challenges a board can have
+├── cheat.ts          one line of the answer drawn in, for a player who asks for help
+├── levels.ts         the "/levels" entry: each size's levels, loaded when asked
+├── levelCounts.ts    how many levels each size has
+├── levelBlocks.ts    levels in blocks of sixteen, and which a player may open
+├── renumber.ts       a record kept by level number, moved to the numbers levels have now
+├── levels.suite.ts   the proof each size's levels test runs: one answer, the one stored
+├── random.ts         the seeded random numbers every board is made from
+├── version.ts        the package's version
+└── levels/
+    ├── size4.data.ts       the 4×4 levels, each a layout and its one answer
+    ├── size5.data.ts       5×5
+    ├── size6.data.ts       6×6
+    ├── size7.data.ts       7×7
+    ├── size8.data.ts       8×8
+    ├── size9.data.ts       9×9
+    ├── size10.data.ts      10×10
+    ├── size11.data.ts      11×11
+    ├── size12.data.ts      12×12
+    ├── marks.data.ts       every level's difficulty, 1 to 5, and each twist's part in its block
+    └── renumbered.data.ts  where each old level went when the levels were renumbered
+```
+
+Tests sit beside the code they test (`*.test.ts`, one `levels.<size>.test.ts`
+a size). `scripts/` makes the levels and the twists, builds the demo and checks
+the package as npm packs it; `demo/` is the playable page.
+
 ## The name
 
 *Tsunagi* (繋ぎ) is Japanese for "joining", "a link": what holds two things
