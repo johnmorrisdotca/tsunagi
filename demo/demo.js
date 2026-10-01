@@ -7,6 +7,7 @@ import { loadTsunagiLevels, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZ
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
 const WORDS = {
   en: {
+    pageApi: "API reference",
     pitch: "Join each pair of marbles with a line. Lines never cross, and when every pair is joined, every cell is filled. Draw with a finger or the mouse, from a marble or from the end of a line.",
     name: "Tsunagi (繋ぎ) is Japanese for joining, a link.",
     nameLink: "About the name",
@@ -31,6 +32,7 @@ const WORDS = {
     foot: "Every level was made once and is proved on every build to have exactly one answer. Your progress stays on this device.",
   },
   ja: {
+    pageApi: "API（英語）",
     pitch: "同じ色の玉どうしを線でつなぎます。線は交差できません。すべての組をつなぐと、すべてのマスが埋まります。玉か線の端から、指やマウスでなぞって描きます。",
     name: "「繋ぎ」は、つなぐこと、つながりという意味です。",
     nameLink: "名前について（英語）",

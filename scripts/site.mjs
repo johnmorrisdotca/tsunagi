@@ -3,6 +3,7 @@
 // compiled library beside it.
 import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 
+import { API_CSS, apiPage } from "./api.mjs";
 import { FAMILY_SCRIPT, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
 
 const id = "tsunagi";
@@ -33,7 +34,7 @@ const page = `<!doctype html>
   </head>
   <body>
     <main>
-      ${familyHeader({ id })}
+      ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
       <div class="setup fam-row">
         <span class="fam-label" data-say="size"></span>
         <div class="fam-seg" role="group" data-say-label="size" id="sizes"></div>
@@ -73,4 +74,7 @@ mkdirSync("site", { recursive: true });
 cpSync("demo", "site", { recursive: true });
 cpSync("dist", "site/dist", { recursive: true });
 writeFileSync("site/index.html", page);
+// The API reference, made from the source: every export of every entry point.
+writeFileSync("site/api.css", API_CSS);
+writeFileSync("site/api.html", apiPage({ id, name: "Tsunagi", icon: ICON }));
 console.log("site/ is ready: serve it, or let the Pages workflow publish it.");

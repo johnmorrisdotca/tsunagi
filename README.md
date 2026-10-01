@@ -10,7 +10,7 @@ Join each pair of marbles with a line, every line its own, until the board is fu
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
 
 <p align="center">
   <img src="docs/desktop.jpg" alt="A 7×7 level solved: seven pairs of coloured marbles, each joined by a line of its colour, every cell of the board filled" width="620">
@@ -102,6 +102,8 @@ difficulty.
 
 ## API
 
+The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+
 | Export | What it does |
 | --- | --- |
 | `decodeLayout(code, size)`, `encodeLayout(cells, walls, more)` | a layout's code and the `LinkLayout` it stands for: marbles (`ends`), cells, walls, waypoints, wrap, hexagon |
@@ -181,7 +183,7 @@ src/
 ```
 
 Tests sit beside the code they test (`*.test.ts`, one `levels.<size>.test.ts`
-a size). `scripts/` makes the levels and the twists, builds the demo and checks
+a size). `scripts/` makes the levels and the twists, builds the demo and its API reference page and checks
 the package as npm packs it; `demo/` is the playable page.
 
 ## The name

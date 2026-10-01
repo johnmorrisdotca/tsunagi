@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 1,792 hand-checked levels from 4×4 to 12×12, each with exactly one answer. Zero dependencies.",
   "keywords": [
     "puzzle",
