@@ -23,6 +23,9 @@ async function importSize(size: number): Promise<readonly LevelRow[]> {
   if (size === 10) return (await import("./levels/size10.data.ts")).TSUNAGI_10;
   if (size === 11) return (await import("./levels/size11.data.ts")).TSUNAGI_11;
   if (size === 12) return (await import("./levels/size12.data.ts")).TSUNAGI_12;
+  if (size === 13) return (await import("./levels/size13.data.ts")).TSUNAGI_13;
+  if (size === 14) return (await import("./levels/size14.data.ts")).TSUNAGI_14;
+  if (size === 15) return (await import("./levels/size15.data.ts")).TSUNAGI_15;
   throw new Error(`No Tsunagi at ${size}×${size}.`);
 }
 

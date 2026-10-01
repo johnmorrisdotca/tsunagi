@@ -1,7 +1,7 @@
 <h1 align="center">Tsunagi <sub>つなぎ</sub></h1>
 
 <p align="center"><strong>A line-joining logic puzzle for JavaScript and TypeScript.</strong><br>
-Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 1,792 levels from 4×4 to 12×12, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch and mouse in any page with one call or one tag. No dependencies.</p>
+Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 2,176 levels from 4×4 to 15×15, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch and mouse in any page with one call or one tag. No dependencies.</p>
 
 <p align="center">
   <a href="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml/badge.svg"></a>
@@ -210,8 +210,10 @@ openTsunagiLevels(7, new Set([1, 2, 3]));         // 16: the first block of sixt
 | 4×4 | 192 | 7×7 | 256 | 10×10 | 128 |
 | 5×5 | 256 | 8×8 | 256 | 11×11 | 64 |
 | 6×6 | 256 | 9×9 | 256 | 12×12 | 128 |
+| 13×13 | 128 | 14×14 | 128 | 15×15 | 128 |
 
-Every level was made once by `scripts/tsunagi-levels.ts` and is proved again
+Every level was made once, by `scripts/tsunagi-levels.ts` (4×4 to 12×12) or
+`scripts/tsunagi-levels-big.ts` (13×13 to 15×15), and is proved again
 on every build: solved from scratch, it must have exactly one answer, the one
 stored, filling every cell, with no two levels the same board turned or
 mirrored. Levels come in blocks of sixteen, each block no easier on average
@@ -228,7 +230,7 @@ difficulty.
 | `@johnmorrisdotca/tsunagi/element` | the `TsunagiBoard` class behind `<tsunagi-board>`, to extend or to define under another name |
 | `@johnmorrisdotca/tsunagi/element/define` | defines `<tsunagi-board>` on the page, for its effect |
 | `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size)`, `tsunagiLevelOf(size, layout)`, each size fetched only when loaded |
-| `@johnmorrisdotca/tsunagi/levels-4` … `/levels-12` | one size's levels, `TSUNAGI_4` … `TSUNAGI_12`, as `[layout, answer]` pairs |
+| `@johnmorrisdotca/tsunagi/levels-4` … `/levels-15` | one size's levels, `TSUNAGI_4` … `TSUNAGI_15`, as `[layout, answer]` pairs |
 | `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5) and `TSUNAGI_ROLES` (each twist level's part in its block) |
 | `@johnmorrisdotca/tsunagi/renumbered` | where each old level went when the levels were renumbered on 2026-09-26, for anyone who stored solves by number |
 
@@ -244,7 +246,8 @@ The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists ev
 | `noLines`, `pressAt`, `dragTo`, `dragThrough`, `letGo` | drawing, as a finger does it: each takes the lines drawn so far and returns new ones |
 | `joined`, `allJoined`, `unjoinedPairs`, `filled`, `ownersOf` | what the lines drawn so far amount to |
 | `encodeLines`, `decodeLines` | lines half drawn, as a code, to keep a game and come back to it |
-| `countSolutions(layout, limit, budget)` | counts answers up to `limit`, within a `budget` of search steps, and returns one |
+| `countSolutions(layout, limit, budget)` | counts answers up to `limit`, within a `budget` of search steps (dead ends, from 13×13), and returns one |
+| `countSolutionsSat(layout, limit, budget, guide)` | the same count made by SAT, a solver that learns from its dead ends: what proves every 13×13 to 15×15 level, and what `countSolutions` is from 13×13 |
 | `candidate`, `repairedCandidate`, `sparseCandidate`, `layoutOf` | a new board from a seeded `Random`: a random filling of lines, cut back to its ends |
 | `bridgeCandidate`, `wallCandidate`, `waypointCandidate`, `wrapCandidate`, `hexCandidate`, `bridgeAndWallCandidate` | a board with a twist |
 | `measureLevel`, `difficultyScores`, `orderByDifficulty` | how hard a board is: corners, guessing, cells not forced, its longest line |
@@ -273,6 +276,18 @@ the same run writes the same files. A board already published keeps its
 number unless a size is grown, and then `/renumbered` says where each old
 level went.
 
+13×13 to 15×15 are made in two steps, because their boards are found by the
+thousand on every core of a desk: `node scripts/tsunagi-pool.ts 15 plain 300`
+runs seeded jobs in parallel (`plain`, or a twist: `bridge`, `walls`, `wrap` …)
+and keeps each board proved to have one answer and measured, and
+`node scripts/tsunagi-levels-big.ts` takes the jobs recorded in it and writes
+the files. A job's boards depend only on its number, never on the machine.
+The plain boards of 13×13 and 14×14 take seconds and 15×15's about six minutes
+on twenty cores; the twist boards take longer, about an hour in all. Boards from 13×13
+up have at most sixteen lines, the most colours there are, and are proved by
+`countSolutionsSat`: 12×12 was the ceiling until a solver that learns from its
+dead ends replaced the one that walks into them again.
+
 ## Architecture
 
 The rules, the solver, the generator and the game in play are plain functions over short codes,
@@ -287,7 +302,9 @@ src/
 ├── steps.ts          where a line may go next on a board: walls, bridges, wrap, hexagons
 ├── lines.ts          the lines a player has drawn, and what a press and a drag do to them
 ├── check.ts          whether an answer joins every pair as the rules allow
-├── solve.ts          the solver, which counts a board's answers up to a limit
+├── solve.ts          the solver, which counts a board's answers up to a limit (4×4 to 12×12)
+├── solveSat.ts       the same count by SAT, for 13×13 and above: the board written as clauses
+├── sat.ts            a small SAT solver: clause learning, restarts, clauses added between solves
 ├── generate.ts       new boards from a seed: lines laid at random, cut back to their ends
 ├── twists.ts         boards with a twist: walls, bridges, waypoints, wrap, hexagons
 ├── sparse.ts         sparse boards: few marbles and long lines
@@ -327,6 +344,9 @@ src/
     ├── size10.data.ts      10×10
     ├── size11.data.ts      11×11
     ├── size12.data.ts      12×12
+    ├── size13.data.ts      13×13
+    ├── size14.data.ts      14×14
+    ├── size15.data.ts      15×15
     ├── marks.data.ts       every level's difficulty, 1 to 5, and each twist's part in its block
     └── renumbered.data.ts  where each old level went when the levels were renumbered
 ```

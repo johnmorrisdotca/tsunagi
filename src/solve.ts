@@ -1,5 +1,18 @@
 import { CELL_EMPTY, type LinkLayout } from "./code.ts";
+import { countSolutionsSat } from "./solveSat.ts";
 import { bridgesOf, stepTable, type Step } from "./steps.ts";
+
+/**
+ * From which side of the board a layout is counted by `solveSat.ts` rather than
+ * by the search below. This search is what proved every level from 4×4 to 12×12
+ * and what their difficulty marks are made from, so it stays as it was for
+ * them. From 13×13 it ran out of positions on nearly every board worth asking
+ * about, and a solver that learns from its dead ends (`solveSat.ts`) took over:
+ * there `nodes` and `branches` count its decisions and dead ends instead of
+ * positions (see `countSolutionsSat`), and the measure of difficulty reads them
+ * the same way.
+ */
+export const SAT_FROM_SIZE = 13;
 
 /*
  * An empty cell, read into this module once. The search reads it millions of
@@ -57,6 +70,8 @@ export type SolveCount = {
 };
 
 export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
+  // For a big board `budget` is a number of dead ends, not of positions.
+  if (layout.size >= SAT_FROM_SIZE) return countSolutionsSat(layout, limit, budget);
   const { size, cells, ends } = layout;
   const total = size * size;
   const steps = stepTable(layout);

@@ -36,7 +36,7 @@
  */
 import { orderByDifficulty } from "../src/difficulty.ts";
 import { bridgeAndWallCandidate, bridgeCandidate, hexCandidate, wallCandidate, waypointCandidate, wrapCandidate, type TwistCandidate } from "../src/twists.ts";
-import { symmetryKey } from "../src/generate.ts";
+import { type FillingStyle, symmetryKey } from "../src/generate.ts";
 import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
 import { challengesOf, isTwist, type Challenge } from "../src/ladder.ts";
 import { decodeLayout, stepBetween, wrappedStep } from "../src/code.ts";
@@ -45,28 +45,28 @@ import { seededRandom } from "../src/random.ts";
 
 type Level = readonly [string, string];
 
-type Kind = "bridge" | "bridges" | "walls" | "wallsAndBlocked" | "bridgeAndWalls" | "waypoints" | "wrap" | "boom" | "blast" | "hexagon" | "sparse" | "strokes";
+export type Kind = "bridge" | "bridges" | "walls" | "wallsAndBlocked" | "bridgeAndWalls" | "waypoints" | "wrap" | "boom" | "blast" | "hexagon" | "sparse" | "strokes";
 
 // A new kind goes on the end: each kind's stream is seeded by its place here, so the others keep making the boards they made.
-const KINDS: readonly Kind[] = ["bridge", "bridges", "walls", "wallsAndBlocked", "bridgeAndWalls", "waypoints", "wrap", "hexagon", "sparse"];
+export const KINDS: readonly Kind[] = ["bridge", "bridges", "walls", "wallsAndBlocked", "bridgeAndWalls", "waypoints", "wrap", "hexagon", "sparse"];
 
 /** How many times a kind's tries a sparse pool gets: few fillings join down to a sparse board with one answer. */
 const SPARSE_TRIES = 5;
 
 /** One kind's candidate, from its own random stream. */
-function candidateOf(kind: Kind, size: number, random: () => number, longest: number, budget: number): TwistCandidate | null {
-  if (kind === "bridge") return bridgeCandidate(size, random, longest, budget, 1);
-  if (kind === "bridges") return bridgeCandidate(size, random, longest, budget, 2);
-  if (kind === "walls") return wallCandidate(size, random, longest, budget, 0, 6);
-  if (kind === "wallsAndBlocked") return wallCandidate(size, random, longest, budget, 2, 6);
-  if (kind === "bridgeAndWalls") return bridgeAndWallCandidate(size, random, longest, budget, 1, 6);
-  if (kind === "waypoints") return waypointCandidate(size, random, longest, budget, 4);
-  if (kind === "hexagon") return hexCandidate(size, random, longest, budget);
+export function candidateOf(kind: Kind, size: number, random: () => number, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
+  if (kind === "bridge") return bridgeCandidate(size, random, longest, budget, 1, style);
+  if (kind === "bridges") return bridgeCandidate(size, random, longest, budget, 2, style);
+  if (kind === "walls") return wallCandidate(size, random, longest, budget, 0, 6, style);
+  if (kind === "wallsAndBlocked") return wallCandidate(size, random, longest, budget, 2, 6, style);
+  if (kind === "bridgeAndWalls") return bridgeAndWallCandidate(size, random, longest, budget, 1, 6, style);
+  if (kind === "waypoints") return waypointCandidate(size, random, longest, budget, 4, style);
+  if (kind === "hexagon") return hexCandidate(size, random, longest, budget, style);
   if (kind === "sparse") {
     const made = sparseCandidate(size, random, budget);
     return made === null ? null : { ...made, bridges: 0, walls: 0, blocked: 0 };
   }
-  return wrapCandidate(size, random, longest, budget);
+  return wrapCandidate(size, random, longest, budget, style);
 }
 
 /**
@@ -189,7 +189,7 @@ export type TwistPlan = { levels: Level[]; placed: { level: number; kind: Kind; 
  * order, untouched: play arriving on a shipped lesson must not deal every later
  * lesson of the size one block along. A played block left plain has no place.
  */
-export function withTwists(size: number, levels: readonly Level[], keep: ReadonlySet<number>, plan: { tries: number; longest: number; budget: number }): TwistPlan {
+export function withTwists(size: number, levels: readonly Level[], keep: ReadonlySet<number>, plan: { tries: number; longest: number; budget: number; pool?: Record<Kind, TwistCandidate[]> }): TwistPlan {
   const out = [...levels];
   const blocks = Math.floor(levels.length / TSUNAGI_BLOCK);
   const placed: TwistPlan["placed"] = [];
@@ -220,7 +220,8 @@ export function withTwists(size: number, levels: readonly Level[], keep: Readonl
   // Explosions change no cell: their lesson is the slot's own board with one added. The rest need boards made.
   const madeNeeded = needed.some((block) => !["explosions", "strokes"].includes(planned[free.indexOf(block)]!.twist));
   const wanted = new Set(needed.flatMap((block) => { const lesson = planned[free.indexOf(block)]!; return [...lesson.teach, ...lesson.test]; }));
-  const pool = madeNeeded ? pools(size, plan.tries, plan.longest, plan.budget, wanted) : ({} as Record<Kind, TwistCandidate[]>);
+  // A pool made beforehand, in parallel (`tsunagi-pool.ts`), is read in place of the serial one.
+  const pool = madeNeeded ? (plan.pool ?? pools(size, plan.tries, plan.longest, plan.budget, wanted)) : ({} as Record<Kind, TwistCandidate[]>);
   const used = new Set<string>(levels.map(([layout]) => symmetryKey(layout, size)));
   const take = (kinds: Kind[], at: number, lesson: number): { made: TwistCandidate; kind: Kind } | null => {
     for (const kind of kinds) {

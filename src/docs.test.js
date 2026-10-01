@@ -21,9 +21,9 @@ describe("the documents", () => {
   it("name in the README every entry package.json exports, and no other", () => {
     const exported = Object.keys(pkg.exports).filter((key) => key !== "." && !/^\.\/levels-\d+$/.test(key)).map((key) => `${pkg.name}/${key.slice(2)}`);
     for (const entry of exported) expect(readme, entry).toContain(`\`${entry}\``);
-    expect(readme).toContain(`\`${pkg.name}/levels-4\` … \`/levels-12\``);
+    expect(readme).toContain(`\`${pkg.name}/levels-4\` … \`/levels-15\``);
     const sizes = Object.keys(pkg.exports).filter((key) => /^\.\/levels-\d+$/.test(key)).map((key) => Number(key.slice(9)));
-    expect(sizes).toEqual([4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(sizes).toEqual([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
   });
 
   it("name in the README every colour set, every board and every attribute of the element", () => {

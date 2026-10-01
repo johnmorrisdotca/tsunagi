@@ -53,8 +53,11 @@ const BLOCKED_MARK = 32_000;
 /** What a board has besides its lines: the cells no line enters, the bridges two lines cross, and the walls between cells. */
 export type LinkExtras = { blocked?: ReadonlySet<number>; bridges?: ReadonlySet<number>; walls?: ReadonlySet<string>; waypoints?: ReadonlySet<number>; wrap?: boolean; hex?: boolean; sparse?: boolean };
 
+/** How a filling is laid, where it need not be the way it always was: how often a line takes its tightest way on, and whether it may start beside the tightest cell as well as on it. */
+export type FillingStyle = { greed?: number; looseStart?: boolean };
+
 /** Grid lines that fill every cell, as lists of cells; null when this attempt painted itself into a corner. */
-export function randomFilling(size: number, random: Random, longest: number, blocked: ReadonlySet<number> = new Set(), wrap = false, hex = false): number[][] | null {
+export function randomFilling(size: number, random: Random, longest: number, blocked: ReadonlySet<number> = new Set(), wrap = false, hex = false, style: FillingStyle = {}): number[][] | null {
   const total = size * size;
   // On a board that wraps, the lines may run off one edge and on at the other.
   // On a board that wraps, the lines may run off one edge and on at the other; on a hexagon, a cell has six neighbours.
@@ -74,7 +77,7 @@ export function randomFilling(size: number, random: Random, longest: number, blo
     if (empty.length === 0) break;
     // Start where the grid is tightest, so no cell is left stranded.
     const tightest = Math.min(...empty.map(emptyAround));
-    const starts = empty.filter((at) => emptyAround(at) === tightest);
+    const starts = style.looseStart === true ? empty.filter((at) => emptyAround(at) <= tightest + 1) : empty.filter((at) => emptyAround(at) === tightest);
     const start = starts[Math.floor(random() * starts.length)]!;
     const id = paths.length;
     const path = [start];
@@ -86,7 +89,7 @@ export function randomFilling(size: number, random: Random, longest: number, blo
       if (ways.length === 0) break;
       // Mostly the tightest way on (Warnsdorff's rule), sometimes any: winding lines that still fill.
       let pick: number;
-      if (random() < 0.7) {
+      if (random() < (style.greed ?? 0.7)) {
         const least = Math.min(...ways.map(emptyAround));
         const tight = ways.filter((next) => emptyAround(next) === least);
         pick = tight[Math.floor(random() * tight.length)]!;

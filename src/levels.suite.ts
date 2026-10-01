@@ -24,7 +24,8 @@ export function levelSuite(size: number): void {
     beforeAll(async () => {
       await loadTsunagiLevels(size);
       solves = tsunagiLevelsOf(size).map(([givens]) => countSolutions(decodeLayout(givens, size)!, 2));
-    }, 240_000);
+    // From 13×13 each proof is a SAT search (`solveSat.ts`): a second or so a level, and a runner is slower than a desk.
+    }, size >= 13 ? 900_000 : 240_000);
 
     it("has as many levels as the board of levels counts, in whole blocks of sixteen, and at least fifty", () => {
       expect(tsunagiLevelsOf(size).length).toBe(TSUNAGI_LEVEL_COUNTS[size]);

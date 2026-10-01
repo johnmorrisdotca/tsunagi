@@ -9,16 +9,17 @@ import { TSUNAGI_BLOCK } from "./levelBlocks.ts";
  * A level is not made from a seed: level 12 at 7×7 is one board for every
  * player on every day, so a time on it can be compared with anybody's.
  */
-export const TSUNAGI_SIZES = [4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
+export const TSUNAGI_SIZES = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] as const;
 
 /**
  * How many levels each size has, read without loading the size. Sixteen
  * blocks of sixteen (`levelBlocks.ts`); twelve at 4×4, where the generator
  * runs out of distinct boards with one answer before two hundred; eight at
  * 10×10 and 12×12 and four at 11×11, whose boards are slow to find and to
- * prove on every build.
+ * prove on every build; eight at 13×13, 14×14 and 15×15, found and proved by a
+ * solver that learns from its dead ends (`solveSat.ts`).
  */
-export const TSUNAGI_LEVEL_COUNTS: Record<number, number> = { 4: 192, 5: 256, 6: 256, 7: 256, 8: 256, 9: 256, 10: 128, 11: 64, 12: 128 };
+export const TSUNAGI_LEVEL_COUNTS: Record<number, number> = { 4: 192, 5: 256, 6: 256, 7: 256, 8: 256, 9: 256, 10: 128, 11: 64, 12: 128, 13: 128, 14: 128, 15: 128 };
 
 /** One level: its layout and its one answer, each a code (`code.ts`). */
 export type LevelRow = readonly [string, string];

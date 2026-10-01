@@ -1,7 +1,7 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
-  "version": "1.1.0",
-  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 1,792 hand-checked levels from 4×4 to 12×12, each with exactly one answer. The board drawn as SVG (colours or numbers, dots or lines) and played by touch and mouse in any page, as a function call or a tag. Zero dependencies.",
+  "version": "1.2.0",
+  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 2,176 hand-checked levels from 4×4 to 15×15, each with exactly one answer. The board drawn as SVG (colours or numbers, dots or lines) and played by touch and mouse in any page, as a function call or a tag. Zero dependencies.",
   "keywords": [
     "puzzle",
     "logic-puzzle",
@@ -119,6 +119,21 @@
       "types": "./dist/levels/size12.data.d.ts",
       "import": "./dist/levels/size12.data.js",
       "default": "./dist/levels/size12.data.js"
+    },
+    "./levels-13": {
+      "types": "./dist/levels/size13.data.d.ts",
+      "import": "./dist/levels/size13.data.js",
+      "default": "./dist/levels/size13.data.js"
+    },
+    "./levels-14": {
+      "types": "./dist/levels/size14.data.d.ts",
+      "import": "./dist/levels/size14.data.js",
+      "default": "./dist/levels/size14.data.js"
+    },
+    "./levels-15": {
+      "types": "./dist/levels/size15.data.d.ts",
+      "import": "./dist/levels/size15.data.js",
+      "default": "./dist/levels/size15.data.js"
     },
     "./marks": {
       "types": "./dist/levels/marks.data.d.ts",

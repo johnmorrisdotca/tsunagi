@@ -27,9 +27,9 @@ const page = `<!doctype html>
     ${familyHead({
       id,
       title: "Tsunagi · join the marbles, fill the board",
-      description: "Play Tsunagi, the line-joining logic puzzle: 1,792 levels from 4×4 to 12×12, each with exactly one answer, with walls, bridges, waypoints and hexagon boards. Free and open source, in English and Japanese.",
+      description: "Play Tsunagi, the line-joining logic puzzle: 2,176 levels from 4×4 to 15×15, each with exactly one answer, with walls, bridges, waypoints and hexagon boards. Free and open source, in English and Japanese.",
       ogTitle: "Tsunagi line puzzle",
-      ogDescription: "Join each pair of marbles with a line, and fill the board. 1,792 levels, each with one answer.",
+      ogDescription: "Join each pair of marbles with a line, and fill the board. 2,176 levels, each with one answer.",
     })}
     <link rel="icon" href="${ICON}" />
     <link rel="stylesheet" href="family.css" />

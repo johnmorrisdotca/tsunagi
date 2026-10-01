@@ -1,5 +1,5 @@
 import { decodeLayout, edgeKey, encodeAnswer, inHex, stepBetween, type LinkLayout } from "./code.ts";
-import { layoutOf, randomFilling, symmetryKey, turnsIn, type LinkCandidate } from "./generate.ts";
+import { type FillingStyle, layoutOf, randomFilling, symmetryKey, turnsIn, type LinkCandidate } from "./generate.ts";
 import { countSolutions } from "./solve.ts";
 import { stepTable } from "./steps.ts";
 import type { Random } from "./random.ts";
@@ -68,8 +68,8 @@ function runsClear(layout: LinkLayout, answer: string): boolean {
 }
 
 /** A filled grid with `want` bridges made in it — its lines, one of them over each bridge — or null where it offers no place for them. */
-function bridgedFilling(size: number, random: Random, longest: number, want: number): { paths: number[][]; bridges: Set<number> } | null {
-  const filling = randomFilling(size, random, longest);
+function bridgedFilling(size: number, random: Random, longest: number, want: number, style: FillingStyle = {}): { paths: number[][]; bridges: Set<number> } | null {
+  const filling = randomFilling(size, random, longest, new Set(), false, false, style);
   if (filling === null) return null;
   let paths = filling.map((path) => [...path]);
   const bridges = new Set<number>();
@@ -107,8 +107,8 @@ function bridgedFilling(size: number, random: Random, longest: number, want: num
 }
 
 /** A board with `want` bridges, or null where this filling offers no place for them or the board has more than one answer. */
-export function bridgeCandidate(size: number, random: Random, longest: number, budget: number, want: number): TwistCandidate | null {
-  const made = bridgedFilling(size, random, longest, want);
+export function bridgeCandidate(size: number, random: Random, longest: number, budget: number, want: number, style: FillingStyle = {}): TwistCandidate | null {
+  const made = bridgedFilling(size, random, longest, want, style);
   if (made === null) return null;
   const { layout, answer } = layoutOf(size, made.paths, { bridges: made.bridges });
   return proved(layout, answer, size, budget, { bridges: made.bridges.size, walls: 0, blocked: 0 });
@@ -150,10 +150,10 @@ function wallsNeeded(decoded: LinkLayout, answer: string, random: Random, budget
 }
 
 /** A board with `blockedWanted` blocked cells and as many walls as it needs (at most `mostWalls`) to have one answer, or null. */
-export function wallCandidate(size: number, random: Random, longest: number, budget: number, blockedWanted: number, mostWalls: number): TwistCandidate | null {
+export function wallCandidate(size: number, random: Random, longest: number, budget: number, blockedWanted: number, mostWalls: number, style: FillingStyle = {}): TwistCandidate | null {
   const blocked = new Set<number>();
   while (blocked.size < blockedWanted) blocked.add(Math.floor(random() * size * size));
-  const filling = randomFilling(size, random, longest, blocked);
+  const filling = randomFilling(size, random, longest, blocked, false, false, style);
   if (filling === null) return null;
   const { layout: plain, answer } = layoutOf(size, filling, { blocked });
   const decoded = decodeLayout(plain, size);
@@ -165,8 +165,8 @@ export function wallCandidate(size: number, random: Random, longest: number, bud
 }
 
 /** A board with bridges and the walls it needs besides: both twists at once, for the blocks after both are taught. */
-export function bridgeAndWallCandidate(size: number, random: Random, longest: number, budget: number, bridgesWanted: number, mostWalls: number): TwistCandidate | null {
-  const made = bridgedFilling(size, random, longest, bridgesWanted);
+export function bridgeAndWallCandidate(size: number, random: Random, longest: number, budget: number, bridgesWanted: number, mostWalls: number, style: FillingStyle = {}): TwistCandidate | null {
+  const made = bridgedFilling(size, random, longest, bridgesWanted, style);
   if (made === null) return null;
   const { layout: plain, answer } = layoutOf(size, made.paths, { bridges: made.bridges });
   const decoded = decodeLayout(plain, size);
@@ -183,8 +183,8 @@ export function bridgeAndWallCandidate(size: number, random: Random, longest: nu
  * through it — until it has one, and then each taken away again where it is not
  * needed: every waypoint left is one a player has to use. At most `most`.
  */
-export function waypointCandidate(size: number, random: Random, longest: number, budget: number, most: number): TwistCandidate | null {
-  const filling = randomFilling(size, random, longest);
+export function waypointCandidate(size: number, random: Random, longest: number, budget: number, most: number, style: FillingStyle = {}): TwistCandidate | null {
+  const filling = randomFilling(size, random, longest, new Set(), false, false, style);
   if (filling === null) return null;
   const middles = filling.flatMap((path) => path.slice(1, -1));
   if (middles.length === 0) return null;
@@ -220,8 +220,8 @@ export function waypointCandidate(size: number, random: Random, longest: number,
  * a thing the board asks for, and only with exactly one answer under the wrap
  * rules.
  */
-export function wrapCandidate(size: number, random: Random, longest: number, budget: number): TwistCandidate | null {
-  const filling = randomFilling(size, random, longest, new Set(), true);
+export function wrapCandidate(size: number, random: Random, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
+  const filling = randomFilling(size, random, longest, new Set(), true, false, style);
   if (filling === null) return null;
   const crosses = filling.some((path) => path.some((cell, at) => at > 0 && stepBetween(size, path[at - 1]!, cell, false) === 0));
   if (!crosses) return null;
@@ -234,10 +234,10 @@ export function wrapCandidate(size: number, random: Random, longest: number, bud
  * board, filled with lines that may step along either slant as well as the four
  * ways a square allows (`hexNeighboursOf`). Only an odd side has a hexagon.
  */
-export function hexCandidate(size: number, random: Random, longest: number, budget: number): TwistCandidate | null {
+export function hexCandidate(size: number, random: Random, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
   if (size % 2 === 0) return null;
   const off = new Set(Array.from({ length: size * size }, (_, at) => at).filter((at) => !inHex(size, at)));
-  const filling = randomFilling(size, random, longest, off, false, true);
+  const filling = randomFilling(size, random, longest, off, false, true, style);
   if (filling === null) return null;
   const { layout, answer } = layoutOf(size, filling, { blocked: off, hex: true });
   return proved(layout, answer, size, budget, { bridges: 0, walls: 0, blocked: 0 });

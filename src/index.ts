@@ -11,6 +11,7 @@ export * from "./code.ts";
 export * from "./lines.ts";
 export * from "./steps.ts";
 export * from "./solve.ts";
+export * from "./solveSat.ts";
 export * from "./generate.ts";
 export * from "./sparse.ts";
 export * from "./twists.ts";
