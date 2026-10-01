@@ -48,3 +48,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: The package as npm packs it installs and imports, by ESM and by require
         run: pnpm test:package
+  frameworks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - name: The README's examples, built from the tarball and played in React, Vue, Svelte, Angular and a plain page
+        run: pnpm test:frameworks

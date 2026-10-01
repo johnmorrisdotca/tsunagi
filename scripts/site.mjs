@@ -18,6 +18,7 @@ const uses = [
   `<tsunagi-board size="7" level="12" colour-set="colour-blind"></tsunagi-board>`,
   `pressGame(game, cell)  // a finger down, as pure functions`,
   `openTsunagiLevels(7, solved)  // 16, 32, …`,
+  `dailyTsunagiLevel(7, new Date())  // the level of the day at 7×7, the same for everybody`,
 ];
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -42,11 +43,12 @@ const page = `<!doctype html>
         <span class="fam-label" data-say="size"></span>
         <div class="fam-seg" role="group" data-say-label="size" id="sizes" data-testid="sizes"></div>
       </div>
-      <div class="setup fam-row" data-help-en="Step to the next or the previous level. Every level has exactly one answer." data-help-ja="矢印で前後のレベルに移ります。どのレベルも、答えはひとつだけです。">
+      <div class="setup fam-row" data-help-en="Step to the next or the previous level, or jump to today's level, the same for everybody. Every level has exactly one answer." data-help-ja="矢印で前後のレベルに移るか、今日のレベル（だれにとっても同じ）に飛びます。どのレベルも、答えはひとつだけです。">
         <span class="fam-label" data-say="level"></span>
         <button type="button" class="fam-button" id="previous" data-testid="previous" data-say-label="previous">←</button>
         <span class="fam-chip" data-lit="true" data-testid="level"><span id="level-number">1</span><span id="level-of" class="of"></span></span>
         <button type="button" class="fam-button" id="next" data-testid="next" data-say-label="next">→</button>
+        <button type="button" class="fam-button" id="today" data-testid="today" data-say="today"></button>
       </div>
       <p class="open" id="open"></p>
       <div class="table fam-felt" id="board" data-testid="board"></div>
@@ -57,7 +59,7 @@ const page = `<!doctype html>
         <div class="setup fam-row" data-help-en="Choose the colours of the marbles. Colour-blind uses colours that are easier to tell apart." data-help-ja="ビー玉の色の組を選びます。「色覚にやさしい」は見分けやすい色です。"><span class="fam-label" data-say="colourSet"></span><div class="fam-seg" role="group" data-say-label="colourSet" id="colour-set" data-testid="colour-set"></div></div>
         <div class="setup fam-row" data-help-en="Choose the look of the board: paper, wood, or a colour." data-help-ja="盤の見た目（紙、木目、色）を選びます。"><span class="fam-label" data-say="board"></span><div class="fam-seg" role="group" data-say-label="board" id="board-look" data-testid="board-look"></div></div>
         <div class="setup fam-row" data-help-en="Show or hide the letters and numbers that name the cells." data-help-ja="セルを示す文字と数字を、表示するか隠します。"><span class="fam-label" data-say="coordinates"></span><div class="fam-seg" role="group" data-say-label="coordinates" id="coordinates" data-testid="coordinates"></div></div>
-        <h2 data-say="play"></h2>
+        <h2 data-say="assists"></h2>
         <div class="setup fam-row" data-help-en="What a mistake does: a full explosion, a softer one, or none. Softer or off counts as helped." data-help-ja="間違えたときの爆発の強さです（ふつう・弱め・なし）。弱めかなしで解くと「助けあり」になります。"><span class="fam-label" data-say="explosions"></span><div class="fam-seg" role="group" data-say-label="explosions" id="explosions" data-testid="explosions"></div></div>
         <div class="setup fam-row" data-help-en="Allow the Cheat button, which shows part of the answer. A level solved with it counts as helped." data-help-ja="答えの一部を見せる「ヒント」ボタンを使えるようにします。使って解くと「助けあり」になります。"><span class="fam-label" data-say="cheating"></span><div class="fam-seg" role="group" data-say-label="cheating" id="cheats" data-testid="cheats"></div></div>
         <p class="fam-fine" data-say="helpCosts"></p>

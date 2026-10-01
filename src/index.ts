@@ -22,6 +22,7 @@ export * from "./ladder.ts";
 export type * from "./ladder.types.ts";
 export * from "./levelBlocks.ts";
 export * from "./levelCounts.ts";
+export * from "./daily.ts";
 export * from "./check.ts";
 export * from "./cheat.ts";
 export { seededRandom, shuffled } from "./random.ts";

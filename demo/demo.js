@@ -2,7 +2,7 @@
 // `mountTsunagi` (the drawing, the drag, Undo, Check, Cheat, the zoom), with every option the package has on a
 // settings panel, a preview of the level's block, kept on this device between visits, and spoken in the language
 // the header's chooser picks. The page itself only chooses a level, keeps what was solved and hands the settings on.
-import { blockOf, blockRange, decodeLayout, decodeLines, helpOpensNext, linesOfAnswer, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./dist/index.js";
+import { blockOf, blockRange, dailyTsunagiLevel, decodeLayout, decodeLines, helpOpensNext, linesOfAnswer, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./dist/index.js";
 import { TSUNAGI_BOARDS, TSUNAGI_BOARD_NAMES, TSUNAGI_COLOUR_SET_NAMES, TSUNAGI_COLOUR_SETS, colourOfPair, drawTsunagi, hsl } from "./dist/draw-entry.js";
 import { mountTsunagi } from "./dist/play-entry.js";
 import { loadTsunagiLevels } from "./dist/levels.js";
@@ -18,9 +18,10 @@ const WORDS = {
     level: "Level",
     previous: "Previous level",
     next: "Next level",
+    today: "Today",
     open: (open, count) => `${open} of ${count} levels open: solve every level of a block of sixteen to open the next.`,
     look: "Look",
-    play: "Help",
+    assists: "Assists",
     marks: "Join by",
     colours: "Colours",
     numbers: "Numbers",
@@ -62,9 +63,10 @@ const WORDS = {
     level: "レベル",
     previous: "前のレベル",
     next: "次のレベル",
+    today: "今日",
     open: (open, count) => `${count}レベル中${open}レベルが開いています。16レベルのまとまりをすべて解くと、次が開きます。`,
     look: "見た目",
-    play: "助け",
+    assists: "補助",
     marks: "見分け方",
     colours: "色",
     numbers: "数字",
@@ -295,7 +297,7 @@ function put() {
   host.dataset.level = String(level);
 }
 
-async function choose(nextSize, nextLevel) {
+async function choose(nextSize, nextLevel, any = false) {
   size = nextSize;
   levels = await loadTsunagiLevels(size);
   const count = TSUNAGI_LEVEL_COUNTS[size];
@@ -303,7 +305,7 @@ async function choose(nextSize, nextLevel) {
   // A level named in the address opens, open or not, as a link to one does; otherwise only the open levels.
   const linked = nextLevel === null && params.has("level");
   const asked = nextLevel ?? (linked ? Number(params.get("level")) : (kept.levels?.[size] ?? 1));
-  level = Math.min(Math.max(1, Number.isInteger(asked) ? asked : 1), linked ? count : open);
+  level = Math.min(Math.max(1, Number.isInteger(asked) ? asked : 1), linked || any ? count : open);
   params.delete("level");
   kept.size = size;
   kept.levels = { ...(kept.levels ?? {}), [size]: level };
@@ -314,6 +316,8 @@ async function choose(nextSize, nextLevel) {
 
 document.getElementById("previous").addEventListener("click", () => choose(size, level - 1));
 document.getElementById("next").addEventListener("click", () => choose(size, level + 1));
+// Today's level at this size: the same board for everybody, open or not, as a level named in the address is.
+document.getElementById("today").addEventListener("click", () => choose(size, dailyTsunagiLevel(size, new Date()), true));
 
 void choose(size, null).then(() => {
   host.dataset.ready = "true";

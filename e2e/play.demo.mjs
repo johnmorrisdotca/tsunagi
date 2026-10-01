@@ -3,7 +3,7 @@
 import { expect, test } from "@playwright/test";
 
 import { at, board, cellPoint, dragCells, findLevel, levelOf, noSidewaysScroll, open, solveByDragging } from "./demo.mjs";
-import { checkTsunagiAnswer } from "../dist/index.js";
+import { checkTsunagiAnswer, dailyTsunagiLevel } from "../dist/index.js";
 
 test("a first visit draws the level the address names, with a marble at each end of every pair", async ({ page }) => {
   const errors = await open(page, "?size=5&level=1");
@@ -118,4 +118,14 @@ test("a level with bridges, walls and explosions is solved by dragging", async (
   await open(page, `?size=${level.size}&level=${level.level}`);
   await solveByDragging(page, board(page), level);
   await expect(page.locator(at("board"))).toHaveAttribute("data-solved", "true");
+});
+
+test("Today opens the level of the day at the size chosen, the same one the package names, and opens it even when it is not open yet", async ({ page }) => {
+  await open(page, "?size=7&level=1");
+  await page.locator(at("today")).click();
+  const expected = dailyTsunagiLevel(7, new Date());
+  await expect(page.locator(at("level"))).toContainText(`${expected} / 256`);
+  await expect(page.locator(at("board"))).toHaveAttribute("data-level", String(expected));
+  await expect(board(page)).toBeVisible();
+  await noSidewaysScroll(page);
 });

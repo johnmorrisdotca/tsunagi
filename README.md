@@ -13,7 +13,7 @@ Join each pair of marbles with a line, every line its own, until the board is fu
 <p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
 
 <p align="center">
-  <img src="docs/desktop.jpg" alt="A 7×7 level with five of its seven pairs joined, under the demo's header with its language chooser and five cloth patches: the size and level choices, then the board on green felt with its difficulty chip, the Undo, Restart and Check buttons and the line '5 of 7 joined · 73% of the board'" width="620">
+  <img src="docs/desktop.jpg" alt="A 7×7 level with five of its seven pairs joined, under the demo's header with its language chooser, five cloth patches and the Help switch: the size choice, the level arrows and the Today button, then the board on green felt with its difficulty chip, the Undo, Restart and Check buttons and the line '5 of 7 joined · 73% of the board'" width="620">
   <img src="docs/phone.jpg" alt="A 6×6 level with three of its eight pairs joined, on a phone in dark mode and in Japanese: the board on green felt with its difficulty chip, the three buttons, the progress line (3 of 8 pairs joined, 75% of the board) and the first of the settings under it" width="200">
 </p>
 
@@ -62,6 +62,119 @@ And in a page, a level to play, by touch and mouse, with nothing else to set up:
   numbers on the marbles, dots or lines, four colour sets, six boards), and
   plays itself in an element or one function call, with Undo, Restart, Check,
   Cheat, the zoom pad a big board needs, and its words in English and Japanese.
+
+## Features
+
+- **Levels everybody plays alike.** Thousands of fixed levels from 4×4 to 15×15 (see [Levels](#levels)), each proved on every build to have exactly one answer, in blocks of sixteen that open one after another. A level keeps its number, so a time on it can be compared with anybody's.
+- **A level of the day**, the same for everybody, from the date alone: `dailyTsunagiLevel(size, date)`. No server, no seed.
+- **A check a server can trust.** `checkTsunagiAnswer` reads a finished answer in O(cells), with no search, and says the first thing wrong.
+- **A solver that counts answers**, and a seeded generator that makes boards with exactly one, with the twists: walls, bridges, waypoints, wrap, hexagons, few lines, explosions and a stroke limit.
+- **A difficulty measure**, so a level has a mark from 1 to 5 and the levels of a size run easiest first.
+- **Drawn as SVG text**, in an entry of its own: colours or numbers on the marbles, dots or lines, four colour sets, six boards, bridges drawn as bridges. A server that only checks answers never loads it.
+- **Played in any page** by touch and mouse, with Undo, Restart, Check, Cheat and the zoom pad a big board needs, as one function call (`mountTsunagi`) or one tag (`<tsunagi-board>`).
+- **Games as short strings**: a layout, an answer, a game half drawn, each a code a database column can keep.
+- **English and Japanese**, in the board's words and the demo.
+- **No dependencies**, no network requests, no sound, and nothing stored outside the page it is in.
+
+## Use it in your project
+
+Tsunagi is three things, each usable without the others: **the puzzle** (rules, solver, generator and levels, as plain functions over strings), **the drawing** (SVG text), and **the page** (a mounted board or a tag). The table under [Levels](#levels) says which entry holds which. The examples are at 6×6.
+
+### 1. The API alone, on a server
+
+```ts
+import { checkTsunagiAnswer, dailyTsunagiLevel } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_6 } from "@johnmorrisdotca/tsunagi/levels-6";
+
+const today = dailyTsunagiLevel(6, new Date());   // the level of the day at 6×6: 1 to 256
+const [givens, answer] = TSUNAGI_6[today! - 1];     // send `givens` to the browser; keep `answer`
+checkTsunagiAnswer(6, givens, answerFromThePlayer); // { ok: true } or { ok: false, reason }, in O(cells)
+```
+
+Importing the main entry on a server is safe: it touches no page.
+
+### 2. One tag, no bundler
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tsunagi@1/dist/element-define.js"></script>
+<tsunagi-board size="6" level="3"></tsunagi-board>
+<script>
+  document.querySelector("tsunagi-board").addEventListener("tsunagi-solve", (event) => console.log(event.detail.answer));
+</script>
+```
+
+### 3. A bundler, and a framework
+
+`import "@johnmorrisdotca/tsunagi/element/define"` once, in code that runs in the browser, and `<tsunagi-board>` is a tag like any other. The tag draws itself in the page's own DOM, so the page's CSS reaches it. Its attributes are read again when they change, and it speaks through DOM events (`tsunagi-change`, `tsunagi-stroke`, `tsunagi-explosion`, `tsunagi-solve`) that carry a `detail`.
+
+```jsx
+// React 19
+import { useEffect, useRef } from "react";
+import "@johnmorrisdotca/tsunagi/element/define";
+
+export function Level({ size, level, onSolved }) {
+  const board = useRef(null);
+  useEffect(() => {
+    const listen = (event) => onSolved(event.detail.answer, event.detail.helped);
+    board.current?.addEventListener("tsunagi-solve", listen);
+    return () => board.current?.removeEventListener("tsunagi-solve", listen);
+  }, [onSolved]);
+  return <tsunagi-board ref={board} size={String(size)} level={String(level)} />;
+}
+```
+
+```vue
+<!-- Vue 3: tell the compiler the tag is not a Vue component -->
+<script setup>
+import "@johnmorrisdotca/tsunagi/element/define";
+defineProps({ size: Number, level: Number });
+</script>
+<template>
+  <tsunagi-board :size="size" :level="level" @tsunagi-solve="(event) => console.log(event.detail.answer)" />
+</template>
+<!-- in vite.config: vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith("tsunagi-") } } }) -->
+```
+
+```svelte
+<!-- Svelte 5 -->
+<script>
+  import "@johnmorrisdotca/tsunagi/element/define";
+  let { size, level } = $props();
+  let board;
+  $effect(() => {
+    const listen = (event) => console.log(event.detail.answer);
+    board.addEventListener("tsunagi-solve", listen);
+    return () => board.removeEventListener("tsunagi-solve", listen);
+  });
+</script>
+<tsunagi-board bind:this={board} size={size} level={level}></tsunagi-board>
+```
+
+```ts
+// Angular: a standalone component with CUSTOM_ELEMENTS_SCHEMA
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
+import "@johnmorrisdotca/tsunagi/element/define";
+
+@Component({
+  selector: "app-level",
+  standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `<tsunagi-board size="6" level="3" (tsunagi-solve)="solved($event)"></tsunagi-board>`,
+})
+export class Level {
+  solved(event: Event) { console.log((event as CustomEvent).detail.answer); }
+}
+```
+
+In Next.js or any server-rendering framework, import the define entry from a client component, so the tag is defined in the browser. Or skip the tag and call `mountTsunagi(element, options)` from `@johnmorrisdotca/tsunagi/play` in an effect: the handle it returns has `destroy()`.
+
+`pnpm test:frameworks` builds these recipes from the packed tarball in a scratch project for each of the five and plays a level to its end in Chromium and WebKit; it needs the network and a few minutes, so it is run before a release and in CI rather than with `pnpm check`.
+
+### What a developer gets
+
+- **Typed results**, with a doc comment on every export. Every function is pure and returns new values.
+- **No dependencies.** ES modules, an entry per concern, and `sideEffects` set so that only the define entry has an effect.
+- **Where it runs.** See [Browser support](#browser-support).
 
 ## The puzzle
 
@@ -234,6 +347,18 @@ difficulty.
 | `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5) and `TSUNAGI_ROLES` (each twist level's part in its block) |
 | `@johnmorrisdotca/tsunagi/renumbered` | where each old level went when the levels were renumbered on 2026-09-26, for anyone who stored solves by number |
 
+### The level of the day
+
+```ts
+import { dailyTsunagiLevel, tsunagiDay } from "@johnmorrisdotca/tsunagi";
+
+dailyTsunagiLevel(7, new Date());      // a level number, 1 to 256: today's at 7×7
+dailyTsunagiLevel(7, "2026-10-01");    // the same level for that day, from its text
+tsunagiDay(new Date());                // "2026-10-01": the day, counted in UTC
+```
+
+The levels are fixed, so the level of the day needs no seed and no server: it is a pure function of the date and the size, the same for everybody on every machine, which is what lets two people compare a time on it. A day is counted in UTC, so it turns over at the same moment worldwide. Each size has a level of its own, and every level of a size comes up once before any comes up again (the size's count of levels, in days). It ignores which blocks a player has opened: today's level is open to everybody. The demo's **Today** button opens it.
+
 ## API
 
 The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
@@ -258,9 +383,80 @@ The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists ev
 | `tsunagiProgress`, `helpOf`, `helpOpensNext`, `strongestTsunagiHelp` | what a game stands at, and which help (Cheat, softened or no explosions) a solve used and what that costs |
 | `seededRandom(seed)` | the mulberry32 stream every generator draws from |
 | `openTsunagiLevels`, `nextTsunagiLevel`, `firstUnsolvedTsunagiLevel`, `tsunagiBand` | which levels a player may open, which comes next, and which third of a size a level is in |
+| `dailyTsunagiLevel(size, date)`, `tsunagiDay(date)`, `isTsunagiDay(text)` | the level of the day at a size, from the date alone; a date as `YYYY-MM-DD` in UTC; whether a text is a real one |
 
 Every function is pure: it returns new values and never changes what it was
 given.
+
+## Theming
+
+Nothing here is branded. The drawing and the playable board are coloured by custom properties, and a page sets only the ones it wants different. The plain `paper` board follows the device's light or dark setting; `data-theme="light"` or `"dark"` on `<html>` forces one. The other boards (`wood`, `green`, `blue`, `red`, `black`) carry their own colours in both. The marbles' colours are not properties: they are a [colour set](#drawing-a-board), or one of your own.
+
+**The drawing** (`drawTsunagi`), custom properties on `.tsunagi`; the dark values are those of the `paper` board:
+
+| Property | What it colours | Light | Dark |
+| --- | --- | --- | --- |
+| `--tsu-paper` | the top of the board's paper | `#fbf8f1` | `#262a27` |
+| `--tsu-paper-deep` | the foot of the paper (the same, unless the board shades) | `#fbf8f1` | `#262a27` |
+| `--tsu-frame` | the frame round the board | `#a98954` | `#6b5632` |
+| `--tsu-grid` | the thin lines between cells | `#cfc6b2` | `#3f443f` |
+| `--tsu-ink` | walls, blocked cells, bridges and the board's rim | `#1f2320` | `#ece8dc` |
+| `--tsu-coordinate` | the row numbers and column letters | `#5b3d1c` | `#e8d3b6` |
+| `--tsu-shu` | the burst where an explosion took a line out | `#d9381e` | the same |
+| `--tsu-good` | a solved board's wash | `#2f7a4f` | the same |
+| `--tsu-font` | the numbers' type | the system's own | the same |
+
+**The playable board** (`mountTsunagi` and `<tsunagi-board>`) wears the drawing's properties, and six of its own on `.tsunagi-play`:
+
+| Property | What it colours | Light | Dark |
+| --- | --- | --- | --- |
+| `--tsp-ink` | text and a pressed button | `#1f2320` | `#ece8dc` |
+| `--tsp-muted` | the lines of words under the board | `#6b6f68` | `#a09d93` |
+| `--tsp-rule` | borders | `#ddd6c6` | `#3a3d38` |
+| `--tsp-surface` | the buttons and chips | `#fbf8f1` | `#1d201e` |
+| `--tsp-accent` | a warning in the words under the board | `#b5452c` | `#ff8a6b` |
+| `--tsp-good` | the progress line once the level is solved | `#2f7a4f` | `#6fcf97` |
+
+```css
+tsunagi-board, .tsunagi, .tsunagi-play { --tsu-ink: #2b2118; --tsp-accent: #8a1c1c; }
+```
+
+The demo's own page is the worked example: its green felt and its cloth patches are the family's stylesheet, [`demo/family.css`](./demo/family.css), which is the same file byte for byte in every sibling's demo, and a test holds it to its hash. The drawing's parts carry classes and data attributes for anything a property cannot reach: see [Drawing a board](#drawing-a-board).
+
+## Limits
+
+All of these are held by tests, and the ones with a name are exported.
+
+| Limit | Value | Where |
+| --- | --- | --- |
+| Sizes | 4×4 to 15×15, one side of a square | `TSUNAGI_SIZES` |
+| Levels | each size's own, in blocks of sixteen | `TSUNAGI_LEVEL_COUNTS`, `TSUNAGI_BLOCK` |
+| Pairs on a board | sixteen, one letter each, `A` to `P` | `PAIR_LETTERS` |
+| Boards with a few lines | at most two thirds of the side | `sparseMost(size)` |
+| Answers counted | two, so that "many" costs no more than "two" | the `limit` argument of `countSolutions` |
+| The solver's work | none unless you give a `budget`; it is dead ends from 13×13 and search steps below | the `budget` argument of `countSolutions` and `countSolutionsSat` |
+| Which solver | the search below 13×13, SAT from 13×13 | `SAT_FROM_SIZE` |
+| The zoom pad | from 10×10, up to 3 times | `TSUNAGI_ZOOM_FROM`, `TSUNAGI_MOST_ZOOM` |
+| A day | `YYYY-MM-DD`, counted in UTC | `isTsunagiDay` |
+
+A generator never runs on a server unless you ask it to. The check never searches: it is linear in the size of the board.
+
+## Browser support
+
+Any browser with ES2020 modules, custom elements, pointer events and CSS `aspect-ratio`: Chrome and Edge 88, Safari 15, Firefox 89, all from 2021 on. The element draws in the page's own DOM, with no shadow DOM and no CSS the page cannot reach. The demo is played in a real Chromium at a phone's width (with touch) and a desk's, and in WebKit, Safari's engine, at a phone's width; Firefox is not in that run. The package itself (everything but the drawing and the page) needs no DOM: it runs in Node 22 or later (CI tests 22 and 24). Deno and Bun are not tested.
+
+## Languages
+
+English and Japanese, chosen by the `language` option, the host's `lang` or the page's, and followed when the page's `lang` changes. The demo has a chooser of its own and takes the browser's language on a first visit. The board's words (`TSUNAGI_STRINGS`, read with `tsunagiSay`) are in both. **Japanese: included; not yet reviewed by a native reader. Corrections welcome.** Every string is listed beside its English in [docs/strings-ja.md](./docs/strings-ja.md), and there is an [issue template](https://github.com/johnmorrisdotca/tsunagi/issues/new?template=fix-a-translation.md) for fixing one. Any other language is a table of your own, passed beside these two.
+
+## Roadmap
+
+Not here yet, and each welcome as an [issue](https://github.com/johnmorrisdotca/tsunagi/issues):
+
+- Drawing a line from the keyboard. A line is drawn by pointer today; Ctrl or Cmd with Z undoes, and the drawing is described to a screen reader, but the cells cannot be walked with keys.
+- A command line: check an answer, count a board's answers, and print a level as text.
+
+Left out on purpose: levels made from a seed when the page opens, because a fixed level is what lets times be compared; and any account, ranking or storage. A page keeps its own games: the events hand them over.
 
 ## Making levels
 
@@ -316,6 +512,7 @@ src/
 ├── game.ts           a game in play as pure functions: strokes, Undo, explosions, Check, Cheat, help
 ├── levels.ts         the "/levels" entry: each size's levels, loaded when asked
 ├── levelCounts.ts    how many levels each size has
+├── daily.ts          the level of the day at a size, from the date alone
 ├── levelBlocks.ts    levels in blocks of sixteen, and which a player may open
 ├── renumber.ts       a record kept by level number, moved to the numbers levels have now
 ├── levels.suite.ts   the proof each size's levels test runs: one answer, the one stored
@@ -362,6 +559,40 @@ together. It comes from the verb *tsunagu* (繋ぐ), to tie, to connect, to hold
 hands, and is said in three beats, *tsu-na-gi*. In the puzzle every pair of
 marbles is joined by its own line, and the lines together fill the board.
 
+## Where it comes from, and where it is used
+
+Tsunagi was built for [Itsutsu](https://itsutsu.com), a site for board games, puzzles, card games and dice games played at your own pace. *Itsutsu* (五つ) is Japanese for "five", after five in a row, the game the site began with. The line-joining puzzle was made there, level by level, each proved to have one answer and each checked on a server in O(cells); once it stood alone it seemed worth sharing.
+
+### Used by
+
+- [Itsutsu](https://itsutsu.com), for its Tsunagi puzzle, every level and the check.
+
+Using Tsunagi in something? Open an *Add my project* issue and we will add you.
+
+### The family
+
+Tsunagi is one of sixteen packages, each made for the same site, each MIT, each at
+[github.com/johnmorrisdotca](https://github.com/johnmorrisdotca):
+
+- [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ, the sound of something small rolling): dice, with notation, exact odds and games.
+- [Kyuubu](https://github.com/johnmorrisdotca/kyuubu) (キューブ, how Japanese says "cube"): a turning cube for the browser, 2×2 to 7×7.
+- [Hitotsu](https://github.com/johnmorrisdotca/hitotsu) (一つ, "one"): a colour-card game, named for the call a player makes with one card left.
+- [Toranpu](https://github.com/johnmorrisdotca/toranpu) (トランプ, the everyday Japanese word for a deck of playing cards): card games as pure rules.
+- [Tane](https://github.com/johnmorrisdotca/tane) (種, a seed, the kind you plant): seeded random numbers and daily seeds.
+- [Narabe](https://github.com/johnmorrisdotca/narabe) (並べ, "line them up"): a rules engine for gomoku, Reversi, Go, checkers and many more.
+- [Tenka](https://github.com/johnmorrisdotca/tenka) (天下, "under heaven"): a world-conquest game for two to six.
+- [Kumimoji](https://github.com/johnmorrisdotca/kumimoji) (組み文字, "letters put together"): a crossword tile race in English and Japanese.
+- [Tsunagi](https://github.com/johnmorrisdotca/tsunagi) (繋ぎ, "joining"): a line-joining puzzle.
+- [Jarajara](https://github.com/johnmorrisdotca/jarajara) (ジャラジャラ, the rattle of mahjong tiles being shuffled): mahjong tiles and a matching solitaire.
+- [Suido](https://github.com/johnmorrisdotca/suido) (水道, "waterworks"): a pipe puzzle.
+- [Domino](https://github.com/johnmorrisdotca/domino) (ドミノ, the Japanese word for dominoes): dominoes and Mexican Train.
+- [Kotoba](https://github.com/johnmorrisdotca/kotoba) (言葉, "words"): word lists and word-game rules.
+- [Sugoroku](https://github.com/johnmorrisdotca/sugoroku) (双六, backgammon's Japanese name): backgammon and its variants.
+- [Kazu](https://github.com/johnmorrisdotca/kazu) (数, "number"): grid number puzzles, Sudoku and five more.
+- [Meikyuu](https://github.com/johnmorrisdotca/meikyuu) (迷宮, "labyrinth"): mazes to draw a line through.
+
+**This package is Tsunagi.** The demos of all sixteen share one header and footer, so each links the rest.
+
 ## Development
 
 ```sh
@@ -370,7 +601,20 @@ pnpm check          # lint, types and every test, every level proved again
 pnpm test:package   # pack, install and import it as somebody who installed it would
 pnpm test:demo      # build the demo and play it in a real browser, at a phone's width and a desk's
 pnpm site           # build the demo into site/, as the Pages workflow publishes it
+pnpm test:frameworks  # the README's React, Vue, Svelte, Angular and plain-page examples, built from the tarball and played (needs the network)
+pnpm docs:make      # rewrite docs/strings-ja.md after changing a word of the board
+pnpm pictures       # take the README's two pictures from the built demo
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md). The commands are under [Development](#development).
+
+Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make the check or the solver run for long, or markup that gets out of the drawing, is for the [security policy](./SECURITY.md), not a public issue.
+
+## Changes
+
+See [CHANGELOG.md](./CHANGELOG.md).
 
 ## Licence
 

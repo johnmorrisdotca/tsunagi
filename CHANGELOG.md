@@ -1,10 +1,59 @@
 # Changelog
 
-## 1.2.0 — 2026-10-01
+All notable changes to this project are written here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
+[Semantic Versioning](https://semver.org/). Every level keeps its number, its
+board and its answer, so a solve kept by any version is still the same solve.
+
+## [Unreleased]
+
+## [1.3.0] - 2026-10-01
+
+Nothing that was exported has changed: every export, every level, every board
+code and every answer is as it was. New: a level of the day, and a README that
+covers the package whole.
+
+### Added
+
+- **A level of the day.** `dailyTsunagiLevel(size, date)` names one level of a
+  size for a date, the same for everybody on every machine, with no server and
+  no seed: the levels are fixed, so the day is all it needs. A day is counted
+  in UTC and each size has a level of its own. Every level of a size comes up
+  once before any comes up again (128 days at 13×13, 256 at 7×7). Also
+  `tsunagiDay(date)` (a date or its text, as `YYYY-MM-DD`), `isTsunagiDay(text)`
+  and `TSUNAGI_DAILY_STRIDE`. The demo has a **Today** button beside the
+  level arrows.
+- **The words of the board in Japanese, listed.** `docs/strings-ja.md` shows
+  every string of `TSUNAGI_STRINGS` beside its Japanese, made by
+  `pnpm docs:make` and held to the source by a test.
+- **The README is the family's outline**: Features, Use it in your project (the
+  API alone, one tag, React, Vue, Svelte and Angular), Theming (every custom
+  property with its light and dark value), Limits, Browser support, Languages, Roadmap,
+  Where it comes from, the family of sixteen packages, Contributing and
+  Changes, held to the code by tests.
+- **`pnpm test:frameworks`** builds the README's React, Vue, Svelte, Angular and
+  plain-page examples from the packed tarball and plays a level in each, in
+  Chromium and WebKit.
+- An *Add my project* issue template, a pull request template, and a copy of
+  the family's `SECURITY.md` and `CODE_OF_CONDUCT.md` kept in `scripts/community`
+  and held equal by a test.
+
+### Changed
+
+- **The demo's settings heading "Help" is now "Assists"** (「補助」), so it no
+  longer shares a name with the family header's Help switch.
+- The changelog is in the Keep a Changelog format, and `package.json`'s
+  `homepage` is the demo.
+- The README and `CONTRIBUTING.md` say Node 22 or later, which is what CI tests.
+- The README's two pictures are taken again from the current demo.
+
+## [1.2.0] - 2026-10-01
 
 Nothing that was exported has changed: every level from 4×4 to 12×12 is the same
 board with the same answer at the same number, so a solve kept by an older
 version is still the same solve. New: 13×13, 14×14 and 15×15.
+
+### Added
 
 - **384 new levels**: 128 each at 13×13, 14×14 and 15×15, in blocks of sixteen
   and ordered easiest first by the same measure as every other size, each proved
@@ -50,11 +99,13 @@ version is still the same solve. New: 13×13, 14×14 and 15×15.
 - The demo's size row has 13 to 15; the board's zoom and move pad, which starts at
   10×10, plays them on a phone.
 
-## 1.1.0 — 2026-10-01
+## [1.1.0] - 2026-10-01
 
 Nothing that was exported has changed: every export, every level and every
 answer is as it was, and a solve kept by an older version is still the same
 solve. New entry points, all additions.
+
+### Added
 
 - **`@johnmorrisdotca/tsunagi/draw`**: a board as SVG text, drawn as itsutsu.com
   draws it. Colours or numbers on the marbles, dots along the lines or the lines
@@ -79,20 +130,27 @@ solve. New entry points, all additions.
 - The demo has a settings panel for every option, a preview of the level's block, the
   tag, and browser tests (`pnpm test:demo`) at a phone's width and a desk's.
 
-## 1.0.1 — 2026-10-01
+## [1.0.1] - 2026-10-01
 
 Nothing that was exported has changed.
+
+### Added
 
 - An API reference page, `api.html` on the demo site: every export of every
   entry point with its signature and its doc comment, made from the source
   when the site is built, so it cannot fall behind the code. The README and
   the demo's header link to it, and a test holds it to the source.
+
+### Changed
+
 - The family's footer lists Jarajara.
 
-## 1.0.0 — 2026-10-01
+## [1.0.0] - 2026-10-01
 
 The first release: Tsunagi as played at itsutsu.com, taken out of the site into
 its own package.
+
+### Added
 
 - Layouts and answers as codes; the rules a line keeps; drawing as a finger
   does it (press, drag, let go); a check a server can trust in O(cells).
@@ -100,3 +158,10 @@ its own package.
   bridges, waypoints, wrap, hexagons, sparse boards, explosions and strokes.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
+
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/johnmorrisdotca/tsunagi/compare/155f236...v1.0.1
+[1.0.0]: https://github.com/johnmorrisdotca/tsunagi/commit/155f236
