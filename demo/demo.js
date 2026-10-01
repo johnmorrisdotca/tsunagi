@@ -1,7 +1,7 @@
 // The demo page's own script: a Tsunagi board to play, any size and any level, drawn in SVG from
 // the package's own functions, kept on this device between visits, and spoken in the language the
 // header's chooser picks.
-import { allJoined, answerOf, challengesOf, CELL_BLOCKED, CELL_BRIDGE, decodeLayout, dragThrough, explosionAfter, filled, inHex, letGo, noLines, pressAt, strokesToExplosion } from "./dist/index.js";
+import { allJoined, answerOf, challengesOf, CELL_BLOCKED, CELL_BRIDGE, decodeLayout, overBridge, dragThrough, explosionAfter, filled, inHex, letGo, noLines, pressAt, strokesToExplosion } from "./dist/index.js";
 import { loadTsunagiLevels, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./dist/levels.js";
 
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
@@ -147,7 +147,6 @@ function draw() {
     const fill = kind === CELL_BLOCKED ? "var(--blocked)" : "var(--cell)";
     if (layout.hex) node("polygon", { points: hexPoints(x, y, half / 0.866 - 0.4), fill, stroke: "var(--grid)", "stroke-width": 0.4 }, cells);
     else node("rect", { x: x - half, y: y - half, width: scale, height: scale, fill, stroke: "var(--grid)", "stroke-width": 0.4 }, cells);
-    if (kind === CELL_BRIDGE) node("rect", { x: x - half * 0.55, y: y - half * 0.55, width: half * 1.1, height: half * 1.1, fill: "none", stroke: "var(--grid-strong)", "stroke-width": 0.8, rx: 1 }, cells);
   }
   // A board whose edges join says so: its rim dashed, where a line may run off one side and on at the other.
   if (layout.wrap) node("rect", { x: 0, y: 0, width: 100, height: 100, fill: "none", class: "wrap" }, cells);
@@ -162,8 +161,20 @@ function draw() {
     const across = Math.abs(p.y - q.y) < 0.01;
     node("line", across ? { x1: mx, y1: my - half, x2: mx, y2: my + half } : { x1: mx - half, y1: my, x2: mx + half, y2: my }, cells).setAttribute("class", "wall");
   }
-  // The lines, each through its cells' middles; a step across a joined edge is drawn as a stub to each side.
+  // The lines, each through its cells' middles; a step across a joined edge is drawn as a stub to each side. Every
+  // bridge's deck is cut out of them, so the line going down passes UNDER the bridge and is lost beneath it, as
+  // itsutsu.com draws it; the deck and the line going across it are drawn on top below.
   const width = scale * 0.32;
+  const bridges = layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
+  const deck = (cell) => ({ x: at[cell].x - half * 0.8, y: at[cell].y - half * 0.8, width: scale * 0.8, height: scale * 0.8 });
+  let under = board;
+  if (bridges.length > 0) {
+    const defs = node("defs", {}, board);
+    const mask = node("mask", { id: "under-bridges", maskUnits: "userSpaceOnUse", x: -10, y: -10, width: 120, height: 120 }, defs);
+    node("rect", { x: -10, y: -10, width: 120, height: 120, fill: "white" }, mask);
+    for (const cell of bridges) node("rect", { ...deck(cell), rx: scale * 0.14, fill: "black" }, mask);
+    under = node("g", { mask: "url(#under-bridges)" }, board);
+  }
   lines.forEach((line, pair) => {
     if (line.length < 2) return;
     let path = "";
@@ -178,8 +189,23 @@ function draw() {
         path += `L${back.x + dx} ${back.y + dy}M${p.x - dx} ${p.y - dy}L${p.x} ${p.y}`;
       } else path += `L${p.x} ${p.y}`;
     }
-    node("path", { d: path, fill: "none", stroke: COLOURS[pair % COLOURS.length], "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round" }, board);
+    node("path", { d: path, fill: "none", stroke: COLOURS[pair % COLOURS.length], "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round" }, under);
   });
+  // Each bridge on top of the line beneath it: its deck and two rails, and the line going across drawn over the deck.
+  for (const cell of bridges) {
+    const { x, y } = at[cell];
+    node("rect", { ...deck(cell), rx: scale * 0.14, fill: "var(--grid-strong)", opacity: 0.22 }, board);
+    for (const edge of [-0.34, 0.34]) node("line", { x1: x - half * 0.8, y1: y + edge * scale, x2: x + half * 0.8, y2: y + edge * scale, stroke: "var(--grid-strong)", "stroke-width": scale * 0.07, "stroke-linecap": "round" }, board);
+    const { across } = overBridge(lines, cell);
+    if (across < 0) continue;
+    const line = lines[across];
+    const on = line.indexOf(cell);
+    const ends = [line[on - 1], line[on + 1]].filter((one) => one !== undefined);
+    if (ends.length === 0) continue;
+    // From the edge it came in by, through the middle, out by the edge beyond: the part of the line the deck cut out.
+    const points = [ends[0], cell, ...ends.slice(1)].map((one) => (one === cell ? `${x},${y}` : `${x + Math.sign(at[one].x - x) * half},${y}`)).join(" ");
+    node("polyline", { points, fill: "none", stroke: COLOURS[across % COLOURS.length], "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round", "data-testid": "over-bridge" }, board);
+  }
   // Waypoints, and the marbles on top.
   for (const [cell, pair] of layout.waypoints) node("circle", { cx: at[cell].x, cy: at[cell].y, r: scale * 0.2, fill: "var(--cell)", stroke: COLOURS[pair % COLOURS.length], "stroke-width": scale * 0.08 }, board);
   layout.ends.forEach((ends, pair) => {
