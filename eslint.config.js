@@ -7,5 +7,6 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   { files: ["e2e/**/*.mjs", "playwright.config.mjs"], languageOptions: { globals: { console: "readonly", URL: "readonly", document: "readonly", window: "readonly", location: "readonly" } } },
   { files: ["scripts/**/*.mjs"], languageOptions: { globals: { console: "readonly", URL: "readonly", document: "readonly" } } },
+  { files: ["scripts/readme-pictures.mjs"], languageOptions: { globals: { window: "readonly", localStorage: "readonly" } } },
   { files: ["demo/**/*.js"], languageOptions: { globals: { document: "readonly", window: "readonly", location: "readonly", history: "readonly", navigator: "readonly", URLSearchParams: "readonly", Intl: "readonly", setInterval: "readonly", setTimeout: "readonly", localStorage: "readonly", familyLanguage: "readonly" } } },
 );

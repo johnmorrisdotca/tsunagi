@@ -13,8 +13,8 @@ Join each pair of marbles with a line, every line its own, until the board is fu
 <p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
 
 <p align="center">
-  <img src="docs/desktop.jpg" alt="A 7×7 level solved: seven pairs of coloured marbles, each joined by a line of its colour, every cell of the board filled" width="620">
-  <img src="docs/phone.jpg" alt="A 6×6 level half drawn on a phone in dark mode, three lines down and three pairs still to join" width="200">
+  <img src="docs/desktop.jpg" alt="A 7×7 level solved, under the demo's header with its language chooser and five cloth patches: the size and level choices, seven pairs of coloured marbles each joined by a line of its colour, every cell of the board filled, and the solved message" width="620">
+  <img src="docs/phone.jpg" alt="A 6×6 level half drawn on a phone in dark mode, in Japanese: three lines down, three pairs still to join, and 27 of 36 cells filled" width="200">
 </p>
 
 Tsunagi is the puzzle sometimes called Number Link, Arukone or Flow. It is
