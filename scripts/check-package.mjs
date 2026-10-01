@@ -70,20 +70,26 @@ writeFileSync(
   `${entries.map((entry, i) => `import * as m${i} from ${JSON.stringify(entry)};`).join("\n")}
 const all = [${entries.map((_, i) => `m${i}`).join(", ")}];
 const names = ${JSON.stringify(entries)};
-all.forEach((m, i) => { if (Object.keys(m).length === 0) throw new Error(names[i] + " exports nothing"); });
+// An entry that only defines the tag on a page (the /define one) exports nothing, and is imported for its effect.
+all.forEach((m, i) => { if (Object.keys(m).length === 0 && !names[i].endsWith("/define")) throw new Error(names[i] + " exports nothing"); });
 const { checkTsunagiAnswer, VERSION } = m0;
 const { loadTsunagiLevels } = await import(${JSON.stringify(`${pkg.name}/levels`)});
 const sevens = await loadTsunagiLevels(7);
 if (JSON.stringify(sevens[11]) !== ${JSON.stringify(JSON.stringify(level))}) throw new Error("level 12 at 7×7 is " + JSON.stringify(sevens[11]));
 if (!checkTsunagiAnswer(7, sevens[11][0], sevens[11][1]).ok) throw new Error("level 12's answer does not check");
 if (VERSION !== ${JSON.stringify(pkg.version)}) throw new Error("VERSION is " + VERSION);
+const { drawTsunagiCode } = await import(${JSON.stringify(`${pkg.name}/draw`)});
+const svg = drawTsunagiCode(sevens[11][0], 7);
+if (!svg.startsWith("<svg") || !svg.includes("tsu-marble")) throw new Error("the drawing of level 12 is " + svg.slice(0, 80));
+const { newTsunagiGame } = m0;
+if (newTsunagiGame(sevens[11][0], 7, { answer: sevens[11][1] }) === null) throw new Error("no game of level 12");
 console.log(names.join(" "));
 `,
 );
 writeFileSync(
   join(project, "cjs.cjs"),
   `const names = ${JSON.stringify(entries)};
-for (const name of names) { const m = require(name); if (Object.keys(m).length === 0) throw new Error(name + " exports nothing"); }
+for (const name of names) { const m = require(name); if (Object.keys(m).length === 0 && !name.endsWith("/define")) throw new Error(name + " exports nothing"); }
 const { checkTsunagiAnswer } = require(${JSON.stringify(pkg.name)});
 const { TSUNAGI_7 } = require(${JSON.stringify(`${pkg.name}/levels-7`)});
 if (!checkTsunagiAnswer(7, TSUNAGI_7[11][0], TSUNAGI_7[11][1]).ok) throw new Error("level 12's answer does not check by require");

@@ -1,7 +1,7 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
-  "version": "1.0.1",
-  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 1,792 hand-checked levels from 4×4 to 12×12, each with exactly one answer. Zero dependencies.",
+  "version": "1.1.0",
+  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 1,792 hand-checked levels from 4×4 to 12×12, each with exactly one answer. The board drawn as SVG (colours or numbers, dots or lines) and played by touch and mouse in any page, as a function call or a tag. Zero dependencies.",
   "keywords": [
     "puzzle",
     "logic-puzzle",
@@ -22,7 +22,10 @@
     "zero-dependencies",
     "browser",
     "node",
-    "itsutsu"
+    "itsutsu",
+    "svg",
+    "custom-element",
+    "web-component"
   ],
   "homepage": "https://github.com/johnmorrisdotca/tsunagi#readme",
   "repository": {
@@ -35,7 +38,9 @@
   "author": "John Morris",
   "license": "MIT",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/element-define.js"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -44,6 +49,26 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./draw": {
+      "types": "./dist/draw-entry.d.ts",
+      "import": "./dist/draw-entry.js",
+      "default": "./dist/draw-entry.js"
+    },
+    "./play": {
+      "types": "./dist/play-entry.d.ts",
+      "import": "./dist/play-entry.js",
+      "default": "./dist/play-entry.js"
+    },
+    "./element": {
+      "types": "./dist/element.d.ts",
+      "import": "./dist/element.js",
+      "default": "./dist/element.js"
+    },
+    "./element/define": {
+      "types": "./dist/element-define.d.ts",
+      "import": "./dist/element-define.js",
+      "default": "./dist/element-define.js"
     },
     "./levels": {
       "types": "./dist/levels.d.ts",
@@ -124,6 +149,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "prepublishOnly": "pnpm check && pnpm build",
     "site": "pnpm build && node scripts/site.mjs",
+    "test:demo": "pnpm site && playwright test",
     "pictures": "pnpm site && node scripts/readme-pictures.mjs"
   },
   "devDependencies": {

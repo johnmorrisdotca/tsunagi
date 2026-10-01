@@ -26,3 +26,4 @@ export * from "./cheat.ts";
 export { seededRandom, shuffled } from "./random.ts";
 export type { Random } from "./random.ts";
 export { VERSION } from "./version.ts";
+export * from "./game.ts";

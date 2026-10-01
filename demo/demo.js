@@ -1,8 +1,11 @@
-// The demo page's own script: a Tsunagi board to play, any size and any level, drawn in SVG from
-// the package's own functions, kept on this device between visits, and spoken in the language the
-// header's chooser picks.
-import { allJoined, answerOf, challengesOf, CELL_BLOCKED, CELL_BRIDGE, decodeLayout, overBridge, dragThrough, explosionAfter, filled, inHex, letGo, noLines, pressAt, strokesToExplosion } from "./dist/index.js";
-import { loadTsunagiLevels, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./dist/levels.js";
+// The demo page's own script: a Tsunagi board to play, any size and any level, played by the package's own
+// `mountTsunagi` (the drawing, the drag, Undo, Check, Cheat, the zoom), with every option the package has on a
+// settings panel, a preview of the level's block, kept on this device between visits, and spoken in the language
+// the header's chooser picks. The page itself only chooses a level, keeps what was solved and hands the settings on.
+import { blockOf, blockRange, decodeLayout, decodeLines, helpOpensNext, linesOfAnswer, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./dist/index.js";
+import { TSUNAGI_BOARDS, TSUNAGI_BOARD_NAMES, TSUNAGI_COLOUR_SET_NAMES, TSUNAGI_COLOUR_SETS, colourOfPair, drawTsunagi, hsl } from "./dist/draw-entry.js";
+import { mountTsunagi } from "./dist/play-entry.js";
+import { loadTsunagiLevels } from "./dist/levels.js";
 
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
 const WORDS = {
@@ -15,20 +18,39 @@ const WORDS = {
     level: "Level",
     previous: "Previous level",
     next: "Next level",
-    reset: "Clear the board",
-    solved: "Solved. Every pair is joined and every cell is filled.",
-    joinedAll: "Every pair is joined, but some cells are empty: every cell must have a line through it.",
-    cells: (done, of) => `${done} of ${of} cells filled`,
-    strokesLeft: (left) => `${left} ${left === 1 ? "stroke" : "strokes"} left`,
-    outOfStrokes: "Out of strokes. Clear the board and try again.",
-    boomIn: (left) => (left === 1 ? "A line breaks after the next stroke" : `A line breaks in ${left} strokes`),
-    boom: "Boom! A line was cut back to half.",
-    blast: "Blast! A line was wiped, and the one beside it cut back to half.",
-    twist: "This level's twist:",
-    twists: { bridges: "bridges, crossed one line each way", walls: "walls no line may pass", waypoints: "waypoints, passed by their own line", wrap: "edges that join, left to right and top to bottom", explosions: "explosions that break a line", strokes: "a limit on strokes", hexagon: "a board of hexagons", sparse: "few marbles, long lines" },
     open: (open, count) => `${open} of ${count} levels open: solve every level of a block of sixteen to open the next.`,
+    look: "Look",
+    play: "Help",
+    marks: "Join by",
+    colours: "Colours",
+    numbers: "Numbers",
+    fill: "Fill",
+    marbles: "Dots",
+    lines: "Lines",
+    colourSet: "Colour set",
+    colourSets: { marble: "Marble", bright: "Bright", "colour-blind": "Colour-blind", soft: "Soft" },
+    board: "Board",
+    boards: { paper: "Paper", wood: "Wood", green: "Green", blue: "Blue", red: "Red", black: "Black" },
+    coordinates: "Coordinates",
+    on: "On",
+    off: "Off",
+    explosions: "Explosions",
+    explosionsOn: "Normal",
+    explosionsSoft: "Softer",
+    explosionsOff: "Off",
+    cheating: "Cheating",
+    cheatsOff: "Not allowed",
+    cheatsOn: "Allowed",
+    helpCosts: "A level solved with Cheat, or with explosions softened or off, counts as helped. With explosions off it does not open the next block.",
+    solvedHere: "Solved",
+    blockTitle: (block) => `Levels ${block}: the block you are in`,
+    blockText: "Every level of a block of sixteen, as drawn: a level you have solved shows its answer, and one not open yet is dimmed.",
+    levelLabel: (level, state) => `Level ${level}, ${state}`,
+    states: { open: "open", solved: "solved", locked: "not open yet", here: "playing now" },
     moreTitle: "Using it",
     moreText: "The board above is the package itself: the rules, the drawing and every level. Each line below is all it takes.",
+    tagTitle: "As a tag",
+    tagText: "The same board in one element, with no framework: numbers, lines only, and the level's challenges under it.",
     foot: "Every level was made once and is proved on every build to have exactly one answer. Your progress stays on this device.",
   },
   ja: {
@@ -40,34 +62,45 @@ const WORDS = {
     level: "レベル",
     previous: "前のレベル",
     next: "次のレベル",
-    reset: "盤面を消す",
-    solved: "解けました。すべての組がつながり、すべてのマスが埋まりました。",
-    joinedAll: "すべての組がつながりましたが、空いているマスがあります。すべてのマスに線を通してください。",
-    cells: (done, of) => `${of}マス中${done}マス`,
-    strokesLeft: (left) => `残り${left}筆`,
-    outOfStrokes: "筆数がなくなりました。盤面を消して、もう一度どうぞ。",
-    boomIn: (left) => (left === 1 ? "次の一筆で線が壊れます" : `あと${left}筆で線が壊れます`),
-    boom: "ドカン！線が半分に切られました。",
-    blast: "バーン！線が一本消え、隣の線も半分に切られました。",
-    twist: "このレベルの仕掛け：",
-    twists: { bridges: "橋（縦と横に一本ずつ通る）", walls: "線が通れない壁", waypoints: "決まった線が通る中継点", wrap: "左右と上下がつながった盤", explosions: "線を壊す爆発", strokes: "筆数の制限", hexagon: "六角形の盤", sparse: "玉が少なく線が長い盤" },
     open: (open, count) => `${count}レベル中${open}レベルが開いています。16レベルのまとまりをすべて解くと、次が開きます。`,
+    look: "見た目",
+    play: "助け",
+    marks: "見分け方",
+    colours: "色",
+    numbers: "数字",
+    fill: "線の中",
+    marbles: "点",
+    lines: "線だけ",
+    colourSet: "色の組",
+    colourSets: { marble: "ビー玉", bright: "あざやか", "colour-blind": "色覚にやさしい", soft: "やわらか" },
+    board: "盤",
+    boards: { paper: "紙", wood: "木目", green: "緑", blue: "青", red: "赤", black: "黒" },
+    coordinates: "座標",
+    on: "あり",
+    off: "なし",
+    explosions: "爆発",
+    explosionsOn: "ふつう",
+    explosionsSoft: "弱め",
+    explosionsOff: "なし",
+    cheating: "ヒント",
+    cheatsOff: "使わない",
+    cheatsOn: "使える",
+    helpCosts: "ヒントを使ったり、爆発を弱めたりなしにして解くと、助けを借りたものとして数えます。爆発なしでは、次のまとまりは開きません。",
+    solvedHere: "解けた",
+    blockTitle: (block) => `レベル一覧：${block}番目のまとまり`,
+    blockText: "16レベルのまとまりをそのまま描いています。解いたレベルは答えが見え、まだ開いていないレベルは薄くなります。",
+    levelLabel: (level, state) => `レベル${level}、${state}`,
+    states: { open: "開いている", solved: "解けた", locked: "まだ開いていない", here: "いま遊んでいる" },
     moreTitle: "使い方",
     moreText: "上の盤面は、このパッケージそのもの（ルール、描き方、すべてのレベル）で動いています。下の各行がそれぞれ必要なコードのすべてです。",
+    tagTitle: "タグとして",
+    tagText: "同じ盤面を、フレームワークなしの一つの要素で。数字、線だけ、盤の下にレベルの仕掛けも出ています。",
     foot: "どのレベルも一度だけ作られ、ビルドのたびに答えがちょうど一つであることが確かめられています。進み具合はこの端末に残ります。",
   },
 };
 
-// A colour for each pair, A to P: told apart at a glance, and readable on the paper of the board.
-const COLOURS = ["#d7263d", "#1b6ca8", "#f2a541", "#2e933c", "#8e44ad", "#e86a92", "#16a3a3", "#7a4b2a", "#f25c05", "#4b5d67", "#a3b915", "#c2185b", "#3949ab", "#00897b", "#b8860b", "#6d4c41"];
 const KEY = "tsunagi.page";
-const svgNS = "http://www.w3.org/2000/svg";
-
-const board = document.getElementById("board");
-const sizes = document.getElementById("sizes");
-const levelLine = document.getElementById("level");
-const status = document.getElementById("status");
-const note = document.getElementById("note");
+const params = new URLSearchParams(location.search);
 
 const read = () => {
   try {
@@ -83,271 +116,205 @@ const write = (value) => {
     /* Not remembered on this device; the board still plays. */
   }
 };
+const pick = (asked, allowed, kept, fallback) => (allowed.includes(asked) ? asked : allowed.includes(kept) ? kept : fallback);
 
 const kept = read();
-let size = TSUNAGI_SIZES.includes(kept.size) ? kept.size : 5;
+const look = {
+  marks: pick(params.get("marks"), ["colours", "numbers"], kept.look?.marks, "colours"),
+  fill: pick(params.get("fill"), ["marbles", "lines"], kept.look?.fill, "marbles"),
+  colours: pick(params.get("colours"), TSUNAGI_COLOUR_SET_NAMES, kept.look?.colours, "marble"),
+  board: pick(params.get("board"), TSUNAGI_BOARD_NAMES, kept.look?.board, "paper"),
+  coordinates: params.has("coordinates") ? params.get("coordinates") !== "off" : kept.look?.coordinates === true,
+};
+const help = {
+  explosions: pick(params.get("explosions"), ["on", "soft", "off"], kept.help?.explosions, "on"),
+  cheats: params.has("cheats") ? params.get("cheats") !== "off" : kept.help?.cheats === true,
+};
+let size = TSUNAGI_SIZES.includes(Number(params.get("size"))) ? Number(params.get("size")) : TSUNAGI_SIZES.includes(kept.size) ? kept.size : 5;
 let solved = kept.solved ?? {};
+let helped = kept.helped ?? {};
+let progress = kept.progress ?? {};
 let level = 1;
 let levels = [];
-let layout = null;
-let givens = "";
-let answer = "";
-let lines = [];
-let drawing = null;
-let before = null;
-let strokes = 0;
-let said = null;
+let mount = null;
 
 const language = familyLanguage({ id: "tsunagi", words: WORDS, onChange: () => render() });
 const say = (key, ...args) => {
   const word = WORDS[language.lang][key];
   return typeof word === "function" ? word(...args) : word;
 };
-const solvedHere = () => new Set(solved[size] ?? []);
+const solvedSet = () => new Set(solved[size] ?? []);
+const keep = () => write({ size, levels: kept.levels, solved, helped, progress, look, help });
 
-/** Where each cell's middle is, in the board's 0 to 100 box: a square of squares, or a hexagon of hexagons sheared from it. */
-function centres() {
-  const at = [];
-  for (let cell = 0; cell < size * size; cell += 1) {
-    const col = cell % size;
-    const row = Math.floor(cell / size);
-    at.push(layout.hex ? { x: col + row / 2, y: row * 0.866 } : { x: col, y: row });
-  }
-  const used = at.filter((_, cell) => !layout.hex || inHex(size, cell));
-  const left = Math.min(...used.map((p) => p.x));
-  const top = Math.min(...used.map((p) => p.y));
-  const span = Math.max(Math.max(...used.map((p) => p.x)) - left, Math.max(...used.map((p) => p.y)) - top) + 1;
-  const scale = 100 / span;
-  return { scale, at: at.map((p) => ({ x: (p.x - left + 0.5) * scale, y: (p.y - top + 0.5) * scale })) };
-}
+const sizes = document.getElementById("sizes");
+const host = document.getElementById("board");
 
-function node(name, attributes, parent) {
-  const element = document.createElementNS(svgNS, name);
-  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
-  parent.append(element);
-  return element;
-}
-
-/** A hexagon's corners about a centre, pointy at the top, as an SVG points list. */
-function hexPoints(x, y, radius) {
-  return Array.from({ length: 6 }, (_, k) => {
-    const angle = (Math.PI / 3) * k + Math.PI / 6;
-    return `${x + radius * Math.cos(angle)},${y + radius * Math.sin(angle)}`;
-  }).join(" ");
-}
-
-function draw() {
-  board.replaceChildren();
-  if (layout === null) return;
-  const { scale, at } = centres();
-  const half = scale / 2;
-  const cells = node("g", {}, board);
-  for (let cell = 0; cell < size * size; cell += 1) {
-    if (layout.hex && !inHex(size, cell)) continue;
-    const { x, y } = at[cell];
-    const kind = layout.cells[cell];
-    const fill = kind === CELL_BLOCKED ? "var(--blocked)" : "var(--cell)";
-    if (layout.hex) node("polygon", { points: hexPoints(x, y, half / 0.866 - 0.4), fill, stroke: "var(--grid)", "stroke-width": 0.4 }, cells);
-    else node("rect", { x: x - half, y: y - half, width: scale, height: scale, fill, stroke: "var(--grid)", "stroke-width": 0.4 }, cells);
-  }
-  // A board whose edges join says so: its rim dashed, where a line may run off one side and on at the other.
-  if (layout.wrap) node("rect", { x: 0, y: 0, width: 100, height: 100, fill: "none", class: "wrap" }, cells);
-  // Walls: a thick rule on the edge between two square cells.
-  for (const edge of layout.walls) {
-    const [a, b] = edge.split("-").map(Number);
-    if (Number.isNaN(a) || Number.isNaN(b) || layout.hex) continue;
-    const p = at[a];
-    const q = at[b];
-    const mx = (p.x + q.x) / 2;
-    const my = (p.y + q.y) / 2;
-    const across = Math.abs(p.y - q.y) < 0.01;
-    node("line", across ? { x1: mx, y1: my - half, x2: mx, y2: my + half } : { x1: mx - half, y1: my, x2: mx + half, y2: my }, cells).setAttribute("class", "wall");
-  }
-  // The lines, each through its cells' middles; a step across a joined edge is drawn as a stub to each side. Every
-  // bridge's deck is cut out of them, so the line going down passes UNDER the bridge and is lost beneath it, as
-  // itsutsu.com draws it; the deck and the line going across it are drawn on top below.
-  const width = scale * 0.32;
-  const bridges = layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
-  const deck = (cell) => ({ x: at[cell].x - half * 0.8, y: at[cell].y - half * 0.8, width: scale * 0.8, height: scale * 0.8 });
-  let under = board;
-  if (bridges.length > 0) {
-    const defs = node("defs", {}, board);
-    const mask = node("mask", { id: "under-bridges", maskUnits: "userSpaceOnUse", x: -10, y: -10, width: 120, height: 120 }, defs);
-    node("rect", { x: -10, y: -10, width: 120, height: 120, fill: "white" }, mask);
-    for (const cell of bridges) node("rect", { ...deck(cell), rx: scale * 0.14, fill: "black" }, mask);
-    under = node("g", { mask: "url(#under-bridges)" }, board);
-  }
-  lines.forEach((line, pair) => {
-    if (line.length < 2) return;
-    let path = "";
-    for (let k = 0; k < line.length; k += 1) {
-      const p = at[line[k]];
-      const back = k > 0 ? at[line[k - 1]] : null;
-      const far = back !== null && Math.hypot(p.x - back.x, p.y - back.y) > scale * 1.5;
-      if (k === 0) path += `M${p.x} ${p.y}`;
-      else if (far) {
-        const dx = Math.sign(back.x - p.x) * half;
-        const dy = Math.sign(back.y - p.y) * half;
-        path += `L${back.x + dx} ${back.y + dy}M${p.x - dx} ${p.y - dy}L${p.x} ${p.y}`;
-      } else path += `L${p.x} ${p.y}`;
-    }
-    node("path", { d: path, fill: "none", stroke: COLOURS[pair % COLOURS.length], "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round" }, under);
-  });
-  // Each bridge on top of the line beneath it: its deck and two rails, and the line going across drawn over the deck.
-  for (const cell of bridges) {
-    const { x, y } = at[cell];
-    node("rect", { ...deck(cell), rx: scale * 0.14, fill: "var(--grid-strong)", opacity: 0.22 }, board);
-    for (const edge of [-0.34, 0.34]) node("line", { x1: x - half * 0.8, y1: y + edge * scale, x2: x + half * 0.8, y2: y + edge * scale, stroke: "var(--grid-strong)", "stroke-width": scale * 0.07, "stroke-linecap": "round" }, board);
-    const { across } = overBridge(lines, cell);
-    if (across < 0) continue;
-    const line = lines[across];
-    const on = line.indexOf(cell);
-    const ends = [line[on - 1], line[on + 1]].filter((one) => one !== undefined);
-    if (ends.length === 0) continue;
-    // From the edge it came in by, through the middle, out by the edge beyond: the part of the line the deck cut out.
-    const points = [ends[0], cell, ...ends.slice(1)].map((one) => (one === cell ? `${x},${y}` : `${x + Math.sign(at[one].x - x) * half},${y}`)).join(" ");
-    node("polyline", { points, fill: "none", stroke: COLOURS[across % COLOURS.length], "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round", "data-testid": "over-bridge" }, board);
-  }
-  // Waypoints, and the marbles on top.
-  for (const [cell, pair] of layout.waypoints) node("circle", { cx: at[cell].x, cy: at[cell].y, r: scale * 0.2, fill: "var(--cell)", stroke: COLOURS[pair % COLOURS.length], "stroke-width": scale * 0.08 }, board);
-  layout.ends.forEach((ends, pair) => {
-    for (const cell of ends) node("circle", { cx: at[cell].x, cy: at[cell].y, r: scale * 0.34, fill: COLOURS[pair % COLOURS.length], stroke: "rgba(0,0,0,.25)", "stroke-width": 0.5 }, board);
-  });
-}
-
-/** The cell under a pointer: the nearest cell middle on the board, within a cell of it. */
-function cellAt(event) {
-  const box = board.getBoundingClientRect();
-  const x = ((event.clientX - box.left) / box.width) * 100;
-  const y = ((event.clientY - box.top) / box.height) * 100;
-  const { scale, at } = centres();
-  let best = null;
-  let nearest = Infinity;
-  at.forEach((p, cell) => {
-    if (layout.hex && !inHex(size, cell)) return;
-    const d = Math.hypot(p.x - x, p.y - y);
-    if (d < nearest) {
-      nearest = d;
-      best = cell;
-    }
-  });
-  return nearest <= scale * 0.75 ? best : null;
-}
-
-const done = () => allJoined(layout, lines) && answerOf(layout, lines) === answer;
-const outOfStrokes = () => layout.strokes !== null && strokes >= layout.strokes && !done();
-
-function render() {
-  language.say();
-  // Size buttons.
-  sizes.replaceChildren(
-    ...TSUNAGI_SIZES.map((each) => {
+function seg(parent, items, chosen, choose, labelOf, extra) {
+  parent.replaceChildren(
+    ...items.map((item) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = `${each}×${each}`;
-      button.setAttribute("aria-pressed", String(each === size));
-      button.addEventListener("click", () => choose(each, null));
+      button.dataset.value = String(item);
+      button.setAttribute("aria-pressed", String(item === chosen));
+      extra?.(button, item);
+      button.append(labelOf(item));
+      button.addEventListener("click", () => choose(item));
       return button;
     }),
   );
+}
+
+/** A small square of a board, as the board patches of a colour picker show it. */
+function patch(name) {
+  const board = TSUNAGI_BOARDS[name];
+  const paper = typeof board.paper === "string" ? board.paper : `linear-gradient(${board.paper[0]}, ${board.paper[1]})`;
+  const span = document.createElement("span");
+  span.className = "patch";
+  span.style.background = paper;
+  span.style.borderColor = board.frame;
+  return span;
+}
+
+function marbleDots(set) {
+  const dots = document.createElement("span");
+  dots.className = "dots";
+  for (let pair = 0; pair < 5; pair += 1) {
+    const dot = document.createElement("i");
+    dot.style.background = hsl(colourOfPair(TSUNAGI_COLOUR_SETS[set], pair));
+    dots.append(dot);
+  }
+  return dots;
+}
+
+function settings() {
+  const row = (id, items, chosen, choose, labelOf, extra) => seg(document.getElementById(id), items, chosen, choose, labelOf, extra);
+  row("marks", ["colours", "numbers"], look.marks, (value) => change({ marks: value }), (value) => say(value));
+  row("fill", ["marbles", "lines"], look.fill, (value) => change({ fill: value }), (value) => say(value));
+  row("colour-set", TSUNAGI_COLOUR_SET_NAMES, look.colours, (value) => change({ colours: value }), (value) => say("colourSets")[value], (button, value) => button.append(marbleDots(value)));
+  row("board-look", TSUNAGI_BOARD_NAMES, look.board, (value) => change({ board: value }), (value) => say("boards")[value], (button, value) => button.append(patch(value)));
+  row("coordinates", [true, false], look.coordinates, (value) => change({ coordinates: value }), (value) => say(value ? "on" : "off"));
+  row("explosions", ["on", "soft", "off"], help.explosions, (value) => changeHelp({ explosions: value }), (value) => say(`explosions${value[0].toUpperCase()}${value.slice(1)}`));
+  row("cheats", [false, true], help.cheats, (value) => changeHelp({ cheats: value }), (value) => say(value ? "cheatsOn" : "cheatsOff"));
+}
+
+function change(next) {
+  Object.assign(look, next);
+  keep();
+  mount?.set(look);
+  settings();
+  block();
+}
+function changeHelp(next) {
+  Object.assign(help, next);
+  keep();
+  mount?.set(help);
+  settings();
+}
+
+/** What a level in the block's preview is: playing now, solved, open or not open yet. */
+function stateOf(each, open) {
+  return each === level ? "here" : solvedSet().has(each) ? "solved" : each <= open ? "open" : "locked";
+}
+
+/** Sixteen levels of the block this one is in, each as its board is drawn, to choose from. */
+function block() {
+  const grid = document.getElementById("block");
   const count = TSUNAGI_LEVEL_COUNTS[size];
-  const open = openTsunagiLevels(size, solvedHere());
+  const open = openTsunagiLevels(size, solvedSet());
+  const { first, last } = blockRange(blockOf(level), count);
+  document.getElementById("block-title").textContent = say("blockTitle", blockOf(level));
+  const buttons = [];
+  for (let each = first; each <= last; each += 1) {
+    const row = levels[each - 1];
+    if (row === undefined) continue;
+    const layout = decodeLayout(row[0], size);
+    const state = stateOf(each, open);
+    const lines = solvedSet().has(each) ? linesOfAnswer(layout, row[1]) : null;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "lv";
+    button.dataset.level = String(each);
+    button.dataset.state = state;
+    button.dataset.solved = String(solvedSet().has(each));
+    button.disabled = state === "locked";
+    button.setAttribute("aria-label", say("levelLabel", each, say("states")[state]));
+    button.innerHTML = drawTsunagi(layout, { ...look, lines: lines ?? undefined, coordinates: false, language: language.lang, label: "" });
+    button.firstElementChild.setAttribute("aria-hidden", "true");
+    button.firstElementChild.removeAttribute("role");
+    const number = document.createElement("span");
+    number.textContent = String(each);
+    button.append(number);
+    button.addEventListener("click", () => choose(size, each));
+    buttons.push(button);
+  }
+  grid.replaceChildren(...buttons);
+}
+
+function render() {
+  language.say();
+  seg(sizes, TSUNAGI_SIZES, size, (each) => choose(each, null), (each) => `${each}×${each}`);
+  const count = TSUNAGI_LEVEL_COUNTS[size];
+  const open = openTsunagiLevels(size, solvedSet());
   document.getElementById("level-number").textContent = `${level}`;
   document.getElementById("level-of").textContent = ` / ${count}`;
   document.getElementById("previous").disabled = level <= 1;
   document.getElementById("next").disabled = level >= open;
   document.getElementById("open").textContent = say("open", open, count);
-  const twists = layout === null ? [] : challengesOf(givens);
-  levelLine.hidden = twists.length === 0;
-  levelLine.textContent = twists.length === 0 ? "" : `${say("twist")} ${twists.map((each) => WORDS[language.lang].twists[each] ?? each).join(", ")}`;
-  draw();
-  if (layout === null) return;
-  const cover = filled(layout, lines);
-  const parts = [];
-  if (done()) parts.push(say("solved"));
-  else if (outOfStrokes()) parts.push(say("outOfStrokes"));
-  else if (allJoined(layout, lines)) parts.push(say("joinedAll"));
-  else parts.push(say("cells", cover.done, cover.of));
-  if (!done() && layout.strokes !== null && !outOfStrokes()) parts.push(say("strokesLeft", layout.strokes - strokes));
-  const boomIn = strokesToExplosion(layout, strokes);
-  if (!done() && boomIn !== null) parts.push(say("boomIn", boomIn));
-  status.textContent = parts.join(" · ");
-  status.dataset.solved = String(done());
-  note.textContent = said === null ? "" : say(said);
+  settings();
+  if (levels.length > 0) block();
+}
+
+function put() {
+  const [givens, answer] = levels[level - 1];
+  const layout = decodeLayout(givens, size);
+  const done = solvedSet().has(level);
+  // A level solved opens on its finished board; a level half drawn comes back as it was left.
+  const lines = done ? linesOfAnswer(layout, answer) : decodeLines(layout, progress[`${size}/${level}`] ?? "");
+  const entry = { size, givens, answer, level, lines: lines ?? undefined };
+  if (mount === null) {
+    mount = mountTsunagi(host, {
+      ...entry,
+      ...look,
+      explosions: help.explosions,
+      cheats: help.cheats,
+      chips: true,
+      onChange: (detail) => {
+        const key = `${size}/${level}`;
+        if (detail.lines.every((line) => line.length === 0) || detail.progress.solved) delete progress[key];
+        else progress[key] = detail.code;
+        keep();
+      },
+      onSolve: (detail) => {
+        helped[size] = detail.helped === null ? (helped[size] ?? []).filter((each) => each !== level) : [...new Set([...(helped[size] ?? []), level])];
+        if (helpOpensNext(detail.helped)) solved = { ...solved, [size]: [...new Set([...(solved[size] ?? []), level])] };
+        keep();
+        render();
+      },
+    });
+  } else mount.load(entry);
+  host.dataset.level = String(level);
 }
 
 async function choose(nextSize, nextLevel) {
   size = nextSize;
   levels = await loadTsunagiLevels(size);
-  const open = openTsunagiLevels(size, solvedHere());
-  const wanted = nextLevel ?? kept.levels?.[size] ?? 1;
-  level = Math.min(Math.max(1, wanted), open);
-  [givens, answer] = levels[level - 1];
-  layout = decodeLayout(givens, size);
-  lines = noLines(layout);
-  strokes = 0;
-  said = null;
+  const count = TSUNAGI_LEVEL_COUNTS[size];
+  const open = openTsunagiLevels(size, solvedSet());
+  // A level named in the address opens, open or not, as a link to one does; otherwise only the open levels.
+  const linked = nextLevel === null && params.has("level");
+  const asked = nextLevel ?? (linked ? Number(params.get("level")) : (kept.levels?.[size] ?? 1));
+  level = Math.min(Math.max(1, Number.isInteger(asked) ? asked : 1), linked ? count : open);
+  params.delete("level");
   kept.size = size;
   kept.levels = { ...(kept.levels ?? {}), [size]: level };
-  write({ ...kept, solved });
+  keep();
+  put();
   render();
 }
 
-board.addEventListener("pointerdown", (event) => {
-  if (layout === null || done() || outOfStrokes()) return;
-  const cell = cellAt(event);
-  if (cell === null) return;
-  const pressed = pressAt(layout, lines, cell);
-  if (pressed.drawing === null) return;
-  board.setPointerCapture(event.pointerId);
-  before = lines;
-  drawing = pressed.drawing;
-  lines = pressed.lines;
-  said = null;
-  render();
-});
-board.addEventListener("pointermove", (event) => {
-  if (drawing === null) return;
-  const cell = cellAt(event);
-  if (cell === null) return;
-  const next = dragThrough(layout, lines, drawing, cell);
-  if (next !== lines) {
-    lines = next;
-    render();
-  }
-});
-const lift = () => {
-  if (drawing === null) return;
-  drawing = null;
-  lines = letGo(lines, layout);
-  const was = before;
-  before = null;
-  if (was !== null && JSON.stringify(was) !== JSON.stringify(lines)) {
-    strokes += 1;
-    if (done()) {
-      solved = { ...solved, [size]: [...new Set([...(solved[size] ?? []), level])] };
-      write({ ...kept, solved });
-    } else {
-      const blown = explosionAfter(layout, givens, lines, strokes);
-      if (blown !== null) {
-        lines = blown.lines;
-        said = blown.hit.length > 1 ? "blast" : "boom";
-      }
-    }
-  }
-  render();
-};
-board.addEventListener("pointerup", lift);
-board.addEventListener("pointercancel", lift);
-
 document.getElementById("previous").addEventListener("click", () => choose(size, level - 1));
 document.getElementById("next").addEventListener("click", () => choose(size, level + 1));
-document.getElementById("reset").addEventListener("click", () => {
-  if (layout === null) return;
-  lines = noLines(layout);
-  strokes = 0;
-  said = null;
-  render();
-});
 
-void choose(size, null);
+void choose(size, null).then(() => {
+  host.dataset.ready = "true";
+});

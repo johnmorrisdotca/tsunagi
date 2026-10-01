@@ -13,7 +13,10 @@ const uses = [
   `import { TSUNAGI_7 } from "@johnmorrisdotca/tsunagi/levels-7";`,
   `checkTsunagiAnswer(7, layout, answer)  // { ok: true }`,
   `countSolutions(decodeLayout(layout, 7), 2).count  // 1`,
-  `pressAt(layout, lines, cell)  // a finger down`,
+  `drawTsunagi(layout, { lines, marks: "numbers", fill: "lines" })  // the board as SVG text`,
+  `mountTsunagi(element, { size: 7, givens, answer, board: "wood" })  // a board to play, by touch and mouse`,
+  `<tsunagi-board size="7" level="12" colour-set="colour-blind"></tsunagi-board>`,
+  `pressGame(game, cell)  // a finger down, as pure functions`,
   `openTsunagiLevels(7, solved)  // 16, 32, …`,
 ];
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -37,22 +40,33 @@ const page = `<!doctype html>
       ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
       <div class="setup fam-row">
         <span class="fam-label" data-say="size"></span>
-        <div class="fam-seg" role="group" data-say-label="size" id="sizes"></div>
+        <div class="fam-seg" role="group" data-say-label="size" id="sizes" data-testid="sizes"></div>
       </div>
       <div class="setup fam-row">
         <span class="fam-label" data-say="level"></span>
-        <button type="button" class="fam-button" id="previous" data-say-label="previous">←</button>
-        <span class="fam-chip" data-lit="true"><span id="level-number">1</span><span id="level-of" class="of"></span></span>
-        <button type="button" class="fam-button" id="next" data-say-label="next">→</button>
-        <button type="button" class="fam-button" id="reset" data-say="reset"></button>
+        <button type="button" class="fam-button" id="previous" data-testid="previous" data-say-label="previous">←</button>
+        <span class="fam-chip" data-lit="true" data-testid="level"><span id="level-number">1</span><span id="level-of" class="of"></span></span>
+        <button type="button" class="fam-button" id="next" data-testid="next" data-say-label="next">→</button>
       </div>
       <p class="open" id="open"></p>
-      <div class="table">
-        <svg id="board" viewBox="0 0 100 100" role="img" aria-label="Tsunagi"></svg>
-      </div>
-      <p class="status" id="status" aria-live="polite"></p>
-      <p class="note" id="note" aria-live="polite"></p>
-      <p class="level-line" id="level" hidden></p>
+      <div class="table fam-felt" id="board" data-testid="board"></div>
+      <section class="settings" aria-labelledby="look-title">
+        <h2 id="look-title" data-say="look"></h2>
+        <div class="setup fam-row"><span class="fam-label" data-say="marks"></span><div class="fam-seg" role="group" data-say-label="marks" id="marks" data-testid="marks"></div></div>
+        <div class="setup fam-row"><span class="fam-label" data-say="fill"></span><div class="fam-seg" role="group" data-say-label="fill" id="fill" data-testid="fill"></div></div>
+        <div class="setup fam-row"><span class="fam-label" data-say="colourSet"></span><div class="fam-seg" role="group" data-say-label="colourSet" id="colour-set" data-testid="colour-set"></div></div>
+        <div class="setup fam-row"><span class="fam-label" data-say="board"></span><div class="fam-seg" role="group" data-say-label="board" id="board-look" data-testid="board-look"></div></div>
+        <div class="setup fam-row"><span class="fam-label" data-say="coordinates"></span><div class="fam-seg" role="group" data-say-label="coordinates" id="coordinates" data-testid="coordinates"></div></div>
+        <h2 data-say="play"></h2>
+        <div class="setup fam-row"><span class="fam-label" data-say="explosions"></span><div class="fam-seg" role="group" data-say-label="explosions" id="explosions" data-testid="explosions"></div></div>
+        <div class="setup fam-row"><span class="fam-label" data-say="cheating"></span><div class="fam-seg" role="group" data-say-label="cheating" id="cheats" data-testid="cheats"></div></div>
+        <p class="fam-fine" data-say="helpCosts"></p>
+      </section>
+      <section class="more blocks" aria-labelledby="block-title">
+        <h2 id="block-title"></h2>
+        <p data-say="blockText"></p>
+        <div class="block" id="block" data-testid="block"></div>
+      </section>
       ${familyUnreviewed({ id })}
       <section class="more" aria-labelledby="more-title">
         <h2 id="more-title" data-say="moreTitle"></h2>
@@ -61,9 +75,15 @@ const page = `<!doctype html>
           ${uses.map((line) => `<li><code>${escape(line)}</code></li>`).join("\n          ")}
         </ul>
       </section>
+      <section class="more tag" aria-labelledby="tag-title">
+        <h2 id="tag-title" data-say="tagTitle"></h2>
+        <p data-say="tagText"></p>
+        <tsunagi-board id="tag" data-testid="tag" size="5" level="2" marks="numbers" fill="lines" chips></tsunagi-board>
+      </section>
       ${familyFooter({ id })}
     </main>
     <script>${FAMILY_SCRIPT}</script>
+    <script type="module" src="dist/element-define.js"></script>
     <script type="module" src="demo.js"></script>
   </body>
 </html>

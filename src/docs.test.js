@@ -4,6 +4,9 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
+import { TSUNAGI_BOARD_NAMES } from "./boards.ts";
+import { TSUNAGI_COLOUR_SET_NAMES } from "./colours.ts";
+import { TsunagiBoard } from "./element.ts";
 import { VERSION } from "./version.ts";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
@@ -21,6 +24,11 @@ describe("the documents", () => {
     expect(readme).toContain(`\`${pkg.name}/levels-4\` … \`/levels-12\``);
     const sizes = Object.keys(pkg.exports).filter((key) => /^\.\/levels-\d+$/.test(key)).map((key) => Number(key.slice(9)));
     expect(sizes).toEqual([4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  });
+
+  it("name in the README every colour set, every board and every attribute of the element", () => {
+    for (const name of [...TSUNAGI_COLOUR_SET_NAMES, ...TSUNAGI_BOARD_NAMES]) expect(readme, name).toContain(`\`${name}\``);
+    for (const attribute of TsunagiBoard.observedAttributes) expect(readme, attribute).toMatch(new RegExp(`\`${attribute}[\`=]|\`${attribute}\``));
   });
 
   it("keep the family's stylesheet byte for byte, as its first line's hash says", () => {

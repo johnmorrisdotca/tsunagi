@@ -1,20 +1,42 @@
-/* Tsunagi's own look, after family.css: the board, and the lines under it. */
-:root { --cell: #fbf8f1; --grid: #cfc6b2; --grid-strong: #8a8270; --blocked: #3a3d38; --wall: #1f2320; --intro-room: 11rem; --intro-room-wide: 6rem; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --cell: #262a27; --grid: #3f443f; --grid-strong: #8b8f86; --blocked: #0d0f0d; --wall: #ece8dc; }
-}
+/* Tsunagi's own look, after family.css: the settings, the board on its table, and the preview of a block. */
+:root { --intro-room: 11rem; --intro-room-wide: 6rem; }
 .setup { margin-top: 10px; }
 .of { color: var(--muted); font-weight: 500; }
 .open { margin: 10px 0 0; color: var(--muted); font-size: .85rem; min-height: 2.6em; }
-.table { margin: 8px auto 0; max-width: min(100%, 560px); background: var(--felt); border-radius: var(--radius); padding: 12px; }
-#board { display: block; width: 100%; height: auto; aspect-ratio: 1; touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; overflow: visible; }
-#board .wall { stroke: var(--wall); stroke-width: 1.6; stroke-linecap: round; }
-.status { margin: 12px 0 0; font-weight: 600; text-align: center; min-height: 1.4em; }
-.status[data-solved="true"] { color: var(--good); }
-.note { margin: 4px 0 0; text-align: center; color: var(--accent); min-height: 1.4em; font-weight: 600; }
-.level-line { margin: 6px 0 0; text-align: center; color: var(--muted); font-size: .9rem; }
+
+/* The board on its table: the play element on the family's felt, its words in the felt's ink. */
+#board { margin: 8px auto 0; max-width: min(100%, 600px); padding: 14px 14px 10px; min-width: 0;
+  --tsp-ink: var(--felt-ink); --tsp-surface: rgba(0,0,0,.28); --tsp-rule: rgba(255,255,255,.35); --tsp-muted: var(--felt-ink); --tsp-accent: #ffd23f; --tsp-good: #b9f1c9; }
+#board .tsp-box { border-radius: 10px; }
+#board .tsp-button, #board .tsp-chip { box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); border-color: transparent; }
+#board .tsp-chip[data-strong="true"] { background: var(--felt-ink); color: var(--felt-deep); }
+#board .tsp-says, #board .tsp-hint, #board .tsp-messages p { opacity: .9; }
+
+.settings { margin-top: 22px; display: grid; gap: 4px; }
+.settings h2 { margin: 12px 0 0; font-size: 1.05rem; }
+.settings h2:first-child { margin-top: 0; }
+.settings .fam-label { min-width: 6.2rem; }
+.settings .fam-seg button { font-size: .85rem; }
+.patch { width: 18px; height: 18px; border-radius: 4px; border: 3px solid; display: inline-block; flex: none; }
+.dots { display: inline-flex; gap: 2px; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+
+/* The block's sixteen levels, each as drawn. */
+.block { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; max-width: 640px; }
+@media (min-width: 700px) { .block { grid-template-columns: repeat(8, minmax(0, 1fr)); max-width: 1100px; } }
+.lv { position: relative; border: 1px solid var(--rule); background: var(--surface); border-radius: 12px; padding: 4px; display: block; min-width: 0; }
+.lv svg { display: block; width: 100%; height: auto; pointer-events: none; }
+.lv span { position: absolute; left: 6px; top: 6px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: var(--ink); color: var(--surface); font-size: .72rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+.lv[data-state="locked"] { opacity: .4; cursor: default; }
+.lv[data-state="here"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.lv[data-solved="true"] span { background: var(--good); color: #fff; }
+.lv:disabled { color: inherit; }
+
 .uses { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .uses code { font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
-
 .more .uses { grid-template-columns: 1fr; }
-#board .wrap { stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 3 2.4; }
+.tag tsunagi-board { display: block; max-width: 420px; }
+@media (max-width: 520px) {
+  #board { padding: 10px 10px 8px; }
+  .settings .fam-label { min-width: 100%; }
+}
