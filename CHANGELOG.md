@@ -7,6 +7,12 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-01
+
+### Changed
+
+- **Needs Node 22 or later; Node 20 is no longer supported.** Nothing else changed.
+
 ## [1.3.0] - 2026-10-01
 
 Nothing that was exported has changed: every export, every level, every board
@@ -159,7 +165,8 @@ its own package.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.0.1...v1.1.0
