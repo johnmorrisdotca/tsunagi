@@ -1,0 +1,136 @@
+{
+  "name": "@johnmorrisdotca/tsunagi",
+  "version": "1.0.0",
+  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 1,792 hand-checked levels from 4×4 to 12×12, each with exactly one answer. Zero dependencies.",
+  "keywords": [
+    "puzzle",
+    "logic-puzzle",
+    "number-link",
+    "numberlink",
+    "flow-free",
+    "flow-puzzle",
+    "line-puzzle",
+    "path-puzzle",
+    "arukone",
+    "puzzle-generator",
+    "puzzle-solver",
+    "levels",
+    "hexagon",
+    "seeded-random",
+    "typescript",
+    "javascript",
+    "zero-dependencies",
+    "browser",
+    "node",
+    "itsutsu"
+  ],
+  "homepage": "https://github.com/johnmorrisdotca/tsunagi#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnmorrisdotca/tsunagi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/johnmorrisdotca/tsunagi/issues"
+  },
+  "author": "John Morris",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./levels": {
+      "types": "./dist/levels.d.ts",
+      "import": "./dist/levels.js",
+      "default": "./dist/levels.js"
+    },
+    "./levels-4": {
+      "types": "./dist/levels/size4.data.d.ts",
+      "import": "./dist/levels/size4.data.js",
+      "default": "./dist/levels/size4.data.js"
+    },
+    "./levels-5": {
+      "types": "./dist/levels/size5.data.d.ts",
+      "import": "./dist/levels/size5.data.js",
+      "default": "./dist/levels/size5.data.js"
+    },
+    "./levels-6": {
+      "types": "./dist/levels/size6.data.d.ts",
+      "import": "./dist/levels/size6.data.js",
+      "default": "./dist/levels/size6.data.js"
+    },
+    "./levels-7": {
+      "types": "./dist/levels/size7.data.d.ts",
+      "import": "./dist/levels/size7.data.js",
+      "default": "./dist/levels/size7.data.js"
+    },
+    "./levels-8": {
+      "types": "./dist/levels/size8.data.d.ts",
+      "import": "./dist/levels/size8.data.js",
+      "default": "./dist/levels/size8.data.js"
+    },
+    "./levels-9": {
+      "types": "./dist/levels/size9.data.d.ts",
+      "import": "./dist/levels/size9.data.js",
+      "default": "./dist/levels/size9.data.js"
+    },
+    "./levels-10": {
+      "types": "./dist/levels/size10.data.d.ts",
+      "import": "./dist/levels/size10.data.js",
+      "default": "./dist/levels/size10.data.js"
+    },
+    "./levels-11": {
+      "types": "./dist/levels/size11.data.d.ts",
+      "import": "./dist/levels/size11.data.js",
+      "default": "./dist/levels/size11.data.js"
+    },
+    "./levels-12": {
+      "types": "./dist/levels/size12.data.d.ts",
+      "import": "./dist/levels/size12.data.js",
+      "default": "./dist/levels/size12.data.js"
+    },
+    "./marks": {
+      "types": "./dist/levels/marks.data.d.ts",
+      "import": "./dist/levels/marks.data.js",
+      "default": "./dist/levels/marks.data.js"
+    },
+    "./renumbered": {
+      "types": "./dist/levels/renumbered.data.d.ts",
+      "import": "./dist/levels/renumbered.data.js",
+      "default": "./dist/levels/renumbered.data.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "test": "vitest run",
+    "test:package": "pnpm build && node scripts/check-package.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "prepublishOnly": "pnpm check && pnpm build",
+    "site": "pnpm build && node scripts/site.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^5.0.0"
+  },
+  "packageManager": "pnpm@10.11.0"
+}

@@ -1,0 +1,20 @@
+/* Tsunagi's own look, after family.css: the board, and the lines under it. */
+:root { --cell: #fbf8f1; --grid: #cfc6b2; --grid-strong: #8a8270; --blocked: #3a3d38; --wall: #1f2320; --intro-room: 11rem; --intro-room-wide: 6rem; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --cell: #262a27; --grid: #3f443f; --grid-strong: #8b8f86; --blocked: #0d0f0d; --wall: #ece8dc; }
+}
+.setup { margin-top: 10px; }
+.of { color: var(--muted); font-weight: 500; }
+.open { margin: 10px 0 0; color: var(--muted); font-size: .85rem; min-height: 2.6em; }
+.table { margin: 8px auto 0; max-width: min(100%, 560px); background: var(--felt); border-radius: var(--radius); padding: 12px; }
+#board { display: block; width: 100%; height: auto; aspect-ratio: 1; touch-action: none; user-select: none; -webkit-user-select: none; cursor: crosshair; overflow: visible; }
+#board .wall { stroke: var(--wall); stroke-width: 1.6; stroke-linecap: round; }
+.status { margin: 12px 0 0; font-weight: 600; text-align: center; min-height: 1.4em; }
+.status[data-solved="true"] { color: var(--good); }
+.note { margin: 4px 0 0; text-align: center; color: var(--accent); min-height: 1.4em; font-weight: 600; }
+.level-line { margin: 6px 0 0; text-align: center; color: var(--muted); font-size: .9rem; }
+.uses { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.uses code { font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
+
+.more .uses { grid-template-columns: 1fr; }
+#board .wrap { stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 3 2.4; }
