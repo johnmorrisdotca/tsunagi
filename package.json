@@ -1,7 +1,7 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
-  "version": "1.4.0",
-  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 2,176 hand-checked levels from 4×4 to 15×15, each with exactly one answer. The board drawn as SVG (colours or numbers, dots or lines) and played by touch and mouse in any page, as a function call or a tag. Zero dependencies.",
+  "version": "1.5.0",
+  "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints, portals and hexagon boards, a difficulty measure, and 2,368 hand-checked levels from 4×4 to 30×30, and 256 more with portals, each with exactly one answer. The board drawn as SVG (colours or numbers, dots or lines) and played by touch and mouse in any page, as a function call or a tag. Zero dependencies.",
   "keywords": [
     "puzzle",
     "logic-puzzle",
@@ -25,7 +25,9 @@
     "itsutsu",
     "svg",
     "custom-element",
-    "web-component"
+    "web-component",
+    "portals",
+    "big-boards"
   ],
   "homepage": "https://johnmorrisdotca.github.io/tsunagi/",
   "repository": {
@@ -134,6 +136,26 @@
       "types": "./dist/levels/size15.data.d.ts",
       "import": "./dist/levels/size15.data.js",
       "default": "./dist/levels/size15.data.js"
+    },
+    "./levels-20": {
+      "types": "./dist/levels/size20.data.d.ts",
+      "import": "./dist/levels/size20.data.js",
+      "default": "./dist/levels/size20.data.js"
+    },
+    "./levels-25": {
+      "types": "./dist/levels/size25.data.d.ts",
+      "import": "./dist/levels/size25.data.js",
+      "default": "./dist/levels/size25.data.js"
+    },
+    "./levels-30": {
+      "types": "./dist/levels/size30.data.d.ts",
+      "import": "./dist/levels/size30.data.js",
+      "default": "./dist/levels/size30.data.js"
+    },
+    "./levels-portals": {
+      "types": "./dist/levels/portals.data.d.ts",
+      "import": "./dist/levels/portals.data.js",
+      "default": "./dist/levels/portals.data.js"
     },
     "./marks": {
       "types": "./dist/levels/marks.data.d.ts",
