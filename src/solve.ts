@@ -1,4 +1,5 @@
 import { CELL_EMPTY, type LinkLayout } from "./code.ts";
+import { linesOfAnswer } from "./lines.ts";
 import { countSolutionsSat } from "./solveSat.ts";
 import { bridgesOf, stepTable, type Step } from "./steps.ts";
 
@@ -13,6 +14,14 @@ import { bridgesOf, stepTable, type Step } from "./steps.ts";
  * the same way.
  */
 export const SAT_FROM_SIZE = 13;
+
+/**
+ * From which side the SAT solver writes a cell's pair as a binary number rather
+ * than a variable for each pair, which a board of dozens of pairs needs: every
+ * level to 15×15 was proved the first way and keeps its counts. Any board with
+ * portals is counted by SAT, and written the second way, whatever its side.
+ */
+export const SAT_BINARY_FROM_SIZE = 16;
 
 /*
  * An empty cell, read into this module once. The search reads it millions of
@@ -70,8 +79,8 @@ export type SolveCount = {
 };
 
 export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
-  // For a big board `budget` is a number of dead ends, not of positions.
-  if (layout.size >= SAT_FROM_SIZE) return countSolutionsSat(layout, limit, budget);
+  // For a big board, or one with portals, `budget` is a number of dead ends, not of positions.
+  if (layout.size >= SAT_FROM_SIZE || layout.portalPairs.length > 0) return countSolutionsSat(layout, limit, budget, null, layout.size >= SAT_BINARY_FROM_SIZE || layout.portalPairs.length > 0 ? "binary" : "one-hot");
   const { size, cells, ends } = layout;
   const total = size * size;
   const steps = stepTable(layout);
@@ -268,4 +277,19 @@ export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.PO
   if (cells.some((cell, at) => cell >= 0 && ends[cell]![0] !== at && ends[cell]![1] !== at)) return result;
   search();
   return result;
+}
+
+/**
+ * How a level is proved and measured: `countSolutions` for a board the search
+ * of this file has always counted (4×4 to 15×15, no portals), and for a bigger
+ * one, or one with portals, the SAT search started from the level's own answer
+ * (`countSolutionsSat`, binary pairs). The answer is found at once and every
+ * other answer is looked for from there, so what the count costs is what
+ * proving there is none costs, which is how a big level was made to be cheap
+ * (`reduce.ts`) and what its difficulty measures. Still a proof: the count is
+ * of every answer, and a level whose stored answer is not the one found fails.
+ */
+export function countSolutionsOfLevel(layout: LinkLayout, answer: string, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
+  if (layout.size < SAT_BINARY_FROM_SIZE && layout.portalPairs.length === 0) return countSolutions(layout, limit, budget);
+  return countSolutionsSat(layout, limit, budget, linesOfAnswer(layout, answer), "binary");
 }

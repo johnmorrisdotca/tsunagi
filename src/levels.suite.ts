@@ -7,7 +7,7 @@ import { symmetryKey } from "./generate.ts";
 import { isTwist } from "./ladder.ts";
 import { TSUNAGI_LEVEL_COUNTS, loadTsunagiLevels, tsunagiBand, tsunagiLevelOf, tsunagiLevelsOf } from "./levels.ts";
 import { TSUNAGI_MARKS } from "./levels/marks.data.ts";
-import { countSolutions, type SolveCount } from "./solve.ts";
+import { countSolutionsOfLevel, type SolveCount } from "./solve.ts";
 
 /**
  * EVERY TSUNAGI LEVEL OF ONE SIZE, PROVED AGAIN ON EVERY BUILD — the tests one
@@ -23,7 +23,7 @@ export function levelSuite(size: number): void {
     let solves: SolveCount[] = [];
     beforeAll(async () => {
       await loadTsunagiLevels(size);
-      solves = tsunagiLevelsOf(size).map(([givens]) => countSolutions(decodeLayout(givens, size)!, 2));
+      solves = tsunagiLevelsOf(size).map(([givens, answer]) => countSolutionsOfLevel(decodeLayout(givens, size)!, answer));
     // From 13×13 each proof is a SAT search (`solveSat.ts`): a second or so a level, and a runner is slower than a desk.
     }, size >= 13 ? 900_000 : 240_000);
 

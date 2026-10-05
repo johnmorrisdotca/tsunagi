@@ -13,6 +13,7 @@ export * from "./steps.ts";
 export * from "./solve.ts";
 export * from "./solveSat.ts";
 export * from "./generate.ts";
+export * from "./reduce.ts";
 export * from "./sparse.ts";
 export * from "./twists.ts";
 export * from "./difficulty.ts";

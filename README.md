@@ -1,7 +1,7 @@
 <h1 align="center">Tsunagi <sub>つなぎ</sub></h1>
 
 <p align="center"><strong>A line-joining logic puzzle for JavaScript and TypeScript.</strong><br>
-Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints and hexagon boards, a difficulty measure, and 2,176 levels from 4×4 to 15×15, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch and mouse in any page with one call or one tag. No dependencies.</p>
+Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints, portals and hexagon boards, a difficulty measure, and 2,368 levels from 4×4 to 30×30, and 256 more with portals, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch and mouse in any page with one call or one tag. No dependencies.</p>
 
 <p align="center">
   <a href="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml/badge.svg"></a>
@@ -65,10 +65,11 @@ And in a page, a level to play, by touch and mouse, with nothing else to set up:
 
 ## Features
 
-- **Levels everybody plays alike.** Thousands of fixed levels from 4×4 to 15×15 (see [Levels](#levels)), each proved on every build to have exactly one answer, in blocks of sixteen that open one after another. A level keeps its number, so a time on it can be compared with anybody's.
+- **Levels everybody plays alike.** Thousands of fixed levels from 4×4 to 30×30 (see [Levels](#levels)), and a second set of boards with portals, each proved on every build to have exactly one answer, in blocks of sixteen that open one after another. A level keeps its number, so a time on it can be compared with anybody's.
 - **A level of the day**, the same for everybody, from the date alone: `dailyTsunagiLevel(size, date)`. No server, no seed.
 - **A check a server can trust.** `checkTsunagiAnswer` reads a finished answer in O(cells), with no search, and says the first thing wrong.
-- **A solver that counts answers**, and a seeded generator that makes boards with exactly one, with the twists: walls, bridges, waypoints, wrap, hexagons, few lines, explosions and a stroke limit.
+- **A solver that counts answers**, and a seeded generator that makes boards with exactly one, with the twists: walls, bridges, waypoints, wrap, portals, hexagons, few lines, explosions and a stroke limit.
+- **Big boards, made by taking clues away.** A 30×30 board with one answer is not found by luck; `reducedCandidate` starts from a filling cut into short lines and joins them while the solver can still prove one answer within a budget of dead ends, so the boards come out with a cheap proof by construction: on one core of a desk (measured 2026-10-05) a median 3 seconds at 20×20, 11 at 25×25 and 25 to 66 at 30×30, and 20×20, 25×25 and 30×30 have 64 levels each.
 - **A difficulty measure**, so a level has a mark from 1 to 5 and the levels of a size run easiest first.
 - **Drawn as SVG text**, in an entry of its own: colours or numbers on the marbles, dots or lines, four colour sets, six boards, bridges drawn as bridges. A server that only checks answers never loads it.
 - **Played in any page** by touch and mouse, with Undo, Restart, Check, Cheat and the zoom pad a big board needs, as one function call (`mountTsunagi`) or one tag (`<tsunagi-board>`).
@@ -188,6 +189,9 @@ when every pair is joined every cell is filled. A level has exactly one answer.
 - **Waypoints**, a cell a pair's own line must pass through.
 - **Wrap**, a board whose edges join, so a line leaving one side comes back
   on the other.
+- **Portals**, pairs of rings inside the board: a line that goes into one comes
+  out of the other, going the same way, and both rings are cells it fills. Each
+  portal is gone through by exactly one line, once.
 - **Hexagons**, a board of six-sided cells, six ways round.
 - **Sparse** boards, with fewer marbles and more room, and **explosions** and
   **strokes**, a limit on how a board may be drawn.
@@ -210,7 +214,11 @@ too, so a finished board is a board of marbles joined by their lines. Walls are
 bars on the edge between two cells and blocked cells are dark squares. A
 **bridge** is drawn as a bridge: the line going down passes *under* its deck and
 is lost beneath it, and the line going across is drawn over the deck. A
-**waypoint** is a ring in its line's colour. A board that **wraps** has a faded
+**waypoint** is a ring in its line's colour. A **portal** is two rings alike, in a colour
+and with a letter (α, β, …) of their own, and the line is seen to stop just inside the one
+it goes into and start again just inside the other, going on the way it went in; a faint link
+between the two shows when the pointer is over one (`data-linked="true"` on the portal's
+group shows it too, which is what a tap does). A board that **wraps** has a faded
 ghost of the far edge all round it and a dashed rim, and a line across the join
 leaves by one edge and comes in by the other. A **hexagon** is a honeycomb of
 hexagons, in the same square box as every board.
@@ -220,7 +228,7 @@ hexagons, in the same square box as every board.
 | `lines` | `Lines` | the lines drawn so far; none, if left out |
 | `marks` | `colours` (default), `numbers` | tell the pairs apart by colour, or by the pair's number on a plain shell marble with every line in a soft tint |
 | `fill` | `marbles` (default), `lines` | a small marble (the dots) in every cell a line runs through, or the line alone |
-| `colours` | `marble` (default), `bright`, `colour-blind`, `soft`, or your own `[hue, saturation, lightness][]` | each pair's colour; a set of your own is used round and round |
+| `colours` | `marble` (default), `bright`, `colour-blind`, `soft`, or your own `[hue, saturation, lightness][]` | each pair's colour: each set has one for all eighty-two pairs, its first sixteen the ones boards to 15×15 are drawn in and then the same hues turned round the wheel and made lighter or darker; a set of your own is used round and round |
 | `board` | `paper` (default), `wood`, `green`, `blue`, `red`, `black`, or a `TsunagiBoardLook` | the paper, the frame, the rules and the ink of walls and bridges; `paper` takes its colours from the page's light or dark |
 | `coordinates` | boolean | row numbers and column letters down the sides (not on a board that wraps or a hexagon) |
 | `ghosts` | boolean, default true | the ghost of the far edge round a board that wraps |
@@ -236,13 +244,22 @@ Every colour is also a custom property on `.tsunagi` (`--tsu-paper`,
 `--tsu-shu`, `--tsu-good`), so a page sets only what it wants different.
 The parts carry classes and data attributes to style or find them: `tsu-marble`
 (`data-pair`, `data-cell`), `tsu-bead`, `tsu-line` (`data-pair`, `data-cells`),
-`tsu-bridge`, `tsu-over-bridge`, `tsu-wall` (`data-edge`), `tsu-waypoint`,
-`tsu-flag`, `tsu-blast`, `tsu-hex-cell`. Nothing in the drawing can be selected,
+`tsu-bridge`, `tsu-over-bridge`, `tsu-wall` (`data-edge`), `tsu-waypoint`, `tsu-portal` (`data-portal`, `data-cells`; its rings are `tsu-portal-end`
+and its link `tsu-portal-link`), `tsu-flag`, `tsu-blast`, `tsu-hex-cell`. Nothing in the drawing can be selected,
 dragged or double-tapped into a selection, and with reduced motion asked for
 nothing moves. `drawTsunagiCode(givens, size, options)` draws a level from its
 code, and `drawTsunagiMarble(pair, options)` one marble for a legend. `tsunagiGeometry(layout)`
 and `cellAtPoint(geometry, x, y)` say where every cell is in the drawing and which
 cell a point is over, so a page of your own can play it.
+
+A drawing is made of groups a page can redraw one at a time: each pair's washes are in
+`.tsu-washes > [data-pair]`, its little marbles in `.tsu-beads > [data-pair]` (and
+`.tsu-ghosts > [data-pair]` on a board that wraps) and its line is a `.tsu-line`. `drawTsunagiPair(layout, pair, id, options)`
+makes the three for one pair, so a finger moving through a cell redraws one or two pairs and not the
+thousands of elements of a 30×30 board (`mountTsunagi` does this; on a phone with the processor
+slowed four times, a move on a full 30×30 board took a median 2.7 ms to handle, where redrawing the
+whole drawing took 18.2). A board with bridges is redrawn whole, since a bridge's deck and the lines
+under it depend on every line.
 
 ## Playing it in a page
 
@@ -260,7 +277,11 @@ board?.undo(); board?.check(); board?.load({ size: 7, givens: other, answer: oth
 
 It plays the way the site does. Press a marble (or the end of a line) and drag to
 its partner; drag back over a line to shorten it, cell by cell; tap a marble to
-clear its line; a line dragged into another cuts the other back. Pointer events,
+clear its line; a line dragged into another cuts the other back. Drag into a
+portal and the line goes in and comes out of the other ring in the same drag, and the finger is
+taken to be over the end of the line from then on (`dragFinger`, `Reach`): move it a cell and the
+line moves a cell, where it now is; where that would take the finger off the board, lift it and press
+the end of the line again. Drag back over the portal and the line is as it was before it. Pointer events,
 captured on the press so a drag that leaves the board still ends, with
 `touch-action: none` so a finger drawing a line never scrolls the page. A big
 board (10×10 up) is looked at through a box with a zoom and move pad, the wheel,
@@ -279,7 +300,7 @@ handle (`undo`, `restart`, `check`, `cheat`, `fit`, `load`, `set`, `destroy`).
 
 | Option | What it does |
 | --- | --- |
-| `size`, `givens`, `answer`, `level` | the level; `answer` is needed for Cheat and makes a solve the stored answer |
+| `size`, `givens`, `answer`, `level`, `set` | the level (`set`: `classic`, the default, or `portals`); `answer` is needed for Cheat and makes a solve the stored answer |
 | `lines` | lines to start from: a kept game (`decodeLines`) or a solved board to show |
 | `marks`, `fill`, `colours`, `board`, `coordinates` | the look, as for `drawTsunagi`; change them with `set` and they take effect at once |
 | `explosions` | `on` (default), `soft` (a boom for a blast, half as often) or `off`; a solve with either help is `helped` |
@@ -300,7 +321,7 @@ page, so a server can replay a game's strokes.
 ```
 
 Or `import "@johnmorrisdotca/tsunagi/element/define"` in a bundle. Attributes, each read again
-when it changes: `size` with `level` (the package's own levels, fetched when asked) or with `givens` and
+when it changes: `size` with `level` (the package's own levels, fetched when asked; `set="portals"` for the ones with portals) or with `givens` and
 `answer`; `marks` (`colours` or `numbers`); `fill` (`marbles` or `lines`); `colour-set` (`marble`,
 `bright`, `colour-blind`, `soft`); `board` (`paper`, `wood`, `green`, `blue`, `red`, `black`);
 `coordinates`; `explosions` (`on`, `soft`, `off`); `cheats`; `controls="off"`; `chips`; `zoom`;
@@ -316,6 +337,7 @@ import { loadTsunagiLevels, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS } from "@joh
 
 const sevens = await loadTsunagiLevels(7);       // 256 levels, easiest first; only 7×7 is fetched
 openTsunagiLevels(7, new Set([1, 2, 3]));         // 16: the first block of sixteen is open from the start
+const portals = await loadTsunagiLevels(7, "portals");   // the 32 levels with portals at 7×7
 ```
 
 | Size | Levels | Size | Levels | Size | Levels |
@@ -324,9 +346,11 @@ openTsunagiLevels(7, new Set([1, 2, 3]));         // 16: the first block of sixt
 | 5×5 | 256 | 8×8 | 256 | 11×11 | 64 |
 | 6×6 | 256 | 9×9 | 256 | 12×12 | 128 |
 | 13×13 | 128 | 14×14 | 128 | 15×15 | 128 |
+| 20×20 | 64 | 25×25 | 64 | 30×30 | 64 |
 
-Every level was made once, by `scripts/tsunagi-levels.ts` (4×4 to 12×12) or
-`scripts/tsunagi-levels-big.ts` (13×13 to 15×15), and is proved again
+Every level was made once, by `scripts/tsunagi-levels.ts` (4×4 to 12×12),
+`scripts/tsunagi-levels-big.ts` (13×13 to 15×15) or `scripts/tsunagi-levels-huge.ts` (20×20 to
+30×30), and is proved again
 on every build: solved from scratch, it must have exactly one answer, the one
 stored, filling every cell, with no two levels the same board turned or
 mirrored. Levels come in blocks of sixteen, each block no easier on average
@@ -342,10 +366,30 @@ difficulty.
 | `@johnmorrisdotca/tsunagi/play` | `mountTsunagi`: a level played in any element by touch and mouse, with its buttons, words, zoom pad and events |
 | `@johnmorrisdotca/tsunagi/element` | the `TsunagiBoard` class behind `<tsunagi-board>`, to extend or to define under another name |
 | `@johnmorrisdotca/tsunagi/element/define` | defines `<tsunagi-board>` on the page, for its effect |
-| `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size)`, `tsunagiLevelOf(size, layout)`, each size fetched only when loaded |
-| `@johnmorrisdotca/tsunagi/levels-4` … `/levels-15` | one size's levels, `TSUNAGI_4` … `TSUNAGI_15`, as `[layout, answer]` pairs |
-| `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5) and `TSUNAGI_ROLES` (each twist level's part in its block) |
+| `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size, set)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size, set)`, `tsunagiLevelOf(size, layout, set)`, each size fetched only when loaded |
+| `@johnmorrisdotca/tsunagi/levels-4` … `/levels-15`, `/levels-20`, `/levels-25`, `/levels-30` | one size's levels, `TSUNAGI_4` … `TSUNAGI_30`, as `[layout, answer]` pairs |
+| `@johnmorrisdotca/tsunagi/levels-portals` | the levels with portals, `TSUNAGI_PORTAL_LEVELS`: every size's in one entry |
+| `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5), `TSUNAGI_ROLES` (each twist level's part in its block) and `TSUNAGI_PORTAL_MARKS` |
 | `@johnmorrisdotca/tsunagi/renumbered` | where each old level went when the levels were renumbered on 2026-09-26, for anyone who stored solves by number |
+
+### Levels with portals
+
+A portal is two rings inside the board: a line that goes into one comes out of the other, going
+the same way on, and both rings are cells it fills. They are written after the cells and the walls,
+`|portals3-40,17-52` (each pair as its two cells, the smaller first, the pairs in order, after `wrap` if
+there is one), and a second set of levels is made of boards with them: 32 a size at 5×5 to 10×10, 12×12
+and 15×15, in two blocks of sixteen, the first block's boards with one portal and the second's with two
+or three. They open a block at a time like the others and are numbered from 1 in their own set;
+a record that keeps a level by one number keeps a portal level as `levelSeed("portals", n)`, 1,000 and
+its number (`setOfSeed` reads it back), which no level of the first set reaches.
+
+The rules a portal keeps are small, and `checkTsunagiAnswer` holds every one. A portal cell is an empty
+cell: never a stone, a waypoint, a bridge or blocked, never beside another portal's, and a board with portals
+has no bridges and is no hexagon. A line steps into a portal cell and comes out of the other, going the same
+way on, into the cell beyond it: where that cell is off the board, blocked, across a wall or a stone of another
+pair, that way into the portal is no way. The two portal cells are one line's, and the portal is gone
+through once; where two ways through portals (or a portal and a plain step) would join the same two cells,
+the layout is refused (`decodeLayout` returns null), because an answer's cells could not tell them apart.
 
 ### The level of the day
 
@@ -365,14 +409,16 @@ The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists ev
 
 | Export | What it does |
 | --- | --- |
-| `decodeLayout(code, size)`, `encodeLayout(cells, walls, more)` | a layout's code and the `LinkLayout` it stands for: marbles (`ends`), cells, walls, waypoints, wrap, hexagon |
+| `decodeLayout(code, size)`, `encodeLayout(cells, walls, more)` | a layout's code and the `LinkLayout` it stands for: marbles (`ends`), cells, walls, waypoints, wrap, portals, hexagon |
 | `encodeAnswer(owners)`, `answerOf(layout, lines)`, `linesOfAnswer(layout, answer)` | an answer as a code: a letter for each cell's line, `#` blocked, `+` a bridge |
 | `checkTsunagiAnswer(size, layout, answer)` | whether an answer joins every pair as the rules allow, in O(cells); `{ ok: true }` or the first reason it does not |
-| `noLines`, `pressAt`, `dragTo`, `dragThrough`, `letGo` | drawing, as a finger does it: each takes the lines drawn so far and returns new ones |
+| `noLines`, `pressAt`, `dragTo`, `dragThrough`, `dragFinger`, `letGo` | drawing, as a finger does it: each takes the lines drawn so far and returns new ones; `dragFinger` keeps the finger's `Reach` over the end of a line that has been through a portal |
 | `joined`, `allJoined`, `unjoinedPairs`, `filled`, `ownersOf` | what the lines drawn so far amount to |
 | `encodeLines`, `decodeLines` | lines half drawn, as a code, to keep a game and come back to it |
 | `countSolutions(layout, limit, budget)` | counts answers up to `limit`, within a `budget` of search steps (dead ends, from 13×13), and returns one |
-| `countSolutionsSat(layout, limit, budget, guide)` | the same count made by SAT, a solver that learns from its dead ends: what proves every 13×13 to 15×15 level, and what `countSolutions` is from 13×13 |
+| `countSolutionsSat(layout, limit, budget, guide, colours)` | the same count made by SAT, a solver that learns from its dead ends: what proves every 13×13 to 15×15 level, and what `countSolutions` is from 13×13; `colours` writes a cell's pair as a variable each (`one-hot`, the default) or as a binary number (`binary`, which a board of dozens of pairs needs) |
+| `countSolutionsOfLevel(layout, answer)` | how a level is proved and measured: the search of `countSolutions` to 15×15, and from 16×16 or with portals the SAT search started from the level's own answer, which finds it at once and looks for every other |
+| `reducedCandidate(size, random, options)`, `withPortals` | a big board made by taking clues away, with blocked cells, wrap, waypoints or portals; portals put into a filling |
 | `candidate`, `repairedCandidate`, `sparseCandidate`, `layoutOf` | a new board from a seeded `Random`: a random filling of lines, cut back to its ends |
 | `bridgeCandidate`, `wallCandidate`, `waypointCandidate`, `wrapCandidate`, `hexCandidate`, `bridgeAndWallCandidate` | a board with a twist |
 | `measureLevel`, `difficultyScores`, `orderByDifficulty` | how hard a board is: corners, guessing, cells not forced, its longest line |
@@ -382,7 +428,8 @@ The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists ev
 | `newTsunagiGame`, `pressGame`, `dragGame`, `liftGame`, `undoGame`, `restartGame`, `checkGame`, `cheatGame` | a game in play as pure functions: lines, strokes, Undo, explosions, a stroke limit, Check and Cheat; each returns a new game |
 | `tsunagiProgress`, `helpOf`, `helpOpensNext`, `strongestTsunagiHelp` | what a game stands at, and which help (Cheat, softened or no explosions) a solve used and what that costs |
 | `seededRandom(seed)` | the mulberry32 stream every generator draws from |
-| `openTsunagiLevels`, `nextTsunagiLevel`, `firstUnsolvedTsunagiLevel`, `tsunagiBand` | which levels a player may open, which comes next, and which third of a size a level is in |
+| `openTsunagiLevels`, `nextTsunagiLevel`, `firstUnsolvedTsunagiLevel`, `tsunagiBand` | which levels a player may open, which comes next, and which third of a size a level is in; each takes the set (`classic` or `portals`) last |
+| `levelCountOf`, `levelSeed`, `setOfSeed` | how many levels a size has in a set, and the one number a record keeps a level of either set by |
 | `dailyTsunagiLevel(size, date)`, `tsunagiDay(date)`, `isTsunagiDay(text)` | the level of the day at a size, from the date alone; a date as `YYYY-MM-DD` in UTC; whether a text is a real one |
 
 Every function is pure: it returns new values and never changes what it was
@@ -429,13 +476,13 @@ All of these are held by tests, and the ones with a name are exported.
 
 | Limit | Value | Where |
 | --- | --- | --- |
-| Sizes | 4×4 to 15×15, one side of a square | `TSUNAGI_SIZES` |
+| Sizes | 4×4 to 30×30, one side of a square: 4 to 15, then 20, 25 and 30; the portal levels at 5×5 to 10×10, 12×12 and 15×15 | `TSUNAGI_SIZES`, `TSUNAGI_PORTAL_SIZES` |
 | Levels | each size's own, in blocks of sixteen | `TSUNAGI_LEVEL_COUNTS`, `TSUNAGI_BLOCK` |
-| Pairs on a board | sixteen, one letter each, `A` to `P` | `PAIR_LETTERS` |
+| Pairs on a board | eighty-two, one character each: `A` to `Z`, `0` to `9`, `a` to `z`, then twenty marks; a board of thirty-six or more has no waypoints | `PAIR_LETTERS`, `CAPITAL_PAIRS` |
 | Boards with a few lines | at most two thirds of the side | `sparseMost(size)` |
 | Answers counted | two, so that "many" costs no more than "two" | the `limit` argument of `countSolutions` |
 | The solver's work | none unless you give a `budget`; it is dead ends from 13×13 and search steps below | the `budget` argument of `countSolutions` and `countSolutionsSat` |
-| Which solver | the search below 13×13, SAT from 13×13 | `SAT_FROM_SIZE` |
+| Which solver | the search below 13×13, SAT from 13×13 (and for any board with portals), a binary pair from 16×16 | `SAT_FROM_SIZE`, `SAT_BINARY_FROM_SIZE` |
 | The zoom pad | from 10×10, up to 3 times | `TSUNAGI_ZOOM_FROM`, `TSUNAGI_MOST_ZOOM` |
 | A day | `YYYY-MM-DD`, counted in UTC | `isTsunagiDay` |
 
@@ -480,9 +527,28 @@ and keeps each board proved to have one answer and measured, and
 the files. A job's boards depend only on its number, never on the machine.
 The plain boards of 13×13 and 14×14 take seconds and 15×15's about six minutes
 on twenty cores; the twist boards take longer, about an hour in all. Boards from 13×13
-up have at most sixteen lines, the most colours there are, and are proved by
+to 15×15 have at most sixteen lines, the most colours there are, and are proved by
 `countSolutionsSat`: 12×12 was the ceiling until a solver that learns from its
 dead ends replaced the one that walks into them again.
+
+20×20, 25×25, 30×30 and the portal levels are made the other way round, because a board
+that big with that few lines is almost never found by luck and never mended in a
+useful time: `node scripts/tsunagi-reduce-pool.ts 30 plain 200` starts each board from a
+filling cut into pieces of four cells and joins neighbours while the solver, started from the
+filling's own answer, can still prove one answer within a budget of dead ends (the job's
+number sets the budget, 3,000 to 50,000: the bigger, the fewer lines and the harder the board),
+and keeps boards of at most 82 lines. `node scripts/tsunagi-levels-huge.ts` and
+`node scripts/tsunagi-levels-portals.ts` take the pools and write the levels, the marks and the
+twists.
+
+Measured on one core of a desk, 2026-10-05, six attempts each: a 20×20 takes a median 3.4 seconds
+(range 1.3 to 7), a 25×25 10.9 (7 to 18) and a 30×30 24.5 at a budget of 6,000 (four attempts in six end
+in a board of at most 82 lines) or 66 at 25,000; with two portals 20×20 takes 3.6, 25×25 9.2 and 30×30
+44.7 seconds. Each board is then proved from its own answer in a fraction of a second to about a
+second. A 30×30 that wraps is the hardest to make, since every cell has four neighbours: it needs a
+budget of 200,000, about five minutes, and one attempt in three or four yields a board of 82 lines or
+fewer. The pools the fixed levels were chosen from took roughly an hour and a half of a twenty-core desk
+for 30×30 and under an hour for the other two sizes together.
 
 ## Architecture
 
@@ -495,14 +561,15 @@ levels is an entry of its own, so a page loads only the size it shows.
 src/
 ├── index.ts          the main entry: everything but the levels, the drawing and the page
 ├── code.ts           layouts and answers as short codes, and the board each stands for
-├── steps.ts          where a line may go next on a board: walls, bridges, wrap, hexagons
+├── steps.ts          where a line may go next on a board: walls, bridges, portals, wrap, hexagons
 ├── lines.ts          the lines a player has drawn, and what a press and a drag do to them
 ├── check.ts          whether an answer joins every pair as the rules allow
 ├── solve.ts          the solver, which counts a board's answers up to a limit (4×4 to 12×12)
-├── solveSat.ts       the same count by SAT, for 13×13 and above: the board written as clauses
+├── solveSat.ts       the same count by SAT, for 13×13 and above and for portals: the board written as clauses
 ├── sat.ts            a small SAT solver: clause learning, restarts, clauses added between solves
 ├── generate.ts       new boards from a seed: lines laid at random, cut back to their ends
-├── twists.ts         boards with a twist: walls, bridges, waypoints, wrap, hexagons
+├── reduce.ts         big boards made by taking clues away, with portals, wrap, waypoints and blocked cells
+├── twists.ts         boards with a twist: walls, bridges, waypoints, wrap, hexagons (portals are `reduce.ts`'s)
 ├── sparse.ts         sparse boards: few marbles and long lines
 ├── explosions.ts     explosions that break a line, and a limit on strokes
 ├── difficulty.ts     how hard a level is, measured from its board and its answer
@@ -544,6 +611,10 @@ src/
     ├── size13.data.ts      13×13
     ├── size14.data.ts      14×14
     ├── size15.data.ts      15×15
+    ├── size20.data.ts      20×20
+    ├── size25.data.ts      25×25
+    ├── size30.data.ts      30×30
+    ├── portals.data.ts     the levels with portals, every size's
     ├── marks.data.ts       every level's difficulty, 1 to 5, and each twist's part in its block
     └── renumbered.data.ts  where each old level went when the levels were renumbered
 ```

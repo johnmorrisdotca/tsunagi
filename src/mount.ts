@@ -1,7 +1,9 @@
 import type { TsunagiBoardLook, TsunagiBoardName } from "./boards.ts";
 import type { TsunagiColour, TsunagiColourSetName, TsunagiFill, TsunagiMarks } from "./colours.ts";
+import { CELL_BRIDGE } from "./code.ts";
+import type { TsunagiSet } from "./levelCounts.ts";
 import { answerOf, encodeLines, type Lines } from "./lines.ts";
-import { drawTsunagi } from "./draw.ts";
+import { drawTsunagi, drawTsunagiPair } from "./draw.ts";
 import { cellAtPoint, tsunagiGeometry, type TsunagiGeometry } from "./geometry.ts";
 import {
   cheatGame,
@@ -81,6 +83,8 @@ export type TsunagiMountOptions = TsunagiLook & {
   answer?: string;
   /** Which level of its size this is, to show its difficulty and its place in its block. */
   level?: number;
+  /** Which set of levels `level` is in: `classic` (the default) or `portals`. */
+  set?: TsunagiSet;
   /** Lines to start from, to carry on a game kept half played. */
   lines?: Lines;
   /** Explosions as made (the default), softened or off. */
@@ -107,7 +111,7 @@ export type TsunagiMount = {
   game: () => TsunagiGame;
   progress: () => TsunagiProgress;
   /** Play another level (or the same one again, fresh). `lines` carries on a kept game. */
-  load: (level: { size: number; givens: string; answer?: string; level?: number; lines?: Lines }) => void;
+  load: (level: { size: number; givens: string; answer?: string; level?: number; set?: TsunagiSet; lines?: Lines }) => void;
   /** Change how the board looks, or how it is played: marks, fill, colours, board, coordinates, explosions, cheats, language. A look takes effect at once; explosions and cheats from the next `load` or `restart`. */
   set: (changes: TsunagiLook & { explosions?: TsunagiExplosionChoice; cheats?: boolean; language?: TsunagiLanguage }) => void;
   undo: () => void;
@@ -123,8 +127,10 @@ export type TsunagiMount = {
 /** How long Check's flashing lasts and how long an explosion's burst shows, in milliseconds; the words stay until the board changes. */
 const FLASH_MS = 2400;
 const BLAST_MS = 1200;
+/** How long a tapped portal shows its link to the other ring. */
+const LINK_MS = 1800;
 
-const CHALLENGE_KEYS: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "explosions", "strokes", "hexagon", "sparse"];
+const CHALLENGE_KEYS: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "portals", "explosions", "strokes", "hexagon", "sparse"];
 
 /** Put the style in the page once: in the document's head, or in the shadow root the host is in. */
 export function ensureTsunagiPlayStyle(host: Element): void {
@@ -156,6 +162,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   let explosions: TsunagiExplosionChoice = options.explosions ?? "on";
   let cheats = options.cheats === true;
   let level = options.level;
+  let set: TsunagiSet = options.set ?? "classic";
   let answer = options.answer;
   let givens = options.givens;
   let size = options.size;
@@ -218,12 +225,15 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   let shownBlast: readonly number[] | null = null;
   let flagTimer = 0;
   let blastTimer = 0;
+  let linkTimer = 0;
   let view: TsunagiView = TSUNAGI_FITTED;
   let boxWidth = 0;
   let geometry: TsunagiGeometry = tsunagiGeometry(game.layout, { coordinates: look.coordinates });
   let solvedTold = false;
   let openChip: string | null = null;
   let drawnKey = "";
+  let drawnLines: Lines | null = null;
+  let drawnStill = "";
   let pointer: { id: number; cell: number | null; x: number; y: number } | null = null;
   let frame = 0;
 
@@ -264,9 +274,9 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     says.hidden = !withChips;
     if (!withChips) return;
     const keys: { key: string; label: string; strong: boolean; says: string }[] = [];
-    const marks = level === undefined ? null : tsunagiMarks(size, level);
+    const marks = level === undefined ? null : tsunagiMarks(size, level, set);
     if (marks !== null) keys.push({ key: "difficulty", label: "", strong: false, says: say("difficultySays") });
-    const role = level === undefined ? null : tsunagiRole(size, level);
+    const role = level === undefined ? null : tsunagiRole(size, level, set);
     if (role?.role === "teaches" && role.newOnes.length > 0) keys.push({ key: "teaches", label: say("teaches", { what: role.newOnes.map((each) => say(each)).join(language === "ja" ? "、" : " and ") }), strong: true, says: say("teachesSays") });
     if (role?.role === "tests") keys.push({ key: "tests", label: say("tests"), strong: true, says: say("testsSays") });
     for (const challenge of challengesOf(givens)) if (CHALLENGE_KEYS.includes(challenge)) keys.push({ key: challenge, label: say(challenge), strong: false, says: say(`${challenge}Says`) });
@@ -339,13 +349,45 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     );
   }
 
+  /**
+   * Only the pairs whose line changed are redrawn, in the drawing already there: on a board of dozens of
+   * lines the whole drawing is thousands of elements, and a finger moving through a cell changes one or two
+   * pairs'. Where the drawing has to be made whole (a look changed, a flash, a solve, a bridge) it is.
+   */
+  function patch(g: TsunagiGame, previous: Lines): boolean {
+    const svg = inner.querySelector("svg");
+    const paper = svg?.querySelector('linearGradient[id$="-paper"]');
+    if (svg === null || svg === undefined || paper === null || paper === undefined) return false;
+    const id = paper.id.slice(0, -"-paper".length);
+    const options = { ...look, lines: g.lines, language };
+    for (const [pair, line] of g.lines.entries()) {
+      if (line === previous[pair]) continue;
+      const parts = drawTsunagiPair(g.layout, pair, id, options);
+      const washes = svg.querySelector(`.tsu-washes > [data-pair="${pair}"]`);
+      const beads = svg.querySelector(`.tsu-beads > [data-pair="${pair}"]`);
+      const drawn = svg.querySelector(".tsu-lines");
+      if (washes === null || beads === null || drawn === null) return false;
+      washes.innerHTML = parts.washes;
+      beads.innerHTML = parts.beads;
+      const ghosts = svg.querySelector(`.tsu-ghosts > [data-pair="${pair}"]`);
+      if (ghosts !== null) ghosts.innerHTML = parts.ghosts;
+      drawn.querySelector(`:scope > .tsu-line[data-pair="${pair}"]`)?.remove();
+      if (parts.line !== "") drawn.insertAdjacentHTML("beforeend", parts.line);
+    }
+    return true;
+  }
+
   function render(force = false): void {
     const g = game;
     const over = g.solved || tsunagiProgress(g).outOfStrokes;
-    const key = JSON.stringify([g.lines, shownFlags, shownBlast, g.solved, look.marks, look.fill, look.board, look.colours, look.coordinates, language, g.layout.size]);
+    const still = JSON.stringify([shownFlags, shownBlast, g.solved, look.marks, look.fill, look.board, look.colours, look.coordinates, language, g.layout.size]);
+    const key = JSON.stringify([g.lines, still]);
     if (force || key !== drawnKey) {
       drawnKey = key;
-      inner.innerHTML = drawTsunagi(g.layout, { ...look, lines: g.lines, flagged: shownFlags ?? [], blasted: shownBlast ?? [], done: g.solved, language });
+      const patched = !force && drawnLines !== null && still === drawnStill && !g.layout.cells.includes(CELL_BRIDGE) && patch(g, drawnLines);
+      if (!patched) inner.innerHTML = drawTsunagi(g.layout, { ...look, lines: g.lines, flagged: shownFlags ?? [], blasted: shownBlast ?? [], done: g.solved, language });
+      drawnLines = g.lines;
+      drawnStill = still;
     }
     box.dataset.over = String(over);
     words();
@@ -377,10 +419,21 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     if (changed) tell("tsunagi-change", detail(), callbacks.onChange);
   }
 
+  /** A tap or press on a portal shows its link to the other ring for a moment: a pointer that hovers sees it by itself, a finger has no hover. */
+  function showLink(cell: number): void {
+    if (!game.layout.portals.has(cell)) return;
+    const group = inner.querySelector(`.tsu-portal-end[data-cell="${cell}"]`)?.parentElement;
+    if (group === null || group === undefined) return;
+    group.setAttribute("data-linked", "true");
+    window.clearTimeout(linkTimer);
+    linkTimer = window.setTimeout(() => group.removeAttribute("data-linked"), LINK_MS);
+  }
+
   function press(event: PointerEvent): void {
     if (pointer !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
     const cell = pointAt(event.clientX, event.clientY);
     if (cell === null) return;
+    showLink(cell);
     const before = game;
     const next = pressGame(before, cell);
     if (next === before) return;
@@ -507,6 +560,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       size = next.size;
       answer = next.answer;
       level = next.level;
+      set = next.set ?? "classic";
       begin(made);
       tell("tsunagi-change", detail(), callbacks.onChange);
     },
@@ -561,6 +615,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     destroy: () => {
       window.clearTimeout(flagTimer);
       window.clearTimeout(blastTimer);
+      window.clearTimeout(linkTimer);
       window.cancelAnimationFrame(frame);
       box.removeEventListener("pointerdown", onDown);
       box.removeEventListener("pointermove", onMove);

@@ -11,6 +11,8 @@
  * than tell two blues apart. Both are the same puzzle.
  */
 
+import { PAIR_LETTERS } from "./code.ts";
+
 /** A colour as hue (0 to 360), saturation and lightness (each 0 to 100). */
 export type TsunagiColour = readonly [number, number, number];
 
@@ -41,8 +43,26 @@ function fromHex(hex: string): TsunagiColour {
   return [Math.round(hue * 60), Math.round(saturation * 100), Math.round(light * 100)];
 }
 
+/** The colours a set starts from: as many pairs as the biggest board to 15×15 has. */
+const SIXTEEN_PAIRS = 16;
+
+/** A set of sixteen carried on to a colour for every pair a board can have; the soft set, already made by the golden angle, is simply made longer. */
+function extended(base: readonly TsunagiColour[], golden: boolean): readonly TsunagiColour[] {
+  const out = [...base];
+  for (let pair = base.length; pair < PAIR_LETTERS.length; pair += 1) {
+    const round = Math.floor(pair / SIXTEEN_PAIRS);
+    if (golden) {
+      out.push([Math.round((pair * 137.5) % 360), 55, 64]);
+      continue;
+    }
+    const [hue, saturation, lightness] = base[pair % SIXTEEN_PAIRS]!;
+    out.push([(hue + 29 * round) % 360, saturation, Math.max(18, Math.min(88, lightness + [14, -14, 8, -8][(round - 1) % 4]!))]);
+  }
+  return out;
+}
+
 /**
- * Sixteen colours each, as many pairs as the biggest board has. `marble`:
+ * Sixteen colours each, as many pairs as the biggest board to 15×15 has. `marble`:
  * twelve of them mostly from Okabe and Ito's palette for colour-blind readers,
  * ordered so the five pairs of a small board are the most unlike (no two
  * blues, and no green, which a green board would swallow), then four for the
@@ -50,7 +70,7 @@ function fromHex(hex: string): TsunagiColour {
  * eight, then each again a shade lighter or darker; past eight, numbers are the
  * better help. `soft`: pastels, for a board that should look quiet.
  */
-export const TSUNAGI_COLOUR_SETS: Record<TsunagiColourSetName, readonly TsunagiColour[]> = {
+const SIXTEEN: Record<TsunagiColourSetName, readonly TsunagiColour[]> = {
   marble: [
     [24, 100, 44], // vermillion
     [202, 77, 60], // sky blue
@@ -71,8 +91,42 @@ export const TSUNAGI_COLOUR_SETS: Record<TsunagiColourSetName, readonly TsunagiC
   ],
   bright: ["#d7263d", "#1b6ca8", "#f2a541", "#2e933c", "#8e44ad", "#e86a92", "#16a3a3", "#7a4b2a", "#f25c05", "#4b5d67", "#a3b915", "#c2185b", "#3949ab", "#00897b", "#b8860b", "#6d4c41"].map(fromHex),
   "colour-blind": ["#e69f00", "#56b4e9", "#009e73", "#f0e442", "#0072b2", "#d55e00", "#cc79a7", "#6b6b6b", "#f7c96b", "#a6dcf5", "#66c9ac", "#f7f1a0", "#66a9d4", "#e89b66", "#e0aecb", "#b3b3b3"].map(fromHex),
-  soft: Array.from({ length: 16 }, (_, at): TsunagiColour => [Math.round((at * 137.5) % 360), 55, 64]),
+  soft: Array.from({ length: SIXTEEN_PAIRS }, (_, at): TsunagiColour => [Math.round((at * 137.5) % 360), 55, 64]),
 };
+
+/**
+ * Every set carries a colour for each of the eighty-two pairs a board can have (`PAIR_LETTERS`): its
+ * sixteen, which every board to 15×15 has been drawn in, then the same hues again turned round the colour
+ * wheel and made lighter or darker, round after round, so that no two pairs of a 30×30 board wear exactly one colour.
+ */
+export const TSUNAGI_COLOUR_SETS: Record<TsunagiColourSetName, readonly TsunagiColour[]> = Object.fromEntries(
+  TSUNAGI_COLOUR_SET_NAMES.map((name) => [name, extended(SIXTEEN[name], name === "soft")]),
+) as Record<TsunagiColourSetName, readonly TsunagiColour[]>;
+
+/**
+ * The colours and the marks of a board's portals: the two rings of a portal
+ * are drawn alike, in one of these colours and with one of these letters, so
+ * that they can be told from any other pair and from a marble. They are used
+ * round and round, and a portal past the last of the letters is given its number.
+ */
+export const TSUNAGI_PORTAL_COLOURS: readonly TsunagiColour[] = [
+  [276, 62, 52],
+  [174, 78, 34],
+  [32, 96, 46],
+  [338, 72, 50],
+  [212, 82, 50],
+  [96, 56, 38],
+  [262, 20, 42],
+  [16, 86, 46],
+];
+
+/** The letters that mark portals: Greek, which no marble or number is. */
+export const TSUNAGI_PORTAL_GLYPHS = "αβγδεζηθικλμνξοπρστυφχψω";
+
+/** The mark of portal `index`, from 0: its Greek letter, or its number once the letters are used up. */
+export function portalMark(index: number): string {
+  return TSUNAGI_PORTAL_GLYPHS[index] ?? String(index + 1);
+}
 
 /** A colour set as asked: one of the named sets, or colours of your own (used round and round when a board has more pairs than you gave). */
 export function tsunagiColourSet(set: TsunagiColourSetName | readonly TsunagiColour[] | undefined): readonly TsunagiColour[] {

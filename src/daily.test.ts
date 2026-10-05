@@ -21,8 +21,8 @@ describe("the level of the day", () => {
     expect(dailyTsunagiLevel(7, "2026-10-01")).not.toBe(dailyTsunagiLevel(7, "2026-10-02"));
   });
 
-  it("is pinned: these are the levels of 1 October 2026 at 4×4 to 15×15, so a change to the rule is a change that is seen", () => {
-    expect(TSUNAGI_SIZES.map((size) => dailyTsunagiLevel(size, "2026-10-01"))).toEqual([104, 225, 124, 121, 216, 153, 60, 1, 40, 113, 28, 41]);
+  it("is pinned: these are the levels of 1 October 2026 at 4×4 to 15×15, and at 20×20, 25×25 and 30×30 (added 5 October 2026), so a change to the rule is a change that is seen", () => {
+    expect(TSUNAGI_SIZES.map((size) => dailyTsunagiLevel(size, "2026-10-01"))).toEqual([104, 225, 124, 121, 216, 153, 60, 1, 40, 113, 28, 41, 40, 57, 28]);
   });
 
   it("visits every level of a size once before any comes round again", () => {

@@ -2,7 +2,7 @@
 // `mountTsunagi` (the drawing, the drag, Undo, Check, Cheat, the zoom), with every option the package has on a
 // settings panel, a preview of the level's block, kept on this device between visits, and spoken in the language
 // the header's chooser picks. The page itself only chooses a level, keeps what was solved and hands the settings on.
-import { blockOf, blockRange, dailyTsunagiLevel, decodeLayout, decodeLines, helpOpensNext, linesOfAnswer, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./dist/index.js";
+import { blockOf, blockRange, dailyTsunagiLevel, decodeLayout, decodeLines, helpOpensNext, levelCountOf, linesOfAnswer, openTsunagiLevels, TSUNAGI_PORTAL_SIZES, TSUNAGI_SIZES } from "./dist/index.js";
 import { TSUNAGI_BOARDS, TSUNAGI_BOARD_NAMES, TSUNAGI_COLOUR_SET_NAMES, TSUNAGI_COLOUR_SETS, colourOfPair, drawTsunagi, hsl } from "./dist/draw-entry.js";
 import { mountTsunagi } from "./dist/play-entry.js";
 import { loadTsunagiLevels } from "./dist/levels.js";
@@ -15,6 +15,9 @@ const WORDS = {
     name: "Tsunagi (繋ぎ) is Japanese for joining, a link.",
     nameLink: "About the name",
     size: "Size",
+    set: "Levels",
+    classic: "Classic",
+    portals: "Portals",
     level: "Level",
     previous: "Previous level",
     next: "Next level",
@@ -60,6 +63,9 @@ const WORDS = {
     name: "「繋ぎ」は、つなぐこと、つながりという意味です。",
     nameLink: "名前について（英語）",
     size: "大きさ",
+    set: "レベルの種類",
+    classic: "いつもの",
+    portals: "ワープ",
     level: "レベル",
     previous: "前のレベル",
     next: "次のレベル",
@@ -132,7 +138,10 @@ const help = {
   explosions: pick(params.get("explosions"), ["on", "soft", "off"], kept.help?.explosions, "on"),
   cheats: params.has("cheats") ? params.get("cheats") !== "off" : kept.help?.cheats === true,
 };
-let size = TSUNAGI_SIZES.includes(Number(params.get("size"))) ? Number(params.get("size")) : TSUNAGI_SIZES.includes(kept.size) ? kept.size : 5;
+// The levels with portals have sizes of their own; the first set's are the default.
+let set = pick(params.get("set"), ["classic", "portals"], kept.set, "classic");
+const sizesOf = () => (set === "portals" ? TSUNAGI_PORTAL_SIZES : TSUNAGI_SIZES);
+let size = sizesOf().includes(Number(params.get("size"))) ? Number(params.get("size")) : sizesOf().includes(kept.size) ? kept.size : 5;
 let solved = kept.solved ?? {};
 let helped = kept.helped ?? {};
 let progress = kept.progress ?? {};
@@ -145,8 +154,10 @@ const say = (key, ...args) => {
   const word = WORDS[language.lang][key];
   return typeof word === "function" ? word(...args) : word;
 };
-const solvedSet = () => new Set(solved[size] ?? []);
-const keep = () => write({ size, levels: kept.levels, solved, helped, progress, look, help });
+// What is kept for a size of the portal levels sits beside the first set's under a name of its own.
+const slot = (each = size) => (set === "portals" ? `p${each}` : String(each));
+const solvedSet = () => new Set(solved[slot()] ?? []);
+const keep = () => write({ size, set, levels: kept.levels, solved, helped, progress, look, help });
 
 const sizes = document.getElementById("sizes");
 const host = document.getElementById("board");
@@ -221,8 +232,8 @@ function stateOf(each, open) {
 /** Sixteen levels of the block this one is in, each as its board is drawn, to choose from. */
 function block() {
   const grid = document.getElementById("block");
-  const count = TSUNAGI_LEVEL_COUNTS[size];
-  const open = openTsunagiLevels(size, solvedSet());
+  const count = levelCountOf(size, set);
+  const open = openTsunagiLevels(size, solvedSet(), set);
   const { first, last } = blockRange(blockOf(level), count);
   document.getElementById("block-title").textContent = say("blockTitle", blockOf(level));
   const buttons = [];
@@ -254,9 +265,11 @@ function block() {
 
 function render() {
   language.say();
-  seg(sizes, TSUNAGI_SIZES, size, (each) => choose(each, null), (each) => `${each}×${each}`);
-  const count = TSUNAGI_LEVEL_COUNTS[size];
-  const open = openTsunagiLevels(size, solvedSet());
+  seg(document.getElementById("set"), ["classic", "portals"], set, (each) => chooseSet(each), (each) => say(each));
+  seg(sizes, sizesOf(), size, (each) => choose(each, null), (each) => `${each}×${each}`);
+  const count = levelCountOf(size, set);
+  const open = openTsunagiLevels(size, solvedSet(), set);
+  document.getElementById("today").disabled = set === "portals";
   document.getElementById("level-number").textContent = `${level}`;
   document.getElementById("level-of").textContent = ` / ${count}`;
   document.getElementById("previous").disabled = level <= 1;
@@ -271,8 +284,8 @@ function put() {
   const layout = decodeLayout(givens, size);
   const done = solvedSet().has(level);
   // A level solved opens on its finished board; a level half drawn comes back as it was left.
-  const lines = done ? linesOfAnswer(layout, answer) : decodeLines(layout, progress[`${size}/${level}`] ?? "");
-  const entry = { size, givens, answer, level, lines: lines ?? undefined };
+  const lines = done ? linesOfAnswer(layout, answer) : decodeLines(layout, progress[`${slot()}/${level}`] ?? "");
+  const entry = { size, givens, answer, level, set, lines: lines ?? undefined };
   if (mount === null) {
     mount = mountTsunagi(host, {
       ...entry,
@@ -281,14 +294,14 @@ function put() {
       cheats: help.cheats,
       chips: true,
       onChange: (detail) => {
-        const key = `${size}/${level}`;
+        const key = `${slot()}/${level}`;
         if (detail.lines.every((line) => line.length === 0) || detail.progress.solved) delete progress[key];
         else progress[key] = detail.code;
         keep();
       },
       onSolve: (detail) => {
-        helped[size] = detail.helped === null ? (helped[size] ?? []).filter((each) => each !== level) : [...new Set([...(helped[size] ?? []), level])];
-        if (helpOpensNext(detail.helped)) solved = { ...solved, [size]: [...new Set([...(solved[size] ?? []), level])] };
+        helped[slot()] = detail.helped === null ? (helped[slot()] ?? []).filter((each) => each !== level) : [...new Set([...(helped[slot()] ?? []), level])];
+        if (helpOpensNext(detail.helped)) solved = { ...solved, [slot()]: [...new Set([...(solved[slot()] ?? []), level])] };
         keep();
         render();
       },
@@ -297,18 +310,25 @@ function put() {
   host.dataset.level = String(level);
 }
 
+/** Another set of levels: the same size where it has one, else its first size. */
+function chooseSet(next) {
+  if (next === set) return;
+  set = next;
+  void choose(sizesOf().includes(size) ? size : sizesOf()[0], null);
+}
+
 async function choose(nextSize, nextLevel, any = false) {
   size = nextSize;
-  levels = await loadTsunagiLevels(size);
-  const count = TSUNAGI_LEVEL_COUNTS[size];
-  const open = openTsunagiLevels(size, solvedSet());
+  levels = await loadTsunagiLevels(size, set);
+  const count = levelCountOf(size, set);
+  const open = openTsunagiLevels(size, solvedSet(), set);
   // A level named in the address opens, open or not, as a link to one does; otherwise only the open levels.
   const linked = nextLevel === null && params.has("level");
-  const asked = nextLevel ?? (linked ? Number(params.get("level")) : (kept.levels?.[size] ?? 1));
+  const asked = nextLevel ?? (linked ? Number(params.get("level")) : (kept.levels?.[slot()] ?? 1));
   level = Math.min(Math.max(1, Number.isInteger(asked) ? asked : 1), linked || any ? count : open);
   params.delete("level");
   kept.size = size;
-  kept.levels = { ...(kept.levels ?? {}), [size]: level };
+  kept.levels = { ...(kept.levels ?? {}), [slot()]: level };
   keep();
   put();
   render();

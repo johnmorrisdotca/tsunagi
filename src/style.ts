@@ -42,6 +42,9 @@ export const TSUNAGI_STYLE = `
 .tsunagi .tsu-line polyline, .tsunagi .tsu-over-bridge { fill: none; stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; }
 .tsunagi .tsu-num { font-family: var(--tsu-font); font-weight: 700; text-anchor: middle; font-variant-numeric: tabular-nums; pointer-events: none; }
 .tsunagi .tsu-coordinate { fill: var(--tsu-coordinate); font-family: var(--tsu-font); font-weight: 600; font-size: 24px; text-anchor: middle; pointer-events: none; }
+.tsunagi .tsu-glyph { font-family: var(--tsu-font); font-weight: 700; text-anchor: middle; pointer-events: none; }
+.tsunagi .tsu-portal-link { fill: none; stroke-width: 5; stroke-dasharray: 2 10; stroke-linecap: round; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.tsunagi .tsu-portal:hover .tsu-portal-link, .tsunagi .tsu-portal[data-linked="true"] .tsu-portal-link { opacity: .65; }
 .tsunagi .tsu-ghosts { opacity: .35; pointer-events: none; }
 .tsunagi .tsu-flag { fill: none; stroke-width: 8; transform-box: fill-box; transform-origin: center; animation: tsu-ping 1s cubic-bezier(0, 0, .2, 1) infinite; pointer-events: none; }
 .tsunagi .tsu-blast { fill: var(--tsu-shu); fill-opacity: .4; stroke: var(--tsu-shu); stroke-width: 8; transform-box: fill-box; transform-origin: center; animation: tsu-ping 1s cubic-bezier(0, 0, .2, 1) infinite; pointer-events: none; }

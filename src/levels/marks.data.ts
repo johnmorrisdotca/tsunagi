@@ -3,9 +3,10 @@
  * from its measured score (`difficulty.ts`) among every level of its size —
  * the marks the row under a board shows. And each twist level's part in its
  * block's lesson (`twistRole`), so the board of levels and the row can say it
- * without loading a size's boards. Written by `node scripts/tsunagi-levels.ts`
- * and `node scripts/tsunagi-levels-big.ts`, never by hand; `difficulty.test.ts`
- * and `ladder.test.ts` hold both to the levels.
+ * without loading a size's boards. The portal levels' marks are the same,
+ * a size's among its own levels. Written by `node scripts/tsunagi-levels.ts`,
+ * `tsunagi-levels-big.ts`, `tsunagi-levels-huge.ts` and `tsunagi-levels-portals.ts`,
+ * never by hand; `difficulty.test.ts` and `ladder.test.ts` hold both to the levels.
  */
 import type { TwistRole } from "../ladder.types.ts";
 
@@ -22,6 +23,9 @@ export const TSUNAGI_MARKS: Readonly<Record<number, string>> = {
   13: "11111112222222132222222222222223222323333333331333333333333333353333333333333333333333333334344444444444444444144444444444444455",
   14: "11111122222222132222222222222213222222333333331333333333333333333333333333333333333333433443444444444444444444334444444444444455",
   15: "11111112222222132222222222222223222222232333331333333333333333333333333333333333333334344444444444444444444444134444444444555555",
+  20: "1222222222222224322332333333334533333333333333233344444444444445",
+  25: "1122222222222223323333333333333533333333333333233344444444444445",
+  30: "1112222222222333333333333333334433333333333333223444444444444444",
 };
 
 export const TSUNAGI_ROLES: Readonly<Record<number, Readonly<Record<number, TwistRole>>>> = {
@@ -37,4 +41,18 @@ export const TSUNAGI_ROLES: Readonly<Record<number, Readonly<Record<number, Twis
   13: {"15":{"role":"teaches","challenges":["bridges"],"newOnes":["bridges"]},"16":{"role":"tests","challenges":["bridges"],"newOnes":[]},"31":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"32":{"role":"tests","challenges":["walls"],"newOnes":[]},"47":{"role":"teaches","challenges":["waypoints"],"newOnes":["waypoints"]},"48":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"63":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"64":{"role":"tests","challenges":["wrap"],"newOnes":[]},"79":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"80":{"role":"tests","challenges":["explosions"],"newOnes":[]},"95":{"role":"teaches","challenges":["strokes"],"newOnes":["strokes"]},"96":{"role":"tests","challenges":["strokes"],"newOnes":[]},"111":{"role":"teaches","challenges":["hexagon"],"newOnes":["hexagon"]},"112":{"role":"tests","challenges":["hexagon"],"newOnes":[]},"127":{"role":"teaches","challenges":["wrap"],"newOnes":[]},"128":{"role":"tests","challenges":["wrap"],"newOnes":[]}},
   14: {"15":{"role":"teaches","challenges":["bridges"],"newOnes":["bridges"]},"16":{"role":"tests","challenges":["bridges"],"newOnes":[]},"31":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"32":{"role":"tests","challenges":["walls"],"newOnes":[]},"47":{"role":"teaches","challenges":["waypoints"],"newOnes":["waypoints"]},"48":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"79":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"80":{"role":"tests","challenges":["explosions"],"newOnes":[]},"95":{"role":"teaches","challenges":["strokes"],"newOnes":["strokes"]},"96":{"role":"tests","challenges":["strokes"],"newOnes":[]},"111":{"role":"teaches","challenges":["waypoints"],"newOnes":[]},"112":{"role":"tests","challenges":["waypoints"],"newOnes":[]}},
   15: {"15":{"role":"teaches","challenges":["bridges"],"newOnes":["bridges"]},"16":{"role":"tests","challenges":["bridges"],"newOnes":[]},"31":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"32":{"role":"tests","challenges":["walls"],"newOnes":[]},"47":{"role":"teaches","challenges":["waypoints"],"newOnes":["waypoints"]},"48":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"79":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"80":{"role":"tests","challenges":["explosions"],"newOnes":[]},"95":{"role":"teaches","challenges":["strokes"],"newOnes":["strokes"]},"96":{"role":"tests","challenges":["strokes"],"newOnes":[]},"111":{"role":"teaches","challenges":["hexagon"],"newOnes":["hexagon"]},"112":{"role":"tests","challenges":["hexagon"],"newOnes":[]}},
+  20: {"15":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"16":{"role":"tests","challenges":["walls"],"newOnes":[]},"31":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"32":{"role":"tests","challenges":["wrap"],"newOnes":[]},"47":{"role":"teaches","challenges":["portals"],"newOnes":["portals"]},"48":{"role":"tests","challenges":["portals"],"newOnes":[]},"63":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"64":{"role":"tests","challenges":["explosions"],"newOnes":[]}},
+  25: {"15":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"16":{"role":"tests","challenges":["walls"],"newOnes":[]},"31":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"32":{"role":"tests","challenges":["wrap"],"newOnes":[]},"47":{"role":"teaches","challenges":["portals"],"newOnes":["portals"]},"48":{"role":"tests","challenges":["portals"],"newOnes":[]},"63":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"64":{"role":"tests","challenges":["explosions"],"newOnes":[]}},
+  30: {"15":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"16":{"role":"tests","challenges":["walls"],"newOnes":[]},"31":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"32":{"role":"tests","challenges":["wrap"],"newOnes":[]},"47":{"role":"teaches","challenges":["portals"],"newOnes":["portals"]},"48":{"role":"tests","challenges":["portals"],"newOnes":[]},"63":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"64":{"role":"tests","challenges":["explosions"],"newOnes":[]}},
+};
+
+export const TSUNAGI_PORTAL_MARKS: Readonly<Record<number, string>> = {
+  5: "11111222222333451111222222233345",
+  6: "11122222333444451111122222233445",
+  7: "11212223334444551111222223333445",
+  8: "12222333434444451112222333334445",
+  9: "11223333334444551122222333334445",
+  10: "12222333334444551122223333333445",
+  12: "12223333334344451122233333343445",
+  15: "12223333333434451222233333334445",
 };

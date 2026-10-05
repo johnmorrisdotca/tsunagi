@@ -21,11 +21,14 @@ function twistLevels() {
   return TSUNAGI_SIZES.flatMap((size) => tsunagiLevelsOf(size).flatMap(([layout, answer], at) => (isTwist(layout) ? [{ size, level: at + 1, layout, answer }] : [])));
 }
 
-/** A line drawn as a finger draws it: a press on its first cell, a step into each after, let go. */
+/** A line drawn as a finger draws it: a press on its first cell, a step into each after, let go. Through a portal the finger goes into the first ring and the line comes out of the other and on, so the cells after a portal's are the line's own. */
 function draw(layout: ReturnType<typeof decodeLayout> & object, lines: Lines, cells: readonly number[]): Lines {
   const pressed = pressAt(layout, lines, cells[0]!);
   let now = pressed.lines;
-  for (const cell of cells.slice(1)) now = dragTo(layout, now, pressed.drawing!, cell);
+  cells.slice(1).forEach((cell, at) => {
+    if (layout.portals.has(cells[at]!)) return;
+    now = dragTo(layout, now, pressed.drawing!, cell);
+  });
   return letGo(now, layout);
 }
 

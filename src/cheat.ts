@@ -1,5 +1,5 @@
 import { CELL_BRIDGE, type LinkLayout } from "./code.ts";
-import { joined, letGo, type Lines } from "./lines.ts";
+import { joined, letGo, withoutPortalTail, type Lines } from "./lines.ts";
 
 /**
  * CHEAT: one unfinished line drawn for the player, correctly. John,
@@ -33,7 +33,7 @@ export function cheatLine(layout: LinkLayout, lines: Lines, answer: Lines): { li
       // A bridge is shared only by lines going different ways over it.
       return way === null || at === 0 || at === line.length - 1 || across(line, at) === way;
     });
-    return clash === -1 ? [...line] : line.slice(0, clash);
+    return clash === -1 ? [...line] : withoutPortalTail(layout, line.slice(0, clash));
   });
   return { lines: letGo(next, layout), pair };
 }

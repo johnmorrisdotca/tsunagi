@@ -139,11 +139,16 @@ export function cellAtPoint(geometry: TsunagiGeometry, x: number, y: number): nu
   return nearest <= CELL * HEX_RADIUS ? best : null;
 }
 
+/** How far from the middle of a portal's cell a line stops going in, and starts coming out, as a share of a cell: just inside the ring. */
+export const PORTAL_STUB = 0.3;
+
 /**
  * A line as the runs it is drawn in, each a list of points through its cells'
  * middles. On a board that wraps, a step across the join ends one run a cell
  * out beyond the edge (in the ghost) and starts the next a cell out beyond the
- * other edge, so the line is seen to leave and come back.
+ * other edge, so the line is seen to leave and come back. Through a portal the
+ * line is two runs: it ends just inside the ring it went into, and the next
+ * starts just inside the ring it comes out of, going on the same way.
  */
 export function lineRuns(layout: LinkLayout, geometry: TsunagiGeometry, line: readonly number[]): TsunagiPoint[][] {
   const { size } = layout;
@@ -151,19 +156,34 @@ export function lineRuns(layout: LinkLayout, geometry: TsunagiGeometry, line: re
     const middle = geometry.centre(cell);
     return { x: middle.x + dx * CELL, y: middle.y + dy * CELL };
   };
+  /** Which way a step goes, as a unit step across and down. */
+  const heading = (from: number, to: number): [number, number] => {
+    const by = stepBetween(size, from, to, layout.wrap);
+    return Math.abs(by) === 1 ? [Math.sign(by), 0] : [0, Math.sign(by)];
+  };
   const runs: TsunagiPoint[][] = [[point(line[0]!)]];
   for (let at = 1; at < line.length; at += 1) {
     const from = line[at - 1]!;
     const to = line[at]!;
+    // Out of a portal's first cell into its other: the line has been through, and comes out going the way it went in.
+    if (layout.portals.get(from) === to && at >= 2) {
+      const [dx, dy] = heading(line[at - 2]!, from);
+      runs.push([point(to, dx * PORTAL_STUB, dy * PORTAL_STUB)]);
+      continue;
+    }
+    // Into a portal's first cell: it stops just inside the ring, on the side it came in.
+    const entering = layout.portals.get(to) === line[at + 1];
+    const stop = (cell: number, dx: number, dy: number): TsunagiPoint => (entering ? point(cell, -dx * PORTAL_STUB, -dy * PORTAL_STUB) : point(cell));
     const plain = layout.hex || stepBetween(size, from, to, false) !== 0 || Math.abs(to - from) === 2 || Math.abs(to - from) === 2 * size;
     if (plain || !layout.wrap) {
-      runs[runs.length - 1]!.push(point(to));
+      const [dx, dy] = entering ? heading(from, to) : [0, 0];
+      runs[runs.length - 1]!.push(stop(to, dx, dy));
       continue;
     }
     const by = stepBetween(size, from, to, true);
     const [dx, dy] = Math.abs(by) === 1 ? [Math.sign(by), 0] : [0, Math.sign(by)];
     runs[runs.length - 1]!.push(point(from, dx, dy));
-    runs.push([point(to, -dx, -dy), point(to)]);
+    runs.push([point(to, -dx, -dy), stop(to, dx, dy)]);
   }
   return runs;
 }

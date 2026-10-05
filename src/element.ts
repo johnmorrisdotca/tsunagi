@@ -1,6 +1,7 @@
 import { decodeLayout } from "./code.ts";
 import { decodeLines } from "./lines.ts";
 import { loadTsunagiLevels } from "./levels.ts";
+import type { TsunagiSet } from "./levelCounts.ts";
 import { mountTsunagi, type TsunagiMount } from "./mount.ts";
 import type { TsunagiExplosionChoice, TsunagiGame, TsunagiProgress } from "./game.ts";
 import { TSUNAGI_BOARD_NAMES, type TsunagiBoardName } from "./boards.ts";
@@ -18,8 +19,8 @@ import { TSUNAGI_COLOUR_SET_NAMES, type TsunagiColourSetName } from "./colours.t
  * ```
  *
  * Attributes (each is read again when it changes):
- *  - `size` and `level`: the level to play, from the package's own levels, fetched when asked. Or `size` and
- *    `givens` (with `answer` if there is one): a layout of your own.
+ *  - `size` and `level`: the level to play, from the package's own levels, fetched when asked; `set="portals"`
+ *    for the levels with portals. Or `size` and `givens` (with `answer` if there is one): a layout of your own.
  *  - `marks`: `colours` (default) or `numbers`. `fill`: `marbles` (the dots, default) or `lines`.
  *  - `colour-set`: `marble` (default), `bright`, `colour-blind` or `soft`. `board`: `paper` (default), `wood`,
  *    `green`, `blue`, `red` or `black`. `coordinates`: row numbers and column letters.
@@ -38,7 +39,7 @@ const isOn = (value: string | null): boolean => value !== null && !["false", "of
 const oneOf = <T extends string>(value: string | null, allowed: readonly T[]): T | undefined => (allowed.includes(value as T) ? (value as T) : undefined);
 
 export class TsunagiBoard extends ElementBase {
-  static observedAttributes = ["size", "level", "givens", "answer", "marks", "fill", "colour-set", "board", "coordinates", "explosions", "cheats", "controls", "chips", "zoom", "lang", "progress"];
+  static observedAttributes = ["size", "level", "set", "givens", "answer", "marks", "fill", "colour-set", "board", "coordinates", "explosions", "cheats", "controls", "chips", "zoom", "lang", "progress"];
 
   #mount: TsunagiMount | null = null;
   #levelKey = "";
@@ -100,12 +101,13 @@ export class TsunagiBoard extends ElementBase {
   async #refresh(): Promise<void> {
     const size = Number(this.getAttribute("size"));
     const level = this.getAttribute("level") === null ? undefined : Number(this.getAttribute("level"));
+    const set: TsunagiSet = this.getAttribute("set") === "portals" ? "portals" : "classic";
     let givens = this.getAttribute("givens") ?? undefined;
     let answer = this.getAttribute("answer") ?? undefined;
     if (!Number.isInteger(size) || size < 2) return;
     const explosions = oneOf<TsunagiExplosionChoice>(this.getAttribute("explosions"), ["on", "soft", "off"]);
     const cheats = isOn(this.getAttribute("cheats"));
-    const key = JSON.stringify([size, level, givens, answer, explosions, cheats, this.getAttribute("controls"), this.getAttribute("chips"), this.getAttribute("zoom")]);
+    const key = JSON.stringify([size, level, set, givens, answer, explosions, cheats, this.getAttribute("controls"), this.getAttribute("chips"), this.getAttribute("zoom")]);
     const look = {
       marks: oneOf(this.getAttribute("marks"), ["colours", "numbers"] as const),
       fill: oneOf(this.getAttribute("fill"), ["marbles", "lines"] as const),
@@ -120,7 +122,7 @@ export class TsunagiBoard extends ElementBase {
     }
     const ask = (this.#asked += 1);
     if (givens === undefined && level !== undefined) {
-      const rows = await loadTsunagiLevels(size).catch(() => null);
+      const rows = await loadTsunagiLevels(size, set).catch(() => null);
       if (ask !== this.#asked) return;
       const row = rows?.[level - 1];
       if (row === undefined) return;
@@ -139,6 +141,7 @@ export class TsunagiBoard extends ElementBase {
       givens,
       answer,
       level,
+      set,
       lines,
       ...look,
       language,

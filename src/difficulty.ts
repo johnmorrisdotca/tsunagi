@@ -1,6 +1,7 @@
-import { decodeLayout, layoutCells, layoutNeighbours, PAIR_LETTERS } from "./code.ts";
+import { decodeLayout, layoutCells, CAPITAL_PAIRS, layoutNeighbours, PAIR_LETTERS, stoneLetters } from "./code.ts";
 import { turnsIn } from "./generate.ts";
-import { countSolutions } from "./solve.ts";
+import { stepTable } from "./steps.ts";
+import { countSolutionsOfLevel } from "./solve.ts";
 
 /**
  * HOW HARD A TSUNAGI LEVEL IS, MEASURED. John, 2026-09-26, on 4×4 level 10 —
@@ -66,10 +67,14 @@ export function forcedShare(code: string, size: number): number {
   if (decoded === null) return 0;
   // Across open edges only; a bridge is not a cell a forced move fills (it is crossed, not taken).
   const around = layoutNeighbours(decoded);
+  // On a board with portals a move is a step as `steps.ts` has it: into a portal and out of the other takes the portal's two cells with it.
+  const stepsOf = decoded.portalPairs.length === 0 ? null : stepTable(decoded);
+  const raw = layoutCells(code);
+  const alphabet = stoneLetters(raw);
   // A waypoint is an empty cell to a forced move: which line takes it is the solver's to say.
-  const layout = layoutCells(code).replace(/[a-p]/g, ".");
-  const letters = [...new Set([...layout].filter((char) => PAIR_LETTERS.includes(char)))];
-  const owner = [...layout].map((char) => (PAIR_LETTERS.includes(char) ? letters.indexOf(char) : char === "." ? -1 : -2));
+  const layout = alphabet.length === PAIR_LETTERS.length ? raw : raw.replace(/[a-z]/g, ".");
+  const letters = [...new Set([...layout].filter((char) => alphabet.includes(char)))];
+  const owner = [...layout].map((char) => (alphabet.includes(char) ? letters.indexOf(char) : char === "." ? -1 : -2));
   const heads = letters.map((letter) => layout.indexOf(letter));
   const goals = letters.map((letter) => layout.lastIndexOf(letter));
   const done = letters.map(() => false);
@@ -81,16 +86,17 @@ export function forcedShare(code: string, size: number): number {
       for (const end of ["head", "goal"] as const) {
         const at = end === "head" ? heads[pair]! : goals[pair]!;
         const other = end === "head" ? goals[pair]! : heads[pair]!;
-        if (around[at]!.includes(other)) {
+        if (stepsOf === null ? around[at]!.includes(other) : stepsOf[at]!.some((step) => step.to === other)) {
           done[pair] = true;
           break;
         }
-        const open = around[at]!.filter((next) => owner[next] === -1);
+        const open = stepsOf === null ? around[at]!.filter((next) => owner[next] === -1).map((to) => ({ to, through: [] as readonly number[] })) : stepsOf[at]!.filter((step) => owner[step.to] === -1 && step.through.every((cell) => owner[cell] === -1));
         if (open.length !== 1) continue;
-        owner[open[0]!] = pair;
-        if (end === "head") heads[pair] = open[0]!;
-        else goals[pair] = open[0]!;
-        forced += 1;
+        const [way] = open as [{ to: number; through: readonly number[] }];
+        for (const cell of [...way.through, way.to]) owner[cell] = pair;
+        if (end === "head") heads[pair] = way.to;
+        else goals[pair] = way.to;
+        forced += 1 + way.through.length;
         moved = true;
       }
     }
@@ -103,7 +109,7 @@ export function forcedShare(code: string, size: number): number {
 export function measureLevel(layout: string, answer: string, size: number): LevelMeasure | null {
   const decoded = decodeLayout(layout, size);
   if (decoded === null) return null;
-  return measureSolved(layout, answer, size, countSolutions(decoded, 2));
+  return measureSolved(layout, answer, size, countSolutionsOfLevel(decoded, answer));
 }
 
 /**
@@ -119,7 +125,7 @@ export function measureSolved(layout: string, answer: string, size: number, solv
     pairs: decoded.ends.length,
     turns: turnsIn(answer, decoded),
     longest: Math.max(...lengths),
-    empties: [...layoutCells(layout)].filter((char) => char === "." || (char >= "a" && char <= "p")).length,
+    empties: [...layoutCells(layout)].filter((char) => char === "." || (decoded.ends.length < CAPITAL_PAIRS && char >= "a" && char <= "z")).length,
     forcedShare: forcedShare(layout, size),
     nodes: solved.nodes,
     branches: solved.branches,

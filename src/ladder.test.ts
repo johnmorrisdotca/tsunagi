@@ -62,9 +62,9 @@ describe.each(TSUNAGI_SIZES.map((size) => [size, size]))("the %i×%i ladder", (s
 
   it("teaches bridges, walls, waypoints and wrap in that order, each first at a 15th that says it is new", () => {
     const all = layouts();
-    // Bridges and walls at every size; waypoints and wrap wherever their generators could make a lesson (not wrap at 10×10).
+    // Bridges and walls at every size to 15×15 (20×20 and up have walls, as blocked cells, but no bridges: their boards are cut from lines that never cross); waypoints and wrap wherever their generators could make a lesson (not wrap at 10×10).
     const found = (["bridges", "walls", "waypoints", "wrap"] as const).map((twist) => ({ twist, at: all.findIndex((layout) => challengesOf(layout).includes(twist)) }));
-    for (const { twist, at } of found.slice(0, 2)) expect(at, `a ${twist} lesson`).toBeGreaterThanOrEqual(0);
+    for (const { twist, at } of found.slice(0, 2)) if (twist === "walls" || size <= 15) expect(at, `a ${twist} lesson`).toBeGreaterThanOrEqual(0);
     const firsts = found.filter(({ at }) => at >= 0);
     for (const { twist, at } of firsts) {
       expect(twistRole(all, at + 1)!.role, twist).toBe("teaches");

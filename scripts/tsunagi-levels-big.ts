@@ -29,7 +29,8 @@ import { PAIR_LETTERS } from "../src/code.ts";
 import { difficultyScores, measureLevel, orderByDifficulty, type LevelMeasure } from "../src/difficulty.ts";
 import { twistRole } from "../src/ladder.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
-import { TSUNAGI_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { marksFile } from "./tsunagi-marks-file.ts";
 import type { TwistCandidate } from "../src/twists.ts";
 import { KINDS, withTwists, type Kind } from "./tsunagi-twists.ts";
 import type { PoolBoard } from "./tsunagi-pool.ts";
@@ -70,7 +71,7 @@ function measureOf(board: PoolBoard): LevelMeasure {
     pairs: board.pairs,
     turns: board.turns,
     longest: Math.max(...lengths),
-    empties: [...cells].filter((char) => char === "." || (char >= "a" && char <= "p")).length,
+    empties: [...cells].filter((char) => char === "." || (char >= "a" && char <= "z")).length,
     forcedShare: board.forced,
     nodes: board.nodes,
     branches: board.branches,
@@ -98,30 +99,6 @@ function fileFor(size: number, levels: readonly Level[]): string {
     `export const TSUNAGI_${size}: readonly (readonly [string, string])[] = [`,
     ...levels.map(([layout, answer]) => `  ["${layout}", "${answer}"],`),
     "];",
-    "",
-  ].join("\n");
-}
-
-function marksFile(marks: Record<number, string>, roles: Record<number, Record<number, TwistRole>>): string {
-  return [
-    "/**",
-    " * EVERY TSUNAGI LEVEL'S DIFFICULTY, 1 TO 5: one digit a level, level 1 first,",
-    " * from its measured score (`difficulty.ts`) among every level of its size —",
-    " * the marks the row under a board shows. And each twist level's part in its",
-    " * block's lesson (`twistRole`), so the board of levels and the row can say it",
-    " * without loading a size's boards. Written by `node scripts/tsunagi-levels.ts`",
-    " * and `node scripts/tsunagi-levels-big.ts`, never by hand; `difficulty.test.ts`",
-    " * and `ladder.test.ts` hold both to the levels.",
-    " */",
-    'import type { TwistRole } from "../ladder.types.ts";',
-    "",
-    "export const TSUNAGI_MARKS: Readonly<Record<number, string>> = {",
-    ...Object.entries(marks).map(([size, digits]) => `  ${size}: "${digits}",`),
-    "};",
-    "",
-    "export const TSUNAGI_ROLES: Readonly<Record<number, Readonly<Record<number, TwistRole>>>> = {",
-    ...Object.entries(roles).map(([size, bySize]) => `  ${size}: ${JSON.stringify(bySize)},`),
-    "};",
     "",
   ].join("\n");
 }
@@ -156,4 +133,4 @@ for (const size of asked.length > 0 ? asked : Object.keys(POOL_JOBS).map(Number)
   }));
   console.log(`${size}×${size}: ${levels.length} levels from a pool of ${plain.length}, ${Math.round((performance.now() - started) / 1000)} s`);
 }
-writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles));
+writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles, { ...TSUNAGI_PORTAL_MARKS }));

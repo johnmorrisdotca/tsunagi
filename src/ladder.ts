@@ -1,7 +1,8 @@
-import { inHex, layoutCells, LINK_BLOCKED, LINK_BRIDGE, LINK_WALLS, tailWord } from "./code.ts";
+import { CAPITAL_PAIRS, inHex, layoutCells, stoneLetters, LINK_BLOCKED, LINK_BRIDGE, LINK_WALLS, tailWord } from "./code.ts";
 import { TSUNAGI_BLOCK } from "./levelBlocks.ts";
 import type { Challenge, TwistRole } from "./ladder.types.ts";
-import { TSUNAGI_MARKS, TSUNAGI_ROLES } from "./levels/marks.data.ts";
+import type { TsunagiSet } from "./levelCounts.ts";
+import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "./levels/marks.data.ts";
 
 export type { Challenge, TwistRole };
 
@@ -16,7 +17,7 @@ export type { Challenge, TwistRole };
  * Imports carry their `.ts` so the level script can read the same rules.
  */
 
-export const CHALLENGES: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "explosions", "strokes", "hexagon", "sparse"];
+export const CHALLENGES: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "portals", "explosions", "strokes", "hexagon", "sparse"];
 
 /** The challenges on a board, in the order the ladder teaches them. */
 export function challengesOf(layout: string): Challenge[] {
@@ -30,8 +31,9 @@ export function challengesOf(layout: string): Challenge[] {
   const size = Math.round(Math.sqrt(cells.length));
   const blocked = [...cells].some((cell, at) => cell === LINK_BLOCKED && (!hex || inHex(size, at)));
   if (words.some((word) => word === null) || blocked) out.push("walls");
-  if (/[a-p]/.test(cells)) out.push("waypoints");
+  if (stoneLetters(cells).length === CAPITAL_PAIRS && /[a-z]/.test(cells)) out.push("waypoints");
   if (words.some((word) => word?.word === "wrap")) out.push("wrap");
+  if (words.some((word) => word?.word === "portals")) out.push("portals");
   if (words.some((word) => word?.word === "explosion")) out.push("explosions");
   if (words.some((word) => word?.word === "strokes")) out.push("strokes");
   if (hex) out.push("hexagon");
@@ -60,12 +62,13 @@ export function twistRole(layouts: readonly string[], level: number): TwistRole 
 }
 
 /** A level's measured difficulty, 1 (easiest) to 5, or null for a level the marks do not have. */
-export function tsunagiMarks(size: number, level: number): number | null {
-  const digit = TSUNAGI_MARKS[size]?.[level - 1];
+export function tsunagiMarks(size: number, level: number, set: TsunagiSet = "classic"): number | null {
+  const digit = (set === "portals" ? TSUNAGI_PORTAL_MARKS : TSUNAGI_MARKS)[size]?.[level - 1];
   return digit === undefined ? null : Number(digit);
 }
 
 /** A level's part in its block's lesson, from the data the level script wrote (`marks.data.ts`), without its size's boards; null for none. */
-export function tsunagiRole(size: number, level: number): TwistRole | null {
-  return TSUNAGI_ROLES[size]?.[level] ?? null;
+export function tsunagiRole(size: number, level: number, set: TsunagiSet = "classic"): TwistRole | null {
+  // The portal levels have no lesson of their own: every one of them is the twist.
+  return set === "portals" ? null : (TSUNAGI_ROLES[size]?.[level] ?? null);
 }

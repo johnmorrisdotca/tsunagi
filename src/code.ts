@@ -4,8 +4,9 @@
  * number grids; this is the spelling of this one).
  *
  * A LAYOUT is row-major, one character a cell: `.` for an empty cell, a
- * capital letter for a stone — each letter exactly twice, the two ends of one
- * line — `#` for a blocked cell no line may enter, and `+` for a BRIDGE: a cell
+ * capital letter for a stone (`PAIR_LETTERS`: after Z the digits, then small
+ * letters and some marks, for a board of dozens of pairs) — each letter exactly
+ * twice, the two ends of one line — `#` for a blocked cell no line may enter, and `+` for a BRIDGE: a cell
  * two different lines cross, one straight across and one straight down, neither
  * turning on it (John, 2026-09-26; Flow Free's bridges). The letters are named
  * in the order their first stone is met reading left to right, top to bottom,
@@ -33,6 +34,15 @@
  * cells outside the hexagon of radius R are `#`, off the board, and a
  * hexagon has no walls, bridges or wrap.
  *
+ * PORTALS (`portals<a>-<b>,…`, after `wrap`) are pairs of cells inside the board,
+ * each named by its two cells, the smaller first, the pairs by their smaller cell:
+ * a line that steps into one comes out of the other, going on the same way, so
+ * `portals3-40` makes a line stepping right into cell 3 reappear moving right out
+ * of cell 40, in the cell beyond it. Both cells of a portal are on that line, and a
+ * portal is used by exactly one line, once, so the cells are filled like any other.
+ * A portal is an empty cell: never a stone, a waypoint, a bridge or blocked, never
+ * beside another portal, and a board with portals has no bridges and is no hexagon.
+ *
  * `sparse` says the board has few, long lines — at most `sparseMost` — and is
  * refused on a board with more; `strokes<N>` (last of all) gives the player N
  * strokes to solve it in, every lift that changed the board spending one.
@@ -51,8 +61,34 @@ export const LINK_BRIDGE = "+";
 /** Where the walls start, after the cells. */
 export const LINK_WALLS = "|";
 
-/** The letters a pair may be named by, in order: sixteen, more than any level uses. */
-export const PAIR_LETTERS = "ABCDEFGHIJKLMNOP";
+/**
+ * The characters a pair may be named by, in order: the capital letters, the
+ * digits, the small letters, then twenty punctuation marks, eighty-two in all,
+ * enough for a 30×30 board with as many lines to the cell as a 15×15 has. A
+ * layout written when the list was shorter (A to P) is still the same string.
+ *
+ * A small letter is two things in a layout: a waypoint of the capital it is
+ * the lower case of, or, on a board that uses every capital and digit, one of
+ * the pairs after them. The board says which by what it uses (`stoneLetters`):
+ * a board of thirty-six pairs or more has no waypoints.
+ */
+export const PAIR_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz!@$%*()[]{},:;=?^_~/";
+
+/** The waypoints a layout may carry: a pair's capital in lower case, so only the first twenty-six pairs can have one. */
+export const WAYPOINT_LETTERS = "abcdefghijklmnopqrstuvwxyz";
+
+/** How many of `PAIR_LETTERS` are not small letters: a board that uses all of them has small letters for stones. */
+export const CAPITAL_PAIRS = 36;
+
+/** The characters that name pairs in a layout's cells: the first thirty-six (capitals and digits), or all eighty-two where the board uses every one of the thirty-six, which is when its small letters are stones and not waypoints. */
+export function stoneLetters(cells: string): string {
+  const used = new Set<string>();
+  for (const char of cells) {
+    if (PAIR_LETTERS.indexOf(char) !== -1 && PAIR_LETTERS.indexOf(char) < CAPITAL_PAIRS) used.add(char);
+    if (used.size === CAPITAL_PAIRS) return PAIR_LETTERS;
+  }
+  return PAIR_LETTERS.slice(0, CAPITAL_PAIRS);
+}
 
 /** A cell in a decoded layout: an empty cell, a blocked one, or a stone of pair `n` (0 for A). */
 export const CELL_EMPTY = -1;
@@ -71,6 +107,10 @@ export type LinkLayout = {
   waypoints: ReadonlyMap<number, number>;
   /** Whether the edges join: left to right and top to bottom. */
   wrap: boolean;
+  /** Each portal's two cells, the smaller first, the pairs in order of their smaller cell. Empty for a board with none. */
+  portalPairs: readonly (readonly [number, number])[];
+  /** Each portal cell's other cell. Empty for a board with none. */
+  portals: ReadonlyMap<number, number>;
   /** Whether the board is a hexagon of hexagons: six neighbours a cell, the square's corners off the board. */
   hex: boolean;
   /** Whether the board is sparse: few, long lines, at most `sparseMost` of them. */
@@ -87,11 +127,12 @@ export type LinkLayout = {
  * `boom<N>` (a line cut back every N strokes) or `blast<N>` (a line wiped and
  * its neighbour cut).
  */
-const TAIL_ORDER = ["hex", "sparse", "wrap", "explosion", "strokes"] as const;
+const TAIL_ORDER = ["hex", "sparse", "wrap", "portals", "explosion", "strokes"] as const;
 
 /** Which of the tail's words a segment is, and what it says; null for none of them (the walls list). */
-export function tailWord(segment: string): { word: (typeof TAIL_ORDER)[number]; every?: number; blast?: boolean } | null {
+export function tailWord(segment: string): { word: (typeof TAIL_ORDER)[number]; every?: number; blast?: boolean; list?: string } | null {
   if (segment === LINK_WRAP) return { word: "wrap" };
+  if (segment.startsWith(LINK_PORTALS) && /^portals\d+-\d+(,\d+-\d+)*$/.test(segment)) return { word: "portals", list: segment.slice(LINK_PORTALS.length) };
   if (segment === LINK_HEX) return { word: "hex" };
   if (segment === LINK_SPARSE) return { word: "sparse" };
   const limit = /^strokes([1-9][0-9]?)$/.exec(segment);
@@ -103,6 +144,9 @@ export function tailWord(segment: string): { word: (typeof TAIL_ORDER)[number]; 
 
 /** The segment after the cells that makes a board wrap. */
 export const LINK_WRAP = "wrap";
+
+/** The word after the cells that begins a list of portals, each as its two cells. */
+export const LINK_PORTALS = "portals";
 
 /** The segment after the cells that makes a board a hexagon of hexagons. */
 export const LINK_HEX = "hex";
@@ -149,6 +193,7 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
   let explosions: LinkLayout["explosions"] = null;
   let hex = false;
   let sparse = false;
+  let portalList: string | null = null;
   let strokes: number | null = null;
   let rank = -1;
   for (const [at, segment] of tail.entries()) {
@@ -164,6 +209,7 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     if (word.word === "wrap") wrap = true;
     else if (word.word === "hex") hex = true;
     else if (word.word === "sparse") sparse = true;
+    else if (word.word === "portals") portalList = word.list!;
     else if (word.word === "strokes") strokes = word.every!;
     else explosions = { every: word.every!, blast: word.blast! };
   }
@@ -171,17 +217,18 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
   const seen: number[][] = [];
   const marked = new Map<number, number>();
   let next = 0;
+  const letters = stoneLetters(grid);
   for (let at = 0; at < grid.length; at += 1) {
     const char = grid[at]!;
     if (char === LINK_EMPTY) cells.push(CELL_EMPTY);
     else if (char === LINK_BLOCKED) cells.push(CELL_BLOCKED);
     else if (char === LINK_BRIDGE) cells.push(CELL_BRIDGE);
-    else if (PAIR_LETTERS.toLowerCase().includes(char)) {
+    else if (letters.length === CAPITAL_PAIRS && WAYPOINT_LETTERS.includes(char)) {
       // A waypoint: an empty cell kept for the pair its letter names.
       cells.push(CELL_EMPTY);
-      marked.set(at, PAIR_LETTERS.toLowerCase().indexOf(char));
+      marked.set(at, WAYPOINT_LETTERS.indexOf(char));
     } else {
-      const pair = PAIR_LETTERS.indexOf(char);
+      const pair = letters.indexOf(char);
       if (pair === -1) return null;
       if (seen[pair] === undefined) {
         // A new letter must be the next one: A, then B, then C, in reading order.
@@ -207,6 +254,20 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     if (size % 2 === 0 || size < 5 || wrap || walls.size > 0 || cells.includes(CELL_BRIDGE)) return null;
     for (let at = 0; at < cells.length; at += 1) if (!inHex(size, at) && cells[at] !== CELL_BLOCKED) return null;
   }
+  // Portals: empty cells away from every other portal, on a square board with no bridges.
+  const portalPairs = portalList === null ? [] : readPortals(portalList, size, wrap);
+  if (portalPairs === null) return null;
+  const portals = new Map<number, number>();
+  if (portalPairs.length > 0) {
+    if (hex || cells.includes(CELL_BRIDGE)) return null;
+    for (const [a, b] of portalPairs) {
+      if (cells[a] !== CELL_EMPTY || cells[b] !== CELL_EMPTY || marked.has(a) || marked.has(b)) return null;
+      portals.set(a, b);
+      portals.set(b, a);
+    }
+    // No two portal cells side by side, whichever pairs they are of: a line goes in and straight out, and its way is never another portal.
+    for (const at of portals.keys()) for (const beside of squareNeighbours(size, at, wrap)) if (portals.has(beside)) return null;
+  }
   // A bridge away from the edge, beside no other bridge, and with no wall on any of its four sides.
   for (let at = 0; at < cells.length; at += 1) {
     if (cells[at] !== CELL_BRIDGE) continue;
@@ -215,7 +276,64 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     if (row === 0 || col === 0 || row === size - 1 || col === size - 1) return null;
     for (const beside of neighboursOf(size, at)) if (cells[beside] === CELL_BRIDGE || walls.has(edgeKey(at, beside))) return null;
   }
-  return { size, cells, ends: seen.map((stones) => [stones[0]!, stones[1]!]), walls, waypoints: marked, wrap, hex, sparse, strokes, explosions };
+  const layout: LinkLayout = { size, cells, ends: seen.map((stones) => [stones[0]!, stones[1]!]), walls, waypoints: marked, wrap, portalPairs, portals, hex, sparse, strokes, explosions };
+  // Two cells joined two ways (beside each other and through a portal, or through two portals) could not be told apart in an answer.
+  if (portalPairs.length > 0 && portalsAreAmbiguous(layout)) return null;
+  return layout;
+}
+
+/** The cell a line comes out at after stepping from `from` into portal cell `into`: beyond the other portal, the same way on; -1 where there is none (off the board, or across a wall). */
+export function portalExit(layout: LinkLayout, from: number, into: number): number {
+  const { size } = layout;
+  const other = layout.portals.get(into);
+  const by = stepBetween(size, from, into, layout.wrap);
+  if (other === undefined || by === 0) return -1;
+  const out = layout.wrap ? wrappedStep(size, other, by) : other + by;
+  if (out < 0 || out >= size * size || (!layout.wrap && Math.abs(by) === 1 && Math.floor(out / size) !== Math.floor(other / size))) return -1;
+  return edgeOpen(layout, other, out) ? out : -1;
+}
+
+/** Whether two ways for a line to go from one cell to another exist on a board with portals (a portal and a step beside it, or two portals, or one in two directions), which an answer's cells could not tell apart. */
+export function portalsAreAmbiguous(layout: LinkLayout): boolean {
+  const { size, wrap } = layout;
+  // Each way through a portal as the entry that makes it (from, into) and the entry that makes it backwards (out, the other cell).
+  const ways = new Map<string, string[]>();
+  for (const into of layout.portals.keys()) {
+    for (const from of squareNeighbours(size, into, wrap)) {
+      const out = portalExit(layout, from, into);
+      if (out === -1) continue;
+      // Beside each other already, or the same cell: a way that is no way.
+      if (out === from || stepBetween(size, from, out, wrap) !== 0) return true;
+      const key = edgeKey(from, out);
+      ways.set(key, [...(ways.get(key) ?? []), `${from}>${into}`]);
+    }
+  }
+  // One way is counted from both its ends: two entries, one the other's reverse.
+  return [...ways.values()].some((entries) => entries.length > 2);
+}
+
+/** The portals after `portals`, or null for a list that is not one: a cell out of the board, a pair of one cell or of two beside each other, a pair or a cell out of order or used twice. */
+function readPortals(list: string, size: number, wrap: boolean): [number, number][] | null {
+  const out: [number, number][] = [];
+  const used = new Set<number>();
+  for (const each of list.split(",")) {
+    const match = /^(\d+)-(\d+)$/.exec(each);
+    if (match === null) return null;
+    const a = Number(match[1]);
+    const b = Number(match[2]);
+    if (a >= b || b >= size * size || used.has(a) || used.has(b)) return null;
+    if (out.length > 0 && out[out.length - 1]![0] >= a) return null;
+    if (squareNeighbours(size, a, wrap).includes(b)) return null;
+    used.add(a);
+    used.add(b);
+    out.push([a, b]);
+  }
+  return out;
+}
+
+/** The cells beside `at` on a square board, across the join where it wraps. */
+function squareNeighbours(size: number, at: number, wrap: boolean): number[] {
+  return wrap ? [...new Set([-size, 1, size, -1].map((by) => wrappedStep(size, at, by)))].filter((next) => next !== at) : neighboursOf(size, at);
 }
 
 /** The walls after a layout's `|`, or null for a list that is not one: an edge that is not two neighbouring cells, out of order, or twice. */
@@ -254,19 +372,28 @@ export function encodeWalls(walls: Iterable<string>): string {
 const NO_LETTER = "?";
 
 /** A layout's code, from its cells, walls, waypoints and whether it wraps: the inverse of `decodeLayout`. */
-export function encodeLayout(cells: readonly number[], walls: Iterable<string> = [], more: { waypoints?: ReadonlyMap<number, number>; wrap?: boolean; hex?: boolean; sparse?: boolean; strokes?: number | null; explosions?: LinkLayout["explosions"] } = {}): string {
+export function encodeLayout(cells: readonly number[], walls: Iterable<string> = [], more: { waypoints?: ReadonlyMap<number, number>; wrap?: boolean; hex?: boolean; sparse?: boolean; portals?: Iterable<readonly [number, number]>; strokes?: number | null; explosions?: LinkLayout["explosions"] } = {}): string {
+  const lastPair = Math.max(-1, ...cells);
   // A pair past the last letter has no spelling: it is written `?`, which no layout reads, so a filling of too many lines is refused rather than thrown on.
   const grid = cells
     .map((cell, at) => {
       const waypoint = more.waypoints?.get(at);
-      if (waypoint !== undefined) return PAIR_LETTERS[waypoint]?.toLowerCase() ?? NO_LETTER;
+      // A board of thirty-six pairs or more has no waypoints: its small letters are stones.
+      if (waypoint !== undefined) return lastPair < CAPITAL_PAIRS - 1 ? (WAYPOINT_LETTERS[waypoint] ?? NO_LETTER) : NO_LETTER;
       return cell === CELL_EMPTY ? LINK_EMPTY : cell === CELL_BLOCKED ? LINK_BLOCKED : cell === CELL_BRIDGE ? LINK_BRIDGE : (PAIR_LETTERS[cell] ?? NO_LETTER);
     })
     .join("");
   const boom = more.explosions == null ? "" : `${LINK_WALLS}${more.explosions.blast ? "blast" : "boom"}${more.explosions.every}`;
-  const words = [more.hex === true ? LINK_HEX : "", more.sparse === true ? LINK_SPARSE : "", more.wrap === true ? LINK_WRAP : ""].filter(Boolean).map((word) => `${LINK_WALLS}${word}`).join("");
+  const portalList = encodePortals(more.portals ?? []);
+  const words = [more.hex === true ? LINK_HEX : "", more.sparse === true ? LINK_SPARSE : "", more.wrap === true ? LINK_WRAP : "", portalList].filter(Boolean).map((word) => `${LINK_WALLS}${word}`).join("");
   const limit = more.strokes == null ? "" : `${LINK_WALLS}strokes${more.strokes}`;
   return grid + encodeWalls(walls) + words + boom + limit;
+}
+
+/** The portals as a layout writes them, after `wrap`: each pair as its smaller cell and its larger, the pairs in order; nothing where there are none. */
+export function encodePortals(pairs: Iterable<readonly [number, number]>): string {
+  const list = [...pairs].map(([a, b]): [number, number] => (a < b ? [a, b] : [b, a])).sort((x, y) => x[0] - y[0]);
+  return list.length === 0 ? "" : `${LINK_PORTALS}${list.map(([a, b]) => `${a}-${b}`).join(",")}`;
 }
 
 /** A finished grid's code: the letter of the line through each cell, `#` where blocked, `+` on a bridge. */

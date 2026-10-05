@@ -159,6 +159,8 @@ test("at 12×12 a level is solved by dragging at Fit, and the wheel zooms the bo
   await page.goto("http://tsunagi.test/?size=12&level=1");
   await page.waitForSelector(`${at("board")}[data-ready="true"] svg.tsunagi`);
   const box = page.locator(`${at("board")} .tsp-box`);
+  // The mouse needs the board on the screen, which the demo's own controls above it (a row more since portals) may push past a phone's foot.
+  await box.scrollIntoViewIfNeeded();
   const scroll = await page.evaluate(() => window.scrollY);
   const rect = await box.boundingBox();
   await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);

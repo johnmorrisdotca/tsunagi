@@ -28,31 +28,83 @@ import { bridgesOf, stepTable } from "./steps.ts";
  * can be given as a guide: the search starts from them, so the answer it was
  * made from is found first and every other answer is looked for from there.
  */
-export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY, guide: readonly (readonly number[])[] | null = null): SolveCount {
+/** How a cell's pair is written as variables: a variable for each pair (the way every level to 15×15 was proved), or a binary number, which a board of many pairs can afford. */
+export type SatColours = "one-hot" | "binary";
+
+/** The clauses a layout comes to, ready to be searched. */
+export type EdgeModel = {
+  sat: Sat;
+  total: number;
+  /** Every edge as the two cells it joins (the smaller first), the bridge it crosses (or -1) and the portal it goes through (the index in `layout.portalPairs`, or -1). */
+  eu: number[];
+  ev: number[];
+  over: number[];
+  via: number[];
+  edgeVar: Int32Array;
+  /** The edges at each cell. */
+  around: number[][];
+  /** The edge between two neighbouring cells on a plain step, or the one through portal `via` (-1 for a plain step); undefined where there is none. */
+  between: (a: number, b: number, via?: number) => number | undefined;
+  /** Whether a line can stand on a cell: not blocked, not a bridge, not a portal. */
+  standable: (at: number) => boolean;
+  /** Each portal cell's two cells' pair variables, for a model that has them (colours, one-hot or binary). */
+  colourVar: Int32Array[];
+};
+
+const subsets = (items: readonly number[], size: number, each: (picked: number[]) => void): void => {
+  const picked: number[] = [];
+  const go = (from: number) => {
+    if (picked.length === size) {
+      each([...picked]);
+      return;
+    }
+    for (let k = from; k < items.length; k += 1) {
+      picked.push(items[k]!);
+      go(k + 1);
+      picked.pop();
+    }
+  };
+  go(0);
+};
+
+/**
+ * A layout written down as clauses (see the top of this file), or null where
+ * it cannot be solved at all: a stone its pair does not name, or a cell with
+ * too few ways in and out to hold a line.
+ */
+export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): EdgeModel | null {
   const { size, cells, ends } = layout;
   const total = size * size;
   const steps = stepTable(layout);
   const pairs = ends.length;
-  const result: SolveCount = { count: 0, nodes: 0, branches: 0, solution: null, solutions: [], gaveUp: false };
-  if (cells.some((cell, at) => cell >= 0 && ends[cell]![0] !== at && ends[cell]![1] !== at)) return result;
+  if (cells.some((cell, at) => cell >= 0 && ends[cell]![0] !== at && ends[cell]![1] !== at)) return null;
 
-  // The edges: every step between two cells a line can stand on, once, and the bridge a step crosses.
-  const standable = (at: number) => cells[at] !== CELL_BLOCKED && cells[at] !== CELL_BRIDGE;
+  // The edges: every step between two cells a line can stand on, once, the bridge it crosses and the portal it goes through.
+  const standable = (at: number) => cells[at] !== CELL_BLOCKED && cells[at] !== CELL_BRIDGE && !layout.portals.has(at);
   const eu: number[] = [];
   const ev: number[] = [];
   const over: number[] = [];
+  const via: number[] = [];
   const seen = new Set<number>();
+  const portalIndex = new Map<number, number>();
+  layout.portalPairs.forEach(([a, b], index) => {
+    portalIndex.set(a, index);
+    portalIndex.set(b, index);
+  });
   for (let at = 0; at < total; at += 1) {
     if (!standable(at)) continue;
     for (const step of steps[at]!) {
       if (!standable(step.to)) continue;
       const a = Math.min(at, step.to);
       const b = Math.max(at, step.to);
-      if (seen.has(a * total + b)) continue;
-      seen.add(a * total + b);
+      const portal = step.through.length === 0 ? -1 : portalIndex.get(step.through[0]!)!;
+      const key = (a * total + b) * (layout.portalPairs.length + 1) + portal + 1;
+      if (seen.has(key)) continue;
+      seen.add(key);
       eu.push(a);
       ev.push(b);
       over.push(step.over);
+      via.push(portal);
     }
   }
   const edges = eu.length;
@@ -65,60 +117,91 @@ export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number
   const sat = new Sat();
   const edgeVar = Int32Array.from({ length: edges }, () => sat.newVar());
   const colourVar: Int32Array[] = Array.from({ length: total }, () => new Int32Array(0));
-  for (let at = 0; at < total; at += 1) if (standable(at)) colourVar[at] = Int32Array.from({ length: pairs }, () => sat.newVar());
+  const bits = Math.max(1, Math.ceil(Math.log2(Math.max(2, pairs))));
+  // A cell a line stands on has a pair; a portal cell has one too, the pair of the line that goes through it.
+  const coloured = (at: number) => standable(at) || layout.portals.has(at);
+  for (let at = 0; at < total; at += 1) if (coloured(at)) colourVar[at] = Int32Array.from({ length: colours === "binary" ? bits : pairs }, () => sat.newVar());
 
-  const subsets = (items: readonly number[], size: number, each: (picked: number[]) => void): void => {
-    const picked: number[] = [];
-    const go = (from: number) => {
-      if (picked.length === size) {
-        each([...picked]);
-        return;
-      }
-      for (let k = from; k < items.length; k += 1) {
-        picked.push(items[k]!);
-        go(k + 1);
-        picked.pop();
-      }
-    };
-    go(0);
+  /** Cell `at` is of pair `pair`. */
+  const named = (at: number, pair: number) => {
+    const own = colourVar[at]!;
+    if (colours === "one-hot") sat.addClause([own[pair]!]);
+    else for (let bit = 0; bit < bits; bit += 1) sat.addClause([(pair >> bit) & 1 ? own[bit]! : -own[bit]!]);
+  };
+  /** If `when` holds, cells `a` and `b` are of one pair. */
+  const sameIf = (when: number, a: number, b: number) => {
+    const x = colourVar[a]!;
+    const y = colourVar[b]!;
+    for (let k = 0; k < x.length; k += 1) {
+      sat.addClause([-when, -x[k]!, y[k]!]);
+      sat.addClause([-when, x[k]!, -y[k]!]);
+    }
   };
 
   for (let at = 0; at < total; at += 1) {
-    if (!standable(at)) continue;
+    if (!coloured(at)) continue;
     // Which pair a cell is in: exactly one; a stone or a waypoint is told its own.
-    const colours = colourVar[at]!;
-    sat.addClause([...colours]);
-    for (let a = 0; a < pairs; a += 1) for (let b = a + 1; b < pairs; b += 1) sat.addClause([-colours[a]!, -colours[b]!]);
-    const named = cells[at]! >= 0 ? cells[at]! : (layout.waypoints.get(at) ?? -1);
-    if (named >= 0) sat.addClause([colours[named]!]);
+    const own = colourVar[at]!;
+    if (colours === "one-hot") {
+      sat.addClause([...own]);
+      for (let a = 0; a < pairs; a += 1) for (let b = a + 1; b < pairs; b += 1) sat.addClause([-own[a]!, -own[b]!]);
+    } else {
+      // A number the board has no pair for is no pair.
+      for (let code = pairs; code < 2 ** bits; code += 1) sat.addClause(Array.from(own, (variable, bit) => ((code >> bit) & 1 ? -variable : variable)));
+    }
+    if (!standable(at)) continue;
+    const given = cells[at]! >= 0 ? cells[at]! : (layout.waypoints.get(at) ?? -1);
+    if (given >= 0) named(at, given);
     // Exactly two edges, or one at a stone.
     const mine = around[at]!.map((e) => edgeVar[e]!);
     const want = cells[at]! >= 0 ? 1 : 2;
-    if (mine.length < want) return result;
+    if (mine.length < want) return null;
     subsets(mine, want + 1, (picked) => sat.addClause(picked.map((v) => -v)));
     subsets(mine, mine.length - want + 1, (picked) => sat.addClause(picked));
   }
-  for (let e = 0; e < edges; e += 1) {
-    const a = colourVar[eu[e]!]!;
-    const b = colourVar[ev[e]!]!;
-    for (let k = 0; k < pairs; k += 1) {
-      // An edge joins two cells of one pair.
-      sat.addClause([-edgeVar[e]!, -a[k]!, b[k]!]);
-      sat.addClause([-edgeVar[e]!, a[k]!, -b[k]!]);
-    }
-  }
+  for (let e = 0; e < edges; e += 1) sameIf(edgeVar[e]!, eu[e]!, ev[e]!);
   // A bridge's two edges are always in, and the lines over it are of different pairs.
   const slots = new Map<number, number[]>();
   for (let e = 0; e < edges; e += 1) if (over[e]! !== -1) slots.set(over[e]!, [...(slots.get(over[e]!) ?? []), e]);
   for (const bridge of bridgesOf(layout)) {
     const slot = slots.get(bridge) ?? [];
     for (const e of slot) sat.addClause([edgeVar[e]!]);
-    if (slot.length === 2) for (let k = 0; k < pairs; k += 1) sat.addClause([-colourVar[eu[slot[0]!]!]![k]!, -colourVar[eu[slot[1]!]!]![k]!]);
+    if (slot.length === 2) {
+      const a = colourVar[eu[slot[0]!]!]!;
+      const b = colourVar[eu[slot[1]!]!]!;
+      if (colours === "one-hot") for (let k = 0; k < pairs; k += 1) sat.addClause([-a[k]!, -b[k]!]);
+      else {
+        // Some bit differs.
+        const differs = Array.from(a, () => sat.newVar());
+        a.forEach((x, bit) => {
+          const y = b[bit]!;
+          const d = differs[bit]!;
+          sat.addClause([-d, x, y]);
+          sat.addClause([-d, -x, -y]);
+        });
+        sat.addClause(differs);
+      }
+    }
   }
+  // A portal is gone through by exactly one line, once; the cells of it are that line's.
+  layout.portalPairs.forEach(([p, q], index) => {
+    const through = edgeVar.filter((_, e) => via[e] === index);
+    sat.addClause([...through]);
+    for (let a = 0; a < through.length; a += 1) for (let b = a + 1; b < through.length; b += 1) sat.addClause([-through[a]!, -through[b]!]);
+    for (let e = 0; e < edges; e += 1) {
+      if (via[e] !== index) continue;
+      sameIf(edgeVar[e]!, eu[e]!, p);
+      sameIf(edgeVar[e]!, eu[e]!, q);
+    }
+  });
   // Every unit square's four edges are not all in: that would be a ring.
   const edgeOf = new Map<number, number>();
-  for (let e = 0; e < edges; e += 1) edgeOf.set(eu[e]! * total + ev[e]!, e);
-  const between = (a: number, b: number) => edgeOf.get(Math.min(a, b) * total + Math.max(a, b));
+  for (let e = 0; e < edges; e += 1) if (via[e] === -1) edgeOf.set(eu[e]! * total + ev[e]!, e);
+  const between = (a: number, b: number, portal = -1) => {
+    if (portal === -1) return edgeOf.get(Math.min(a, b) * total + Math.max(a, b));
+    for (const e of around[a]!) if (via[e] === portal && (eu[e] === b || ev[e] === b)) return e;
+    return undefined;
+  };
   if (!layout.hex && !layout.wrap) {
     for (let at = 0; at < total; at += 1) {
       if (at % size === size - 1 || at + size >= total) continue;
@@ -126,16 +209,41 @@ export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number
       if (square.every((e) => e !== undefined)) sat.addClause(square.map((e) => -edgeVar[e!]!));
     }
   }
+  return { sat, total, eu, ev, over, via, edgeVar, around, between, standable, colourVar };
+}
+
+/**
+ * Counts a layout's answers by SAT, up to `limit`. `budget` is a number of
+ * conflicts; `guide` is the lines the layout was made from (cells in order,
+ * portal cells too); `colours` says how a cell's pair is written as variables,
+ * and the default is the way every level up to 15×15 was proved: another way
+ * writes another search, with other counts.
+ */
+export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY, guide: readonly (readonly number[])[] | null = null, colours: SatColours = "one-hot"): SolveCount {
+  const { cells, ends } = layout;
+  const result: SolveCount = { count: 0, nodes: 0, branches: 0, solution: null, solutions: [], gaveUp: false };
+  const model = edgeModel(layout, colours);
+  if (model === null) return result;
+  const { sat, total, eu, ev, via, edgeVar, between, standable } = model;
+  const edges = eu.length;
+  const pairs = ends.length;
   // Starting phases: the guide's own edges in.
   if (guide !== null) {
     for (const line of guide) {
       let previous = -1;
+      let portal = -1;
       for (const cell of line) {
         if (cells[cell] === CELL_BRIDGE) continue;
+        // The portal cells of a line are the way from the cell before to the cell after.
+        if (layout.portals.has(cell)) {
+          if (portal === -1) portal = layout.portalPairs.findIndex(([a, b]) => a === cell || b === cell);
+          continue;
+        }
         if (previous !== -1) {
-          const e = between(previous, cell);
+          const e = between(previous, cell, portal);
           if (e !== undefined) sat.prefer(edgeVar[e]!, true);
         }
+        portal = -1;
         previous = cell;
       }
     }
@@ -207,6 +315,8 @@ export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number
       for (const ring of rings) sat.addClause(ring.map((e) => -edgeVar[e]!));
       continue;
     }
+    // A portal's cells are the pair of the line that goes through it.
+    for (const e of taken) if (via[e]! !== -1) for (const cell of layout.portalPairs[via[e]!]!) owner[cell] = owner[eu[e]!]!;
     result.count += 1;
     const answer = Array.from(owner, (owned, at) => (cells[at] === CELL_BRIDGE ? CELL_BRIDGE : owned));
     if (result.solution === null) result.solution = answer;

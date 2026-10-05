@@ -48,7 +48,8 @@ import { candidate, repairedCandidate, symmetryKey, type LinkCandidate } from ".
 import { difficultyScores, measureLevel, orderByDifficulty } from "../src/difficulty.ts";
 import { withTwists } from "./tsunagi-twists.ts";
 import { twistRole } from "../src/ladder.ts";
-import { TSUNAGI_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { marksFile } from "./tsunagi-marks-file.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
 import { seededRandom } from "../src/random.ts";
 import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
@@ -214,29 +215,6 @@ function marksOf(levels: readonly Level[], size: number): string {
   return scores.map((score) => String(Math.min(5, 1 + Math.floor(score / 20)))).join("");
 }
 
-function marksFile(marks: Record<number, string>, roles: Record<number, Record<number, TwistRole>>): string {
-  return [
-    "/**",
-    " * EVERY TSUNAGI LEVEL'S DIFFICULTY, 1 TO 5: one digit a level, level 1 first,",
-    " * from its measured score (`difficulty.ts`) among every level of its size —",
-    " * the marks the row under a board shows. And each twist level's part in its",
-    " * block's lesson (`twistRole`), so the board of levels and the row can say it",
-    " * without loading a size's boards. Written by `node scripts/tsunagi-levels.ts`,",
-    " * never by hand; `difficulty.test.ts` and `ladder.test.ts` hold both to the levels.",
-    " */",
-    'import type { TwistRole } from "../ladder.types.ts";',
-    "",
-    "export const TSUNAGI_MARKS: Readonly<Record<number, string>> = {",
-    ...Object.entries(marks).map(([size, digits]) => `  ${size}: "${digits}",`),
-    "};",
-    "",
-    "export const TSUNAGI_ROLES: Readonly<Record<number, Readonly<Record<number, TwistRole>>>> = {",
-    ...Object.entries(roles).map(([size, bySize]) => `  ${size}: ${JSON.stringify(bySize)},`),
-    "};",
-    "",
-  ].join("\n");
-}
-
 const args = process.argv.slice(2);
 const migrationAt = args.includes("--migration") ? args[args.indexOf("--migration") + 1] : undefined;
 // The slots with play on production, as `size:level`: never given a twist.
@@ -285,7 +263,7 @@ for (const size of asked.length > 0 ? asked : Object.keys(PLAN).map(Number)) {
   const stayed = to.filter((level, from) => level === from + 1).length;
   console.log(`${size}×${size}: ${levels.length} levels (${levels.length - now.length} new), ${now.length - stayed} of ${now.length} old ones moved, ${Math.round((performance.now() - started) / 1000)} s`);
 }
-writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles));
+writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles, { ...TSUNAGI_PORTAL_MARKS }));
 if (Object.values(moves).some((to) => to.some((level, from) => level !== from + 1))) {
   writeFileSync("src/levels/renumbered.data.ts", renumberedFile(moves));
   if (migrationAt !== undefined) {

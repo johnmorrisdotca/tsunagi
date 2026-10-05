@@ -18,6 +18,7 @@ const uses = [
   `<tsunagi-board size="7" level="12" colour-set="colour-blind"></tsunagi-board>`,
   `pressGame(game, cell)  // a finger down, as pure functions`,
   `openTsunagiLevels(7, solved)  // 16, 32, …`,
+  `loadTsunagiLevels(7, "portals")  // the levels with portals, where a line goes into one ring and out of another`,
   `dailyTsunagiLevel(7, new Date())  // the level of the day at 7×7, the same for everybody`,
 ];
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -28,9 +29,9 @@ const page = `<!doctype html>
     ${familyHead({
       id,
       title: "Tsunagi · join the marbles, fill the board",
-      description: "Play Tsunagi, the line-joining logic puzzle: 2,176 levels from 4×4 to 15×15, each with exactly one answer, with walls, bridges, waypoints and hexagon boards. Free and open source, in English and Japanese.",
+      description: "Play Tsunagi, the line-joining logic puzzle: 2,368 levels from 4×4 to 30×30 and 256 more with portals, each with exactly one answer, with walls, bridges, waypoints, wrap and hexagon boards. Free and open source, in English and Japanese.",
       ogTitle: "Tsunagi line puzzle",
-      ogDescription: "Join each pair of marbles with a line, and fill the board. 2,176 levels, each with one answer.",
+      ogDescription: "Join each pair of marbles with a line, and fill the board. 2,368 levels and 256 with portals, each with one answer.",
     })}
     <link rel="icon" href="${ICON}" />
     <link rel="stylesheet" href="family.css" />
@@ -39,6 +40,10 @@ const page = `<!doctype html>
   <body>
     <main>
       ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
+      <div class="setup fam-row" data-help-en="Choose which levels: the classic ones, or the ones with portals, where a line goes into one ring and comes out of another." data-help-ja="どのレベルで遊ぶかを選びます。いつものレベルか、線が一方の輪に入ってもう一方から出てくる「ワープ」のレベルです。">
+        <span class="fam-label" data-say="set"></span>
+        <div class="fam-seg" role="group" data-say-label="set" id="set" data-testid="set"></div>
+      </div>
       <div class="setup fam-row" data-help-en="Choose the board size. Each size has its own levels." data-help-ja="盤の大きさを選びます。大きさごとにレベルがあります。">
         <span class="fam-label" data-say="size"></span>
         <div class="fam-seg" role="group" data-say-label="size" id="sizes" data-testid="sizes"></div>

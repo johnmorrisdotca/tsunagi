@@ -11,7 +11,7 @@ import { TSUNAGI_COLOUR_SET_NAMES } from "./colours.ts";
 import { TSUNAGI_DAILY_STRIDE } from "./daily.ts";
 import { TsunagiBoard } from "./element.ts";
 import { TSUNAGI_BLOCK } from "./levelBlocks.ts";
-import { TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./levelCounts.ts";
+import { TSUNAGI_LEVEL_COUNTS, TSUNAGI_PORTAL_COUNTS, TSUNAGI_SIZES } from "./levelCounts.ts";
 import { TSUNAGI_PLAY_STYLE } from "./playStyle.ts";
 import { SAT_FROM_SIZE } from "./solve.ts";
 import { TSUNAGI_STRINGS } from "./strings.ts";
@@ -51,7 +51,7 @@ describe("the documents", () => {
     for (const entry of exported) expect(readme, entry).toContain(`\`${entry}\``);
     expect(readme).toContain(`\`${pkg.name}/levels-4\` … \`/levels-15\``);
     const sizes = Object.keys(pkg.exports).filter((key) => /^\.\/levels-\d+$/.test(key)).map((key) => Number(key.slice(9)));
-    expect(sizes).toEqual([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    expect(sizes).toEqual([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30]);
   });
 
   it("name in the README every colour set, every board and every attribute of the element", () => {
@@ -95,8 +95,11 @@ describe("the README's promises", () => {
     expect(table).toEqual(TSUNAGI_LEVEL_COUNTS);
     expect(TSUNAGI_SIZES.map(String).sort()).toEqual(Object.keys(table).sort());
     const total = Object.values(TSUNAGI_LEVEL_COUNTS).reduce((sum, count) => sum + count, 0);
-    expect(readme).toContain(`${total.toLocaleString("en-US")} levels from 4×4 to 15×15`);
+    expect(readme).toContain(`${total.toLocaleString("en-US")} levels from 4×4 to 30×30`);
     expect(readFileSync("package.json", "utf8")).toContain(`${total.toLocaleString("en-US")} hand-checked levels`);
+    // And the portal levels' own count, in the first lines.
+    const portalTotal = Object.values(TSUNAGI_PORTAL_COUNTS).reduce((sum, count) => sum + count, 0);
+    expect(readme).toContain(`and ${portalTotal} more with portals`);
   });
 
   it("lists every package of the family, with its kana, as the demo's footer does", () => {
@@ -131,8 +134,8 @@ describe("the README's promises", () => {
     const limits = section("Limits");
     expect(limits).toContain(`4×4 to ${Math.max(...TSUNAGI_SIZES)}×${Math.max(...TSUNAGI_SIZES)}`);
     expect(Math.min(...TSUNAGI_SIZES)).toBe(4);
-    expect(PAIR_LETTERS).toHaveLength(16);
-    expect(limits).toContain("sixteen, one letter each, `A` to `P`");
+    expect(PAIR_LETTERS).toHaveLength(82);
+    expect(limits).toContain("eighty-two, one character each");
     expect(TSUNAGI_BLOCK).toBe(16);
     expect(limits).toContain(`from ${SAT_FROM_SIZE}×${SAT_FROM_SIZE}`);
     expect(limits).toContain(`from ${TSUNAGI_ZOOM_FROM}×${TSUNAGI_ZOOM_FROM}, up to ${TSUNAGI_MOST_ZOOM} times`);

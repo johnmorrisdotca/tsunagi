@@ -39,10 +39,10 @@ function pick(givens: string, stroke: number, salt: string, among: number): numb
   return hash % among;
 }
 
-/** A line cut back to half its cells, never ending on a bridge; a line left as only its stone is no line. */
+/** A line cut back to half its cells, never ending on a bridge or a portal; a line left as only its stone is no line. */
 function halved(layout: LinkLayout, line: readonly number[]): number[] {
   let kept = line.slice(0, Math.floor(line.length / 2));
-  while (kept.length > 0 && layout.cells[kept[kept.length - 1]!] === CELL_BRIDGE) kept = kept.slice(0, -1);
+  while (kept.length > 0 && (layout.cells[kept[kept.length - 1]!] === CELL_BRIDGE || layout.portals.has(kept[kept.length - 1]!))) kept = kept.slice(0, -1);
   return kept.length < 2 ? [] : kept;
 }
 

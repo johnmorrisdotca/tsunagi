@@ -11,6 +11,7 @@ with `One` at the end of its name is the singular, said in English when the coun
 | `board` | Tsunagi board, {size} by {size} | つなぎの盤、{size}×{size} |
 | `boardHex` | Tsunagi board of hexagons, {size} across | 六角形の盤、一辺{size}マス |
 | `marble` | marble {n}, row {row}, column {col} | 玉{n}、{row}行{col}列 |
+| `portal` | portal {mark}, between row {row}, column {col} and row {row2}, column {col2} | ワープ{mark}、{row}行{col}列と{row2}行{col2}列のあいだ |
 | `undo` | Undo | 元に戻す |
 | `restart` | Restart | やり直す |
 | `check` | Check | 確かめる |
@@ -60,5 +61,7 @@ with `One` at the end of its name is the singular, said in English when the coun
 | `strokesSays` | Only so many strokes: every time you lift your finger having changed the board, one is spent, and Undo gives none back. Run out before it is solved and Restart gives you them all again. | 使える筆数が決まっています。盤を変えて指を離すたびに一筆使い、元に戻しても戻りません。解く前に使い切ったら、やり直すと全部戻ります。 |
 | `sparse` | Few lines | 線が少ない盤 |
 | `sparseSays` | Fewer pairs than a board this size usually has, so each line is long and has far to go. No new rule: the distance is the difficulty. | この大きさにしては組が少ないので、一本一本の線が長くなります。新しいルールはなく、距離が難しさです。 |
+| `portals` | Portals | ワープ |
+| `portalsSays` | Two rings alike are a portal. A line that goes into one comes out of the other, going the same way, and both rings are cells it fills. Each portal is gone through by exactly one line, once. Point at a ring, or tap it, to see its partner. | 同じ形の輪が二つで一組のワープです。一方に入った線は、同じ向きのままもう一方から出てきます。二つの輪はどちらも線が埋めるマスです。それぞれのワープは、ちょうど一本の線が一回だけ通ります。輪にポインターを合わせるかタップすると、相手の輪がわかります。 |
 | `hexagon` | Hexagon | 六角形 |
 | `hexagonSays` | A honeycomb: every cell has six neighbours, so a line may run up and down, side to side, and along both slants. | ハチの巣の形です。どのマスにも隣が六つあり、縦、横、そして両方の斜めに線が通れます。 |

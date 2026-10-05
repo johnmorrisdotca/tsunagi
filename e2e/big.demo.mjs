@@ -46,6 +46,8 @@ test("a 15×15 is looked at through the pad: zoomed in and out, the first line i
 });
 
 test("a 13×13 hexagon and a 15×15 with bridges are solved by dragging", async ({ page }) => {
+  // Slow only through a remote browser's socket (the Linux image run from a Mac): a minute and a half there, seconds where the browser runs.
+  test.setTimeout(180_000);
   for (const [size, want] of [
     [13, "hexagon"],
     [15, "bridges"],

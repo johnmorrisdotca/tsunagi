@@ -1,7 +1,7 @@
 import { decodeLayout, type LinkLayout } from "./code.ts";
 import { cheatLine } from "./cheat.ts";
 import { explosionAfter, explosionsAsChosen, strokesToExplosion } from "./explosions.ts";
-import { allJoined, answerOf, dragThrough, filled, joined, letGo, linesOfAnswer, noLines, pressAt, unjoinedPairs, type Lines } from "./lines.ts";
+import { allJoined, answerOf, dragFinger, filled, joined, letGo, linesOfAnswer, NO_REACH, noLines, pressAt, unjoinedPairs, type Lines, type Reach } from "./lines.ts";
 
 /**
  * A TSUNAGI GAME IN PLAY, as pure functions: the lines drawn so far, the
@@ -58,6 +58,8 @@ export type TsunagiGame = {
   drawing: number | null;
   /** The lines as they were when the pair being drawn was pressed. */
   before: Lines | null;
+  /** How far the finger is from the end of the line it draws, once that has been through a portal (`Reach`). */
+  reach: Reach;
   /** Pairs Check found not joined, until the board next changes. */
   flagged: readonly number[] | null;
   /** The cells the last explosion took a line out of, until the next press. */
@@ -93,6 +95,7 @@ export function newTsunagiGame(givens: string, size: number, options: TsunagiGam
     strokes: 0,
     drawing: null,
     before: null,
+    reach: NO_REACH,
     flagged: null,
     blasted: null,
     exploded: null,
@@ -128,14 +131,14 @@ export function pressGame(game: TsunagiGame, cell: number): TsunagiGame {
   if (gameOver(game) || game.drawing !== null) return game;
   const pressed = pressAt(game.layout, game.lines, cell);
   if (pressed.drawing === null) return game;
-  return shown(game, pressed.lines, { drawing: pressed.drawing, before: game.lines, blasted: null, exploded: null });
+  return shown(game, pressed.lines, { drawing: pressed.drawing, before: game.lines, reach: NO_REACH, blasted: null, exploded: null });
 }
 
 /** The finger carried into a cell: the line grows, shortens or cuts another back, as the rules say. */
 export function dragGame(game: TsunagiGame, cell: number): TsunagiGame {
   if (game.drawing === null) return game;
-  const lines = dragThrough(game.layout, game.lines, game.drawing, cell);
-  return lines === game.lines ? game : shown(game, lines);
+  const dragged = dragFinger(game.layout, game.lines, game.drawing, cell, game.reach);
+  return dragged.lines === game.lines && dragged.reach === game.reach ? game : shown(game, dragged.lines, { reach: dragged.reach });
 }
 
 /** The finger lifted: the stroke is counted if it changed the board, the board may be solved, and an explosion may go off. */
@@ -143,7 +146,7 @@ export function liftGame(game: TsunagiGame): TsunagiGame {
   if (game.drawing === null) return game;
   const lines = letGo(game.lines, game.layout);
   const was = game.before;
-  const ended = { ...game, lines, drawing: null, before: null };
+  const ended = { ...game, lines, drawing: null, before: null, reach: NO_REACH };
   if (was === null || JSON.stringify(was) === JSON.stringify(lines)) return ended;
   const strokes = game.strokes + 1;
   if (isSolved(game.layout, lines, game.answer)) return { ...ended, strokes, solved: true };
