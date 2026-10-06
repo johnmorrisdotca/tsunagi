@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Tsunagi, a line-joining logic puzzle (Flow-style number link) for JavaScript and TypeScript: layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints, portals and hexagon boards, a difficulty measure, and 2,368 hand-checked levels from 4×4 to 30×30, and 256 more with portals, each with exactly one answer. The board drawn as SVG (colours or numbers, dots or lines) and played by touch and mouse in any page, as a function call or a tag. Zero dependencies.",
   "keywords": [
     "puzzle",
@@ -151,6 +151,11 @@
       "types": "./dist/levels/size30.data.d.ts",
       "import": "./dist/levels/size30.data.js",
       "default": "./dist/levels/size30.data.js"
+    },
+    "./layouts": {
+      "types": "./dist/levels/layouts.data.d.ts",
+      "import": "./dist/levels/layouts.data.js",
+      "default": "./dist/levels/layouts.data.js"
     },
     "./levels-portals": {
       "types": "./dist/levels/portals.data.d.ts",

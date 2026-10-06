@@ -369,6 +369,7 @@ difficulty.
 | `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size, set)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size, set)`, `tsunagiLevelOf(size, layout, set)`, each size fetched only when loaded |
 | `@johnmorrisdotca/tsunagi/levels-4` … `/levels-15`, `/levels-20`, `/levels-25`, `/levels-30` | one size's levels, `TSUNAGI_4` … `TSUNAGI_30`, as `[layout, answer]` pairs |
 | `@johnmorrisdotca/tsunagi/levels-portals` | the levels with portals, `TSUNAGI_PORTAL_LEVELS`: every size's in one entry |
+| `@johnmorrisdotca/tsunagi/layouts` | every level's board without its answer, `TSUNAGI_LAYOUTS` and `TSUNAGI_PORTAL_LAYOUTS` (by size, in level order): for a server that checks a solve or lists who solved which level, at about a third of the bytes of the levels |
 | `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5), `TSUNAGI_ROLES` (each twist level's part in its block) and `TSUNAGI_PORTAL_MARKS` |
 | `@johnmorrisdotca/tsunagi/renumbered` | where each old level went when the levels were renumbered on 2026-09-26, for anyone who stored solves by number |
 
@@ -539,7 +540,7 @@ filling's own answer, can still prove one answer within a budget of dead ends (t
 number sets the budget, 3,000 to 50,000: the bigger, the fewer lines and the harder the board),
 and keeps boards of at most 82 lines. `node scripts/tsunagi-levels-huge.ts` and
 `node scripts/tsunagi-levels-portals.ts` take the pools and write the levels, the marks and the
-twists.
+twists. `node scripts/tsunagi-layouts.ts` then writes the layouts alone, which `layouts.test.ts` holds to the levels.
 
 Measured on one core of a desk, 2026-10-05, six attempts each: a 20×20 takes a median 3.4 seconds
 (range 1.3 to 7), a 25×25 10.9 (7 to 18) and a 30×30 24.5 at a budget of 6,000 (four attempts in six end
@@ -615,6 +616,7 @@ src/
     ├── size25.data.ts      25×25
     ├── size30.data.ts      30×30
     ├── portals.data.ts     the levels with portals, every size's
+    ├── layouts.data.ts     every level's board alone, for a server (made by scripts/tsunagi-layouts.ts)
     ├── marks.data.ts       every level's difficulty, 1 to 5, and each twist's part in its block
     └── renumbered.data.ts  where each old level went when the levels were renumbered
 ```
