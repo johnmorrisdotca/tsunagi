@@ -7,6 +7,16 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-05
+
+### Added
+
+- **Every level's board without its answer**: `@johnmorrisdotca/tsunagi/layouts`, `TSUNAGI_LAYOUTS` (by size, in level
+  order) and `TSUNAGI_PORTAL_LAYOUTS`. A server that checks a solve, or lists who solved which level, knows a level by its
+  board and never needs its answer, and the answers are over half of every size's file; the layouts of all 2,624 levels
+  are about a third of the bytes of the levels. Made by `node scripts/tsunagi-layouts.ts`, held to the level files by
+  `layouts.test.ts`. Nothing that was exported has changed.
+
 ## [1.5.0] - 2026-10-05
 
 Every level up to 15×15 keeps its number, its board and its answer, and every export, board code and
@@ -209,7 +219,8 @@ its own package.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.2.0...v1.3.0
