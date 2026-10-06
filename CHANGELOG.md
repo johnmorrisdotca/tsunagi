@@ -7,6 +7,20 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-05
+
+Nothing that was exported has changed.
+
+### Added
+
+- A test holds every `@johnmorrisdotca/tsunagi@N` version pin in the README to this package's major version.
+
+### Changed
+
+- The family's list, in the README and in the demo's footer, names all twenty-four packages, Karakuri and Houseki included.
+- The npm description is one sentence of 250 characters or fewer, so npm and its search show it whole; it is also the repository's About text. `homepage` is the demo site and `author` is `"John Morris"`, the same in every package.
+- The GitHub Actions workflows use the current versions of the actions (checkout 7, setup-node 7, pnpm/action-setup 6; configure-pages 6, upload-pages-artifact 5 and deploy-pages 5 for Pages), which clears GitHub's Node 20 deprecation warning.
+
 ## [1.6.0] - 2026-10-05
 
 ### Added
@@ -219,7 +233,8 @@ its own package.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.3.0...v1.4.0
