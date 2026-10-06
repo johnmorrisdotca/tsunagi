@@ -12,10 +12,24 @@ Join each pair of marbles with a line, every line its own, until the board is fu
 
 <p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
 
-<p align="center">
-  <img src="docs/desktop.jpg" alt="A 7×7 level with five of its seven pairs joined, under the demo's header with its language chooser, five cloth patches and the Help switch: the size choice, the level arrows and the Today button, then the board on green felt with its difficulty chip, the Undo, Restart and Check buttons and the line '5 of 7 joined · 73% of the board'" width="620">
-  <img src="docs/phone.jpg" alt="A 6×6 level with three of its eight pairs joined, on a phone in dark mode and in Japanese: the board on green felt with its difficulty chip, the three buttons, the progress line (3 of 8 pairs joined, 75% of the board) and the first of the settings under it" width="200">
-</p>
+<table align="center">
+  <tr>
+    <td align="center" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-desk-light.webp" alt="A 7×7 level with five of its seven pairs joined, under the demo's header with its language chooser, five cloth patches and the Help switch: the size choice, the level arrows and the Today button, then the board on green felt with its difficulty chip, the Undo, Restart and Check buttons and the line '5 of 7 joined · 73% of the board'" width="600">
+      </picture>
+      <br><em>The demo on a desk: a 7×7 level with five of its seven pairs joined.</em>
+    </td>
+    <td align="center" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-phone-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-phone-light.webp" alt="A 6×6 level with three of its eight pairs joined, on a phone and in Japanese: the board on green felt with its difficulty chip, the three buttons, the progress line (3 of 8 pairs joined, 75% of the board) and the first of the settings under it" width="190">
+      </picture>
+      <br><em>On a phone, in Japanese, in the device's light or dark.</em>
+    </td>
+  </tr>
+</table>
 
 Tsunagi is the puzzle sometimes called Number Link, Arukone or Flow. It is
 played at [itsutsu.com](https://itsutsu.com/games/tsunagi), which this package
@@ -77,9 +91,106 @@ And in a page, a level to play, by touch and mouse, with nothing else to set up:
 - **English and Japanese**, in the board's words and the demo.
 - **No dependencies**, no network requests, no sound, and nothing stored outside the page it is in.
 
+### What's in it
+
+Every picture is a real board, drawn by the package and taken from [the demo](https://johnmorrisdotca.github.io/tsunagi/) with `pnpm screenshots:readme`, in light and dark.
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colours-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colours-desk-light.webp" alt="A finished 7×7 level on paper: each pair of marbles joined by a line in its own colour, with a small marble in every cell the line runs through" width="300">
+      </picture>
+      <br><em><strong>Colours and dots.</strong> Each pair has a colour, and the cells a line runs through are washed in it. The default look; see <a href="#drawing-a-board">Drawing a board</a>.</em>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/numbers-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/numbers-desk-light.webp" alt="A finished 6×6 level on a wood board: each pair is told by its number on a plain shell marble, the lines are soft tints, and the cells hold lines alone" width="300">
+      </picture>
+      <br><em><strong>Numbers and lines.</strong> <code>marks: "numbers"</code> and <code>fill: "lines"</code> tell the pairs apart without colour.</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colour-blind-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colour-blind-desk-light.webp" alt="A finished 7×7 level on a black board with row numbers down one side and column letters along the top, drawn in the colour-blind colour set" width="300">
+      </picture>
+      <br><em><strong>A colour-blind set, coordinates.</strong> Four colour sets, six boards, and row and column marks for talking about a cell.</em>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/walls-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/walls-desk-light.webp" alt="A finished 6×6 level on a green board in which a dark bar on the edge between two cells is a wall that no line may cross, and a darker square is a blocked cell" width="300">
+      </picture>
+      <br><em><strong>Walls and blocked cells.</strong> A bar between two cells stops a line; a dark square is a cell no line may enter. See <a href="#the-puzzle">The puzzle</a>.</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/bridges-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/bridges-desk-light.webp" alt="A finished 6×6 level on a blue board where one line passes straight across a bridge cell, drawn with a deck and two rails, while another line goes straight down beneath it" width="300">
+      </picture>
+      <br><em><strong>Bridges.</strong> One line goes across a bridge and another goes down under it, and the drawing shows which is over.</em>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/waypoints-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/waypoints-desk-light.webp" alt="A finished 6×6 level on paper in which a ring in a pair's colour marks a cell that pair's own line must pass through" width="300">
+      </picture>
+      <br><em><strong>Waypoints.</strong> A ring in a line's colour is a cell that pair's own line has to go through.</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/wrap-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/wrap-desk-light.webp" alt="A finished 6×6 level on a red board whose edges join: faded ghosts of the far edge surround it, a dashed rim marks the real board, and lines leave one side and come in at the other" width="300">
+      </picture>
+      <br><em><strong>A board that wraps.</strong> A line leaving one side comes back on the opposite one; the far edge is shown faded round the board.</em>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hexagon-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hexagon-desk-light.webp" alt="A finished hexagon-shaped level of 7×7 on a wood board, made of six-sided cells joined by lines that run along slants" width="300">
+      </picture>
+      <br><em><strong>Hexagons.</strong> A honeycomb of six-sided cells, six ways round.</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/portals-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/portals-desk-light.webp" alt="A finished 7×7 level with portals on paper: a purple ring marked α is where a line goes in, and a second ring marked α is where it comes out, going the same way on" width="300">
+      </picture>
+      <br><em><strong>Portals.</strong> A line that goes into one ring comes out of the other. A second set of levels is made of boards with them.</em>
+    </td>
+    <td align="center" valign="top" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/big-desk-dark.webp">
+        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/big-desk-light.webp" alt="A finished 30×30 level drawn as lines only: dozens of coloured lines winding across a board of nine hundred cells, every cell filled" width="300">
+      </picture>
+      <br><em><strong>Big boards.</strong> Up to 30×30, each with one answer, played through a box with a zoom and move pad.</em>
+    </td>
+  </tr>
+</table>
+
 ## Use it in your project
 
 Tsunagi is three things, each usable without the others: **the puzzle** (rules, solver, generator and levels, as plain functions over strings), **the drawing** (SVG text), and **the page** (a mounted board or a tag). The table under [Levels](#levels) says which entry holds which. The examples are at 6×6.
+
+### Install
+
+```sh
+npm install @johnmorrisdotca/tsunagi
+# or: pnpm add @johnmorrisdotca/tsunagi
+# or: yarn add @johnmorrisdotca/tsunagi
+```
+
+It is ES modules only, with its types included, and needs Node 22 or later when it runs outside a browser. For a page with no bundler, the same files are on a CDN: `https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tsunagi@1/dist/element-define.js` defines the `<tsunagi-board>` tag.
 
 ### 1. The API alone, on a server
 
@@ -89,7 +200,8 @@ import { TSUNAGI_6 } from "@johnmorrisdotca/tsunagi/levels-6";
 
 const today = dailyTsunagiLevel(6, new Date());   // the level of the day at 6×6: 1 to 256
 const [givens, answer] = TSUNAGI_6[today! - 1];     // send `givens` to the browser; keep `answer`
-checkTsunagiAnswer(6, givens, answerFromThePlayer); // { ok: true } or { ok: false, reason }, in O(cells)
+const answerFromThePlayer = answer;                 // here it stands in for the text the player sent
+console.log(checkTsunagiAnswer(6, givens, answerFromThePlayer)); // { ok: true } or { ok: false, reason }, in O(cells)
 ```
 
 Importing the main entry on a server is safe: it touches no page.
@@ -151,7 +263,7 @@ defineProps({ size: Number, level: Number });
 <tsunagi-board bind:this={board} size={size} level={level}></tsunagi-board>
 ```
 
-```ts
+```ts no-check
 // Angular: a standalone component with CUSTOM_ELEMENTS_SCHEMA
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
 import "@johnmorrisdotca/tsunagi/element/define";
@@ -177,6 +289,281 @@ In Next.js or any server-rendering framework, import the define entry from a cli
 - **No dependencies.** ES modules, an entry per concern, and `sideEffects` set so that only the define entry has an effect.
 - **Where it runs.** See [Browser support](#browser-support).
 
+## Examples
+
+Each example is a whole recipe: copy it, and it works. They are run, in the package's own tests, against the built package, so none of them is a guess (`pnpm test:readme`). Output, where there is some, is shown under the example. The shorter ways in are under [Use it in your project](#use-it-in-your-project), and the frameworks' own recipes are there too, built from the packed tarball by `pnpm test:frameworks`.
+
+### A page with nothing else
+
+Save this as `level.html` and open it. One script, one tag, and a level to play, with the buttons, the words and a line under the board that says where the game stands.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>A Tsunagi level</title>
+  </head>
+  <body>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tsunagi@1/dist/element-define.js"></script>
+    <tsunagi-board size="7" level="12" marks="numbers" fill="lines" board="wood" chips cheats></tsunagi-board>
+    <p id="said">Join every pair of marbles.</p>
+    <script type="module">
+      const board = document.querySelector("tsunagi-board");
+      board.addEventListener("tsunagi-solve", (event) => {
+        document.getElementById("said").textContent = event.detail.helped ? "Solved, with help." : "Solved on your own.";
+      });
+    </script>
+  </body>
+</html>
+```
+
+### Check an answer in Node
+
+The check reads a finished answer in O(cells), with no search, and says the first thing that is wrong.
+
+```ts
+import { checkTsunagiAnswer, decodeLayout } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
+
+const [givens, answer] = TSUNAGI_5[0];                       // level 1 at 5×5: its layout and its one answer
+console.log(checkTsunagiAnswer(5, givens, answer));          // { ok: true }
+console.log(checkTsunagiAnswer(5, givens, "x".repeat(25)));  // { ok: false, reason: 'a cell has no line through it' }
+console.log(decodeLayout(givens, 5)?.ends);                  // each pair's two marbles, by cell number
+```
+
+```text
+{ ok: true }
+{ ok: false, reason: 'a cell has no line through it' }
+[ [ 0, 15 ], [ 1, 4 ], [ 6, 20 ], [ 7, 23 ], [ 8, 18 ], [ 9, 24 ] ]
+```
+
+### A server that keeps no answers
+
+A server that checks a solve, or lists who solved which level, needs a level's board and nothing more: the player sends an answer, and the check says whether it is one. The `layouts` entry holds every board without its answer, at about a third of the bytes of the levels.
+
+```ts
+import { checkTsunagiAnswer } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_LAYOUTS } from "@johnmorrisdotca/tsunagi/layouts";
+
+/** Is `submitted` a solve of level `level` at `size`? Nothing is stored but the boards. */
+function isSolve(size: number, level: number, submitted: string): boolean {
+  const givens = TSUNAGI_LAYOUTS[size]?.[level - 1];
+  return givens !== undefined && checkTsunagiAnswer(size, givens, submitted).ok;
+}
+
+console.log(isSolve(5, 1, "ABBBBACDEFACDEFACDEFCCDDF")); // true
+console.log(isSolve(5, 1, "ABBBBACDEFACDEFACDEFCCDDD")); // false
+console.log(isSolve(5, 9999, "anything"));               // false: there is no such level
+```
+
+### Today's level, from the date alone
+
+Today's level is a pure function of the date and the size, the same for everybody, with no seed to share and no server to ask.
+
+```ts
+import { dailyTsunagiLevel, tsunagiDay } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_7 } from "@johnmorrisdotca/tsunagi/levels-7";
+
+const day = tsunagiDay(new Date("2026-10-01T23:30:00Z"));  // "2026-10-01": a day is counted in UTC
+const level = dailyTsunagiLevel(7, day)!;                  // 121
+const [givens] = TSUNAGI_7[level - 1];
+console.log(day, level, givens.length);                    // 2026-10-01 121 …
+```
+
+### Draw a board as SVG text
+
+`drawTsunagi` returns text, so a board can go in a page, a file, an email or an image, and a server can draw one with no page at all.
+
+```ts
+import { decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+import { drawTsunagi } from "@johnmorrisdotca/tsunagi/draw";
+import { TSUNAGI_6 } from "@johnmorrisdotca/tsunagi/levels-6";
+
+const [givens, answer] = TSUNAGI_6[2];
+const layout = decodeLayout(givens, 6)!;
+const svg = drawTsunagi(layout, { lines: linesOfAnswer(layout, answer)!, marks: "numbers", fill: "lines", board: "wood", style: true });
+console.log(svg.startsWith("<svg"), svg.includes("tsu-line"));  // true true
+```
+
+`style: true` puts the drawing's style inside it, so the text stands alone as an image. Written to a file it is a picture anyone can open:
+
+```js
+import { writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+import { drawTsunagiCode } from "@johnmorrisdotca/tsunagi/draw";
+import { TSUNAGI_6 } from "@johnmorrisdotca/tsunagi/levels-6";
+
+const [givens, answer] = TSUNAGI_6[2];
+const lines = linesOfAnswer(decodeLayout(givens, 6), answer);
+const file = join(tmpdir(), "tsunagi-level-3.svg");
+writeFileSync(file, drawTsunagiCode(givens, 6, { lines, style: true, board: "green" }));
+console.log("wrote", file.endsWith(".svg"));
+```
+
+### A look of your own
+
+A board is a look of colours, and a colour set is a list of `[hue, saturation, lightness]`, used round and round. Each colour is also a custom property on `.tsunagi`, so a page can change a single one with CSS instead.
+
+```ts
+import { decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+import { drawTsunagi, TSUNAGI_BOARDS, TSUNAGI_COLOUR_SET_NAMES } from "@johnmorrisdotca/tsunagi/draw";
+import { TSUNAGI_7 } from "@johnmorrisdotca/tsunagi/levels-7";
+
+const [givens, answer] = TSUNAGI_7[0];
+const layout = decodeLayout(givens, 7)!;
+const svg = drawTsunagi(layout, {
+  lines: linesOfAnswer(layout, answer)!,
+  board: { paper: ["#f6efe0", "#e8dcc0"], frame: "#7a5b2e", grid: "#bfae8a", ink: "#2b2118", coordinate: "#5b3d1c" },
+  colours: [[12, 80, 52], [200, 70, 50], [48, 90, 55], [320, 60, 55]],
+  coordinates: true,
+});
+console.log(Object.keys(TSUNAGI_BOARDS), TSUNAGI_COLOUR_SET_NAMES);
+console.log(svg.includes("tsu-coordinate"));
+```
+
+```css
+/* or change one colour for every board on the page */
+tsunagi-board, .tsunagi { --tsu-ink: #2b2118; --tsu-frame: #7a5b2e; }
+```
+
+### A game as pure functions
+
+The rules of play are functions over plain values: each takes a game and returns a new one, so a server can replay a game's strokes, a test can play one, and a page of your own can draw the result.
+
+```ts
+import { dragGame, liftGame, linesOfAnswer, newTsunagiGame, pressGame, tsunagiProgress, undoGame } from "@johnmorrisdotca/tsunagi";
+import type { TsunagiGame } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
+
+/** One stroke: a finger down on the line's first cell, drawn along it, and let go. */
+function stroke(game: TsunagiGame, line: readonly number[]): TsunagiGame {
+  let next = pressGame(game, line[0]);
+  for (const cell of line.slice(1)) next = dragGame(next, cell);
+  return liftGame(next);
+}
+
+const [givens, answer] = TSUNAGI_5[0];
+let game = newTsunagiGame(givens, 5, { answer })!;
+const lines = linesOfAnswer(game.layout, answer)!;
+
+game = stroke(game, lines[0]);
+console.log(tsunagiProgress(game).joined);               // 1: one pair joined
+console.log(tsunagiProgress(undoGame(game)).joined);     // 0: Undo takes the stroke back
+for (const line of lines.slice(1)) game = stroke(game, line);
+console.log(game.solved, tsunagiProgress(game).joined);  // true 6
+console.log(undoGame(game).solved);                       // true: a solved game is over, and takes nothing back
+```
+
+### Keep a game half drawn, and come back to it
+
+Lines have a short code, so a game can be kept in a database column or in a page's own storage, and carried on from it.
+
+```ts
+import { decodeLines, dragGame, encodeLines, liftGame, linesOfAnswer, newTsunagiGame, pressGame, tsunagiProgress } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
+
+const [givens, answer] = TSUNAGI_5[0];
+let game = newTsunagiGame(givens, 5, { answer })!;
+const first = linesOfAnswer(game.layout, answer)![0];          // draw one pair, and stop
+game = pressGame(game, first[0]);
+for (const cell of first.slice(1)) game = dragGame(game, cell);
+game = liftGame(game);
+
+const code = encodeLines(game.layout, game.lines);             // a short string: keep it anywhere
+const back = newTsunagiGame(givens, 5, { answer, lines: decodeLines(game.layout, code)! })!;
+console.log(tsunagiProgress(back).joined === tsunagiProgress(game).joined, code.length); // true 25
+```
+
+The element and `mountTsunagi` hand the same code over in every event (`detail.code`) and take it back as `progress`, so a page keeps and resumes a game with one line each way.
+
+### Listen to the board
+
+The element speaks through DOM events that carry a `detail`: `tsunagi-change` after every stroke, `tsunagi-stroke`, `tsunagi-explosion` and `tsunagi-solve`.
+
+```ts no-run
+type Solve = { answer: string; helped: "cheated" | "explosions-soft" | "explosions-off" | null };
+
+const board = document.querySelector("tsunagi-board")!;
+board.addEventListener("tsunagi-change", (event) => {
+  const { code, progress } = (event as CustomEvent).detail;   // `code` keeps the game; `progress` says where it stands
+  localStorage.setItem("level-12", code);
+  console.log(progress);
+});
+board.addEventListener("tsunagi-solve", (event) => {
+  const { answer, helped } = (event as CustomEvent<Solve>).detail;
+  fetch("/solves", { method: "POST", body: JSON.stringify({ level: 12, answer, helped }) });
+});
+```
+
+### Count a board's answers
+
+The solver counts answers up to a limit, so a board's single answer is proved and a loose board is told apart from it. A level in this package has exactly one.
+
+```ts
+import { countSolutions, decodeLayout } from "@johnmorrisdotca/tsunagi";
+import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
+
+const level = decodeLayout(TSUNAGI_5[0][0], 5)!;
+console.log(countSolutions(level, 2).count);                  // 1: one answer, as every level has
+
+const loose = decodeLayout("A..A............", 4)!;            // two marbles at opposite corners, nothing else
+console.log(countSolutions(loose, 2).count);                  // 2: at least two, and the count stops at the limit
+```
+
+### Make a board from a seed
+
+A generator makes boards the same way every time for a seed: lay lines at random, cut them back to their ends, and keep the board if the solver finds exactly one answer.
+
+```ts
+import { candidate, checkTsunagiAnswer, seededRandom } from "@johnmorrisdotca/tsunagi";
+
+const random = seededRandom(7);
+let made = null;
+for (let tries = 0; tries < 500 && made === null; tries += 1) made = candidate(5, random, 8, 100_000);
+console.log(made?.layout, made?.answer, made?.pairs);        // AB.BC..D..E.....EA..D...C ABBBCAADDCEAADCEEADCDDDDC 5
+console.log(made && checkTsunagiAnswer(5, made.layout, made.answer).ok); // true
+```
+
+A board made this way is not a published level. Published levels are fixed, so that a time on one can be compared with anybody's; a generator is for a board of the day of your own, a practice mode, or a test.
+
+### Which levels are open, and how hard each is
+
+Levels come in blocks of sixteen, and a block opens when every level of the one before is solved. The ladder is a pure function of what a player has solved.
+
+```ts
+import { levelCountOf, nextTsunagiLevel, openTsunagiLevels, tsunagiMarks } from "@johnmorrisdotca/tsunagi";
+
+const solved = new Set([1, 2, 3]);
+console.log(openTsunagiLevels(7, solved));   // 16: the first block is open from the start
+console.log(levelCountOf(7, "classic"));     // 256
+console.log(levelCountOf(7, "portals"));     // 32
+console.log(tsunagiMarks(7, 12));            // 1 to 5: how hard level 12 at 7×7 is
+console.log(nextTsunagiLevel(7, solved));    // the level to offer next
+```
+
+### Load the levels with portals
+
+The second set of levels is boards with portals, loaded by size like the first.
+
+```ts
+import { challengesOf, decodeLayout, levelCountOf } from "@johnmorrisdotca/tsunagi";
+import { loadTsunagiLevels } from "@johnmorrisdotca/tsunagi/levels";
+
+const levels = await loadTsunagiLevels(7, "portals");          // only 7×7's portal levels are fetched
+const [givens] = levels[0];
+const layout = decodeLayout(givens, 7)!;
+console.log(levels.length, levelCountOf(7, "portals"));        // 32 32
+console.log(layout.portalPairs.length, challengesOf(givens));  // the portals this board has, and what it asks of a player
+```
+
+### In React, Vue, Svelte and Angular
+
+The tag is a custom element, so a framework needs nothing but its import and an event listener. The four recipes, with the one-line settings each framework's compiler wants, are under [Use it in your project](#3-a-bundler-and-a-framework); they are built from the packed tarball and played to a solve in Chromium and WebKit by `pnpm test:frameworks`.
+
 ## The puzzle
 
 Each letter in a layout is a marble, and each marble has one partner. A line
@@ -201,7 +588,9 @@ when every pair is joined every cell is filled. A level has exactly one answer.
 ```ts
 import { decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
 import { drawTsunagi, TSUNAGI_STYLE } from "@johnmorrisdotca/tsunagi/draw";
+import { TSUNAGI_7 } from "@johnmorrisdotca/tsunagi/levels-7";
 
+const [givens, answer] = TSUNAGI_7[0];
 const layout = decodeLayout(givens, 7)!;
 const svg = drawTsunagi(layout, { lines: linesOfAnswer(layout, answer)!, marks: "numbers", fill: "lines", board: "wood" });
 ```
@@ -263,8 +652,13 @@ under it depend on every line.
 
 ## Playing it in a page
 
-```ts
+```ts no-run
 import { mountTsunagi } from "@johnmorrisdotca/tsunagi/play";
+import { TSUNAGI_7 } from "@johnmorrisdotca/tsunagi/levels-7";
+
+const [givens, answer] = TSUNAGI_7[11];
+const [other, otherAnswer] = TSUNAGI_7[12];
+const send = (answer: string, helped: string | null) => fetch("/solves", { method: "POST", body: JSON.stringify({ answer, helped }) });
 
 const board = mountTsunagi(document.getElementById("here")!, {
   size: 7, givens, answer, level: 12,         // a level; `level` shows its difficulty and its place in its block
@@ -359,19 +753,7 @@ once every level of the one before is solved. `TSUNAGI_MARKS`
 (`@johnmorrisdotca/tsunagi/marks`) rates every level 1 to 5 from its measured
 difficulty.
 
-| Import | What it holds |
-| --- | --- |
-| `@johnmorrisdotca/tsunagi` | the rules, the solver, the generator, the levels' counts, and `game.ts`'s pure play functions: everything but the boards, the drawing and the page |
-| `@johnmorrisdotca/tsunagi/draw` | `drawTsunagi` and the rest of the drawing as SVG text, the colour sets, the boards, the style, and where everything sits in the drawing; no page needed |
-| `@johnmorrisdotca/tsunagi/play` | `mountTsunagi`: a level played in any element by touch and mouse, with its buttons, words, zoom pad and events |
-| `@johnmorrisdotca/tsunagi/element` | the `TsunagiBoard` class behind `<tsunagi-board>`, to extend or to define under another name |
-| `@johnmorrisdotca/tsunagi/element/define` | defines `<tsunagi-board>` on the page, for its effect |
-| `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size, set)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size, set)`, `tsunagiLevelOf(size, layout, set)`, each size fetched only when loaded |
-| `@johnmorrisdotca/tsunagi/levels-4` … `/levels-15`, `/levels-20`, `/levels-25`, `/levels-30` | one size's levels, `TSUNAGI_4` … `TSUNAGI_30`, as `[layout, answer]` pairs |
-| `@johnmorrisdotca/tsunagi/levels-portals` | the levels with portals, `TSUNAGI_PORTAL_LEVELS`: every size's in one entry |
-| `@johnmorrisdotca/tsunagi/layouts` | every level's board without its answer, `TSUNAGI_LAYOUTS` and `TSUNAGI_PORTAL_LAYOUTS` (by size, in level order): for a server that checks a solve or lists who solved which level, at about a third of the bytes of the levels |
-| `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5), `TSUNAGI_ROLES` (each twist level's part in its block) and `TSUNAGI_PORTAL_MARKS` |
-| `@johnmorrisdotca/tsunagi/renumbered` | where each old level went when the levels were renumbered on 2026-09-26, for anyone who stored solves by number |
+The entry points, `@johnmorrisdotca/tsunagi/levels-4` to `/levels-30`, `/levels-portals`, `/layouts`, `/marks` and `/renumbered` among them, are listed under [Entry points](#entry-points) in the API section.
 
 ### Levels with portals
 
@@ -407,6 +789,26 @@ The levels are fixed, so the level of the day needs no seed and no server: it is
 ## API
 
 The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+
+### Entry points
+
+Each concern is an entry of its own, so a page loads only what it uses. Importing any of them on a server is safe.
+
+| Import | What it holds |
+| --- | --- |
+| `@johnmorrisdotca/tsunagi` | the rules, the solver, the generator, the levels' counts, and `game.ts`'s pure play functions: everything but the boards, the drawing and the page |
+| `@johnmorrisdotca/tsunagi/draw` | `drawTsunagi` and the rest of the drawing as SVG text, the colour sets, the boards, the style, and where everything sits in the drawing; no page needed |
+| `@johnmorrisdotca/tsunagi/play` | `mountTsunagi`: a level played in any element by touch and mouse, with its buttons, words, zoom pad and events |
+| `@johnmorrisdotca/tsunagi/element` | the `TsunagiBoard` class behind `<tsunagi-board>`, to extend or to define under another name |
+| `@johnmorrisdotca/tsunagi/element/define` | defines `<tsunagi-board>` on the page, for its effect |
+| `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size, set)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size, set)`, `tsunagiLevelOf(size, layout, set)`, each size fetched only when loaded |
+| `@johnmorrisdotca/tsunagi/levels-4` … `/levels-15`, `/levels-20`, `/levels-25`, `/levels-30` | one size's levels, `TSUNAGI_4` … `TSUNAGI_30`, as `[layout, answer]` pairs |
+| `@johnmorrisdotca/tsunagi/levels-portals` | the levels with portals, `TSUNAGI_PORTAL_LEVELS`: every size's in one entry |
+| `@johnmorrisdotca/tsunagi/layouts` | every level's board without its answer, `TSUNAGI_LAYOUTS` and `TSUNAGI_PORTAL_LAYOUTS` (by size, in level order): for a server that checks a solve or lists who solved which level, at about a third of the bytes of the levels |
+| `@johnmorrisdotca/tsunagi/marks` | `TSUNAGI_MARKS` (each level's 1 to 5), `TSUNAGI_ROLES` (each twist level's part in its block) and `TSUNAGI_PORTAL_MARKS` |
+| `@johnmorrisdotca/tsunagi/renumbered` | where each old level went when the levels were renumbered on 2026-09-26, for anyone who stored solves by number |
+
+### The calls to learn first
 
 | Export | What it does |
 | --- | --- |
@@ -488,6 +890,18 @@ All of these are held by tests, and the ones with a name are exported.
 | A day | `YYYY-MM-DD`, counted in UTC | `isTsunagiDay` |
 
 A generator never runs on a server unless you ask it to. The check never searches: it is linear in the size of the board.
+
+## Accessibility
+
+What the package does, and what it does not yet.
+
+- **A screen reader hears the board.** The drawing is a group with a label (the size, or the label you give it), and each marble, bridge, waypoint and portal is an image with its own label naming its pair and where it is. Row and column marks are for sighted use and are hidden from a screen reader. The words are in English and Japanese (`language`), and follow the page's `lang`.
+- **Progress is announced.** Under the playable board, the progress line, the message line and the line that says what Check found are live regions, so a change in them is spoken without moving focus.
+- **Colour is never the only way to tell pairs apart.** `marks: "numbers"` puts each pair's number on its marbles; there is a colour-blind colour set; and every pair also has its own cells washed in its colour, so a line is told by where it goes as well as what it is called. Contrast follows the board you choose, and the plain `paper` board follows the device's light or dark setting.
+- **Touch and pointer.** Buttons and chips are at least 44 px high, and the board has `touch-action: none`, so a finger drawing a line never scrolls the page. A line is drawn by pointer events, captured on the press, so a drag that leaves the board still ends. Ctrl or Cmd with Z undoes.
+- **Reduced motion.** With `prefers-reduced-motion: reduce`, nothing in the drawing moves: no flash, no burst, no sliding.
+- **Nothing is selected by accident.** The drawing cannot be selected, dragged or double-tapped into a selection.
+- **Not yet.** A line cannot be drawn from the keyboard: the cells cannot be walked with keys, and a person who cannot use a pointer cannot play a level today. It is on the [Roadmap](#roadmap). The check and the rules have no such limit, so a page of your own can offer a different way in, using the pure functions.
 
 ## Browser support
 
@@ -686,7 +1100,8 @@ pnpm test:demo      # build the demo and play it in a real browser, at a phone's
 pnpm site           # build the demo into site/, as the Pages workflow publishes it
 pnpm test:frameworks  # the README's React, Vue, Svelte, Angular and plain-page examples, built from the tarball and played (needs the network)
 pnpm docs:make      # rewrite docs/strings-ja.md after changing a word of the board
-pnpm pictures       # take the README's two pictures from the built demo
+pnpm screenshots:readme  # retake the README's pictures (docs/images) from the built demo, in light and dark
+pnpm test:readme    # run every ts and js example in this README against the built package
 ```
 
 ## Contributing
@@ -697,7 +1112,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make the che
 
 ## Changes
 
-See [CHANGELOG.md](./CHANGELOG.md).
+Every release is written up in [CHANGELOG.md](./CHANGELOG.md), newest first, in the Keep a Changelog form, with the date of each. A level keeps its number, its board and its answer from one release to the next, so a solve kept by any version is still the same solve, and a change to what the package exports follows semantic versioning. The releases are also on the [releases page](https://github.com/johnmorrisdotca/tsunagi/releases), each with the tarball that npm publishes.
 
 ## Licence
 

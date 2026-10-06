@@ -7,8 +7,21 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-10-06
+
+Nothing that was exported has changed. npm shows the README from the tarball, so a README that is fuller is a release.
+
+### Added
+
+- **The README follows the family's README standard** (johnmorrisdotca/.github, `README-STANDARD.md`): a hero picture under the title, `### What's in it` with a picture of each kind of board (colours, numbers, a colour-blind set, walls, bridges, waypoints, a board that wraps, hexagons, portals and a 30×30), an install section, an **Examples** section whose code is run by a test (a page with nothing else, a check in Node, a server that keeps no answers, the level of the day, a drawing as SVG text and as a file, a look of your own, a game as pure functions, a game kept and resumed, the board's events, counting answers, a board from a seed, the ladder and the portal levels), and an **Accessibility** section.
+- Twenty-four pictures in `docs/images`, in light and dark, taken from the built demo by `pnpm screenshots:readme` (`scripts/readme-pictures.mjs`) and shown by absolute address so that GitHub and npm both show them. They are WebP, each under its size budget, and are never in the tarball: `pnpm test:package` fails if one is.
+- `pnpm test:readme` type-checks and runs every TypeScript and JavaScript example in the README against the built package, and the `readme` job in CI runs it. The README's own earlier examples are now complete enough to run, or say that they are excerpts.
+- `src/readme.test.js` holds the README to the standard: its sections in order, a language on every code block, a picture's file, its alt text, its caption and its dark twin, the size budget, table widths and plain words.
+
 ### Changed
 
+- The README's pictures moved from `docs/desktop.jpg` and `docs/phone.jpg` to `docs/images/`, and the `pnpm pictures` command is `pnpm screenshots:readme`.
+- The entry-point table moved from Levels to API, where the standard keeps it.
 - Repository only: the package and everything it exports are unchanged. `CONTRIBUTING.md` is the family's one text with a section of its own for Tsunagi, held to the master in johnmorrisdotca/.github by `src/family.test.js`; `ci.yml` and `pages.yml` are the family's one text (`pnpm check`, the demo, and the package on Linux, macOS and Windows), and any jobs of the package's own after them.
 
 ### Fixed

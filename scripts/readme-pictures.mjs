@@ -1,48 +1,51 @@
-// Takes the pictures the README shows, from the built demo in `site/`: `pnpm pictures` (builds the demo, then runs this).
-// The page is served to a browser without a port, never fetched from the live site, and the same each run:
-// the level is the demo's own first level of a size, its lines are drawn along the level's answer with the mouse,
-// and motion is reduced. It waits on the board's own svg, and on the page saying every pair drawn is joined, never on a clock.
-// Output: docs/desktop.jpg (1280 wide, light, English) and docs/phone.jpg (390 by 844, dark, Japanese).
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-import { chromium } from "@playwright/test";
-
+// Takes the pictures the README shows, from the built demo in `site/`: `pnpm screenshots:readme` (builds the demo, then runs this).
+// The family's standard is in johnmorrisdotca/.github (README-STANDARD.md); the shared part is readme-pictures-lib.mjs.
+// The page is served to a browser without a port, never fetched from the live site, and is the same each run: a level is
+// opened by its address (size, level, set and look), a finished board is a level kept as solved, a half-drawn one is drawn with the
+// mouse along the level's answer, and motion is reduced. It waits on the board's own svg and on the page's own `data-joined`.
+// Output: docs/images/<subject>-<desk|phone>-<light|dark>.webp.
 import { decodeLayout, linesOfAnswer } from "../dist/index.js";
 import { tsunagiGeometry } from "../dist/draw-entry.js";
-import { loadTsunagiLevels } from "../dist/levels.js";
+import { loadEveryTsunagiLevel, tsunagiLevelsOf, loadTsunagiLevels } from "../dist/levels.js";
+import { challengesOf } from "../dist/index.js";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const site = join(root, "site");
-const docs = join(root, "docs");
-const host = "http://tsunagi.test";
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml" };
-const QUALITY = 76;
+import { takePictures } from "./readme-pictures-lib.mjs";
 
-if (!existsSync(join(site, "index.html"))) throw new Error("site/ is not built: run `pnpm pictures` (it builds the demo first)");
-const browser = await chromium.launch();
+await loadEveryTsunagiLevel();
 
-/** Level 1 of a square size, with its first `pairs` pairs joined, each by dragging from one marble along the answer to the other. */
-async function shot({ width, height, colorScheme, lang, size, pairs, path, scrollTo }) {
-  const [givens, answer] = (await loadTsunagiLevels(size))[0];
-  const lines = linesOfAnswer(decodeLayout(givens, size), answer).slice(0, pairs);
-  const context = await browser.newContext({ viewport: { width, height }, colorScheme, reducedMotion: "reduce", locale: "en-US", deviceScaleFactor: 2 });
-  const page = await context.newPage();
-  await page.route(`${host}/**`, (route) => {
-    const { pathname } = new URL(route.request().url());
-    const file = join(site, pathname === "/" ? "index.html" : pathname);
-    if (!existsSync(file)) return route.fulfill({ status: 404, body: "" });
-    return route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" });
-  });
-  // The demo keeps its size and level on the device: this is the board it is opened on.
-  await page.addInitScript((kept) => localStorage.setItem("tsunagi.page", JSON.stringify(kept)), { size, levels: { [size]: 1 }, solved: {} });
-  await page.goto(`${host}/?lang=${lang}`);
-  const svg = page.locator("#board svg.tsunagi");
-  await page.waitForSelector('#board[data-ready="true"] svg.tsunagi');
-  // Where a cell is on the page: the drawing's own geometry, placed in the board's svg.
+/** The first level of a size, among those that have a challenge, in the first set. */
+const withChallenge = (challenge, size) => {
+  const at = tsunagiLevelsOf(size).findIndex(([givens]) => challengesOf(givens).includes(challenge));
+  if (at < 0) throw new Error(`no ${challenge} level at ${size}×${size}`);
+  return at + 1;
+};
+
+/** The demo keeps its size, level and what was solved on the device: this is the page opened on a finished board. */
+const keepSolved = ({ size, level, set }) => {
+  const slot = set === "portals" ? `p${size}` : String(size);
+  localStorage.setItem("tsunagi.page", JSON.stringify({ size, set, levels: { [slot]: level }, solved: { [slot]: [level] } }));
+};
+/** The demo keeps its size and level, and nothing solved: this is the page opened on a board to draw. */
+const keepOpen = ({ size, level }) => localStorage.setItem("tsunagi.page", JSON.stringify({ size, levels: { [size]: level }, solved: {} }));
+
+/** A finished board, cropped to its drawing. */
+const finished = (subject, { size, level, set = "classic", look = "" }) => ({
+  subject,
+  views: ["desk"],
+  url: `/?lang=en&size=${size}&level=${level}&set=${set}${look}`,
+  init: keepSolved,
+  state: { size, level, set },
+  ready: '#board[data-ready="true"] svg.tsunagi',
+  target: "#board svg.tsunagi",
+});
+
+/** The level's first `pairs` pairs joined, each by dragging from one marble along the answer to the other. */
+async function draw(page, size, level, pairs) {
+  const [givens, answer] = (await loadTsunagiLevels(size))[level - 1];
   const layout = decodeLayout(givens, size);
+  const lines = linesOfAnswer(layout, answer).slice(0, pairs);
   const geometry = tsunagiGeometry(layout);
+  const svg = page.locator("#board svg.tsunagi");
   await svg.scrollIntoViewIfNeeded();
   for (const line of lines) {
     const box = await svg.boundingBox();
@@ -57,16 +60,45 @@ async function shot({ width, height, colorScheme, lang, size, pairs, path, scrol
   }
   // Every pair drawn is on the page before it is photographed.
   await page.waitForFunction((joined) => document.getElementById("board").dataset.joined === String(joined), pairs);
-  if (scrollTo) await page.locator(scrollTo).evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 4));
-  else await page.evaluate(() => window.scrollTo(0, 0));
-  await page.mouse.move(0, 0);
-  await page.screenshot({ path, type: "jpeg", quality: QUALITY });
-  await context.close();
 }
 
-// A 7×7 level with five of its seven pairs joined, from the top of the page so the header, the language chooser, the cloth patches
-// and the board with its buttons and progress line all show.
-await shot({ width: 1280, height: 1180, colorScheme: "light", lang: "en", size: 7, pairs: 5, path: join(docs, "desktop.jpg") });
-// A 6×6 level with three of its eight pairs joined, on a phone in dark mode and Japanese, scrolled to the board.
-await shot({ width: 390, height: 844, colorScheme: "dark", lang: "ja", size: 6, pairs: 3, path: join(docs, "phone.jpg"), scrollTo: "#board" });
-await browser.close();
+const READY = '#board[data-ready="true"] svg.tsunagi';
+await takePictures({
+  shots: [
+    // The page from the top, a 7×7 level with five of its seven pairs joined; and on a phone, in Japanese, a 6×6 with three of eight.
+    {
+      subject: "hero",
+      views: ["desk", "phone"],
+      height: 1180,
+      url: "/?lang=en&size=7&level=1",
+      init: keepOpen,
+      state: { size: 7, level: 1 },
+      ready: READY,
+      async prepare(page, { view }) {
+        if (view === "desk") {
+          await draw(page, 7, 1, 5);
+          await page.evaluate(() => window.scrollTo(0, 0));
+        } else {
+          await page.goto("http://tsunagi.test/?lang=ja&size=6&level=1");
+          await page.waitForSelector(READY);
+          await draw(page, 6, 1, 3);
+          await page.locator("#board").evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 4));
+        }
+      },
+    },
+    // Dots in colours on paper: the first look, a finished 7×7 level.
+    finished("colours", { size: 7, level: 2 }),
+    // Numbers and lines on wood: the pair's number on a plain shell marble, every line in a soft tint.
+    finished("numbers", { size: 6, level: 3, look: "&marks=numbers&fill=lines&board=wood" }),
+    // The colour-blind set on a black board, with coordinates.
+    finished("colour-blind", { size: 7, level: 5, look: "&colours=colour-blind&board=black&coordinates=on" }),
+    finished("walls", { size: 6, level: withChallenge("walls", 6), look: "&board=green" }),
+    finished("bridges", { size: 6, level: withChallenge("bridges", 6), look: "&board=blue" }),
+    finished("waypoints", { size: 6, level: withChallenge("waypoints", 6), look: "&board=paper" }),
+    finished("wrap", { size: 6, level: withChallenge("wrap", 6), look: "&board=red" }),
+    finished("hexagon", { size: 7, level: withChallenge("hexagon", 7), look: "&board=wood" }),
+    finished("portals", { size: 7, level: 3, set: "portals", look: "&board=paper" }),
+    // A 30×30 board, with its one answer drawn.
+    finished("big", { size: 30, level: 1, look: "&marks=colours&fill=lines&board=paper" }),
+  ],
+});
