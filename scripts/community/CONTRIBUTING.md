@@ -76,21 +76,3 @@ The Release workflow (`.github/workflows/release.yml`) checks and builds the
 package, attaches the tarball to a GitHub release and publishes it to npm by
 trusted publishing, with provenance and no token. A version already on npm is
 not published again.
-
-## Particular to Tsunagi
-
-Bug reports and ideas go in the [issues](https://github.com/johnmorrisdotca/tsunagi/issues).
-
-### Commands and rules
-
-```sh
-pnpm check          # lint, types and tests
-pnpm test:package   # pack it as npm does, install it in an empty project, import every entry
-pnpm test:demo      # build the demo and play it in a real browser
-pnpm docs:make      # rewrite docs/strings-ja.md after changing a word of the board
-```
-
-A change to the rules is tested beside it, and must leave every level in
-`src/levels/` with exactly one answer, the one stored: people's solves, times
-and half-drawn boards on itsutsu.com are on each of them, kept by its number.
-A level once published keeps its number; see `scripts/tsunagi-levels.ts`.
