@@ -47,6 +47,8 @@ export const BANNED = [
 export const BUDGET_DESK = 200 * 1024;
 export const BUDGET_OTHER = 120 * 1024;
 export const BUDGET_TOTAL = 2 * 1024 * 1024;
+/** npm keeps and shows only the first 65,536 characters of a README: anything after is cut off, mid-sentence. */
+export const BUDGET_README = 64_000;
 export const MIN_EXAMPLE_BLOCKS = 6;
 export const MIN_SUBJECTS = 4;
 const NAME = /^([a-z0-9]+(?:-[a-z0-9]+)*)-(desk|phone)-(light|dark)\.(webp|png)$/;
@@ -133,6 +135,8 @@ export function lintReadme({ readme, pkg, pictures, minSubjects = MIN_SUBJECTS, 
   const prefix = `https://raw.githubusercontent.com/johnmorrisdotca/${repo}/main/docs/images/`;
   const all = headings(readme);
   const lines = readme.split("\n");
+
+  if (readme.length > BUDGET_README) fault(`The README is ${readme.length.toLocaleString("en-US")} characters; npm shows only the first 65,536 and cuts the rest off, so the budget is ${BUDGET_README.toLocaleString("en-US")}. Move reference material to a file under docs/ and link it.`);
 
   // The title: one h1, the first thing in the README.
   const firstLine = lines.find((line) => line.trim() !== "") ?? "";

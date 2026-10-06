@@ -13,22 +13,22 @@ Join each pair of marbles with a line, every line its own, until the board is fu
 <p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
 
 <table align="center">
-  <tr>
-    <td align="center" valign="top">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-desk-light.webp" alt="A 7×7 level with five of its seven pairs joined, under the demo's header with its language chooser, five cloth patches and the Help switch: the size choice, the level arrows and the Today button, then the board on green felt with its difficulty chip, the Undo, Restart and Check buttons and the line '5 of 7 joined · 73% of the board'" width="600">
-      </picture>
-      <br><em>The demo on a desk: a 7×7 level with five of its seven pairs joined.</em>
-    </td>
-    <td align="center" valign="top">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-phone-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-phone-light.webp" alt="A 6×6 level with three of its eight pairs joined, on a phone and in Japanese: the board on green felt with its difficulty chip, the three buttons, the progress line (3 of 8 pairs joined, 75% of the board) and the first of the settings under it" width="190">
-      </picture>
-      <br><em>On a phone, in Japanese, in the device's light or dark.</em>
-    </td>
-  </tr>
+<tr>
+<td align="center" valign="top">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-desk-light.webp" alt="The demo on a desk: its header, the size and level choices, then a 7×7 board on green felt with five of seven pairs joined, the Undo, Restart and Check buttons and the line '5 of 7 joined · 73% of the board'" width="600">
+</picture>
+<br><em>The demo on a desk: a 7×7 level with five of its seven pairs joined.</em>
+</td>
+<td align="center" valign="top">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-phone-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hero-phone-light.webp" alt="The demo on a phone, in Japanese: a 6×6 board on green felt with three of eight pairs joined, the three buttons, the progress line and the first of the settings" width="190">
+</picture>
+<br><em>On a phone, in Japanese, in the device's light or dark.</em>
+</td>
+</tr>
 </table>
 
 Tsunagi is the puzzle sometimes called Number Link, Arukone or Flow. It is
@@ -83,7 +83,7 @@ And in a page, a level to play, by touch and mouse, with nothing else to set up:
 - **A level of the day**, the same for everybody, from the date alone: `dailyTsunagiLevel(size, date)`. No server, no seed.
 - **A check a server can trust.** `checkTsunagiAnswer` reads a finished answer in O(cells), with no search, and says the first thing wrong.
 - **A solver that counts answers**, and a seeded generator that makes boards with exactly one, with the twists: walls, bridges, waypoints, wrap, portals, hexagons, few lines, explosions and a stroke limit.
-- **Big boards, made by taking clues away.** A 30×30 board with one answer is not found by luck; `reducedCandidate` starts from a filling cut into short lines and joins them while the solver can still prove one answer within a budget of dead ends, so the boards come out with a cheap proof by construction: on one core of a desk (measured 2026-10-05) a median 3 seconds at 20×20, 11 at 25×25 and 25 to 66 at 30×30, and 20×20, 25×25 and 30×30 have 64 levels each.
+- **Big boards, made by taking clues away.** A 30×30 board with one answer is not found by luck: `reducedCandidate` starts from a filling cut into short lines and joins them while the solver can still prove one answer, so a board comes out with a cheap proof by construction (a median 3 seconds at 20×20, 11 at 25×25 and 25 to 66 at 30×30, on one core of a desk, measured 2026-10-05). 20×20, 25×25 and 30×30 have 64 levels each; see [Making levels](docs/MAKING-LEVELS.md).
 - **A difficulty measure**, so a level has a mark from 1 to 5 and the levels of a size run easiest first.
 - **Drawn as SVG text**, in an entry of its own: colours or numbers on the marbles, dots or lines, four colour sets, six boards, bridges drawn as bridges. A server that only checks answers never loads it.
 - **Played in any page** by touch and mouse, with Undo, Restart, Check, Cheat and the zoom pad a big board needs, as one function call (`mountTsunagi`) or one tag (`<tsunagi-board>`).
@@ -93,89 +93,89 @@ And in a page, a level to play, by touch and mouse, with nothing else to set up:
 
 ### What's in it
 
-Every picture is a real board, drawn by the package and taken from [the demo](https://johnmorrisdotca.github.io/tsunagi/) with `pnpm screenshots:readme`, in light and dark.
+Every picture is a real board, drawn by the package, taken from [the demo](https://johnmorrisdotca.github.io/tsunagi/) in light and dark.
 
 <table>
-  <tr>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colours-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colours-desk-light.webp" alt="A finished 7×7 level on paper: each pair of marbles joined by a line in its own colour, with a small marble in every cell the line runs through" width="300">
-      </picture>
-      <br><em><strong>Colours and dots.</strong> Each pair has a colour, and the cells a line runs through are washed in it. The default look; see <a href="#drawing-a-board">Drawing a board</a>.</em>
-    </td>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/numbers-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/numbers-desk-light.webp" alt="A finished 6×6 level on a wood board: each pair is told by its number on a plain shell marble, the lines are soft tints, and the cells hold lines alone" width="300">
-      </picture>
-      <br><em><strong>Numbers and lines.</strong> <code>marks: "numbers"</code> and <code>fill: "lines"</code> tell the pairs apart without colour.</em>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colour-blind-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colour-blind-desk-light.webp" alt="A finished 7×7 level on a black board with row numbers down one side and column letters along the top, drawn in the colour-blind colour set" width="300">
-      </picture>
-      <br><em><strong>A colour-blind set, coordinates.</strong> Four colour sets, six boards, and row and column marks for talking about a cell.</em>
-    </td>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/walls-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/walls-desk-light.webp" alt="A finished 6×6 level on a green board in which a dark bar on the edge between two cells is a wall that no line may cross, and a darker square is a blocked cell" width="300">
-      </picture>
-      <br><em><strong>Walls and blocked cells.</strong> A bar between two cells stops a line; a dark square is a cell no line may enter. See <a href="#the-puzzle">The puzzle</a>.</em>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/bridges-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/bridges-desk-light.webp" alt="A finished 6×6 level on a blue board where one line passes straight across a bridge cell, drawn with a deck and two rails, while another line goes straight down beneath it" width="300">
-      </picture>
-      <br><em><strong>Bridges.</strong> One line goes across a bridge and another goes down under it, and the drawing shows which is over.</em>
-    </td>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/waypoints-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/waypoints-desk-light.webp" alt="A finished 6×6 level on paper in which a ring in a pair's colour marks a cell that pair's own line must pass through" width="300">
-      </picture>
-      <br><em><strong>Waypoints.</strong> A ring in a line's colour is a cell that pair's own line has to go through.</em>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/wrap-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/wrap-desk-light.webp" alt="A finished 6×6 level on a red board whose edges join: faded ghosts of the far edge surround it, a dashed rim marks the real board, and lines leave one side and come in at the other" width="300">
-      </picture>
-      <br><em><strong>A board that wraps.</strong> A line leaving one side comes back on the opposite one; the far edge is shown faded round the board.</em>
-    </td>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hexagon-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hexagon-desk-light.webp" alt="A finished hexagon-shaped level of 7×7 on a wood board, made of six-sided cells joined by lines that run along slants" width="300">
-      </picture>
-      <br><em><strong>Hexagons.</strong> A honeycomb of six-sided cells, six ways round.</em>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/portals-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/portals-desk-light.webp" alt="A finished 7×7 level with portals on paper: a purple ring marked α is where a line goes in, and a second ring marked α is where it comes out, going the same way on" width="300">
-      </picture>
-      <br><em><strong>Portals.</strong> A line that goes into one ring comes out of the other. A second set of levels is made of boards with them.</em>
-    </td>
-    <td align="center" valign="top" width="50%">
-      <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/big-desk-dark.webp">
-        <img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/big-desk-light.webp" alt="A finished 30×30 level drawn as lines only: dozens of coloured lines winding across a board of nine hundred cells, every cell filled" width="300">
-      </picture>
-      <br><em><strong>Big boards.</strong> Up to 30×30, each with one answer, played through a box with a zoom and move pad.</em>
-    </td>
-  </tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colours-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colours-desk-light.webp" alt="A finished 7×7 level on paper, each pair joined by a line in its own colour" width="300">
+</picture>
+<br><em><strong>Colours and dots.</strong> Each pair has a colour, and its cells are washed in it. The default look; see <a href="#drawing-a-board">Drawing a board</a>.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/numbers-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/numbers-desk-light.webp" alt="A finished 6×6 level on wood, each pair told by its number on a plain marble" width="300">
+</picture>
+<br><em><strong>Numbers and lines.</strong> <code>marks: "numbers"</code> and <code>fill: "lines"</code> tell the pairs apart without colour.</em>
+</td>
+</tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colour-blind-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/colour-blind-desk-light.webp" alt="A finished 7×7 level on a black board with row and column marks, in the colour-blind colour set" width="300">
+</picture>
+<br><em><strong>A colour-blind set, coordinates.</strong> Four colour sets, six boards, and row and column marks for talking about a cell.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/walls-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/walls-desk-light.webp" alt="A finished 6×6 level on green with a dark wall bar between two cells and a blocked square" width="300">
+</picture>
+<br><em><strong>Walls and blocked cells.</strong> A bar stops a line; a dark square is a cell no line may enter.</em>
+</td>
+</tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/bridges-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/bridges-desk-light.webp" alt="A finished 6×6 level on blue where one line crosses a bridge and another passes under it" width="300">
+</picture>
+<br><em><strong>Bridges.</strong> One line goes across, another goes down under it.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/waypoints-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/waypoints-desk-light.webp" alt="A finished 6×6 level on paper with a waypoint ring in one pair's colour" width="300">
+</picture>
+<br><em><strong>Waypoints.</strong> A ring is a cell its pair's line must go through.</em>
+</td>
+</tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/wrap-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/wrap-desk-light.webp" alt="A finished 6×6 level on red whose edges join, with the far edge faded round it and a dashed rim" width="300">
+</picture>
+<br><em><strong>A board that wraps.</strong> A line leaving one side comes back on the opposite one.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hexagon-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/hexagon-desk-light.webp" alt="A finished 7×7 hexagon level on wood, made of six-sided cells" width="300">
+</picture>
+<br><em><strong>Hexagons.</strong> A honeycomb of six-sided cells, six ways round.</em>
+</td>
+</tr>
+<tr>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/portals-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/portals-desk-light.webp" alt="A finished 7×7 level with portals: two purple rings marked α, one where a line goes in and one where it comes out" width="300">
+</picture>
+<br><em><strong>Portals.</strong> A line that goes into one ring comes out of the other.</em>
+</td>
+<td align="center" valign="top" width="50%">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/big-desk-dark.webp">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/big-desk-light.webp" alt="A finished 30×30 level drawn as lines only, dozens of coloured lines filling nine hundred cells" width="300">
+</picture>
+<br><em><strong>Big boards.</strong> Up to 30×30, each with one answer, played through a zoom and move pad.</em>
+</td>
+</tr>
 </table>
 
 ## Use it in your project
@@ -281,17 +281,16 @@ export class Level {
 
 In Next.js or any server-rendering framework, import the define entry from a client component, so the tag is defined in the browser. Or skip the tag and call `mountTsunagi(element, options)` from `@johnmorrisdotca/tsunagi/play` in an effect: the handle it returns has `destroy()`.
 
-`pnpm test:frameworks` builds these recipes from the packed tarball in a scratch project for each of the five and plays a level to its end in Chromium and WebKit; it needs the network and a few minutes, so it is run before a release and in CI rather than with `pnpm check`.
+`pnpm test:frameworks` builds these recipes from the packed tarball for each of the five and plays a level to its end in Chromium and WebKit; it needs the network and a few minutes, so it runs before a release and in CI, not with `pnpm check`.
 
 ### What a developer gets
 
 - **Typed results**, with a doc comment on every export. Every function is pure and returns new values.
 - **No dependencies.** ES modules, an entry per concern, and `sideEffects` set so that only the define entry has an effect.
-- **Where it runs.** See [Browser support](#browser-support).
 
 ## Examples
 
-Each example is a whole recipe: copy it, and it works. They are run, in the package's own tests, against the built package, so none of them is a guess (`pnpm test:readme`). Output, where there is some, is shown under the example. The shorter ways in are under [Use it in your project](#use-it-in-your-project), and the frameworks' own recipes are there too, built from the packed tarball by `pnpm test:frameworks`.
+Each example is a whole recipe: copy it, and it works. Each is run against the built package (`pnpm test:readme`), so none is a guess, and output is shown under it. The shorter ways in, and the React, Vue, Svelte and Angular recipes, are under [Use it in your project](#use-it-in-your-project).
 
 ### A page with nothing else
 
@@ -560,10 +559,6 @@ console.log(levels.length, levelCountOf(7, "portals"));        // 32 32
 console.log(layout.portalPairs.length, challengesOf(givens));  // the portals this board has, and what it asks of a player
 ```
 
-### In React, Vue, Svelte and Angular
-
-The tag is a custom element, so a framework needs nothing but its import and an event listener. The four recipes, with the one-line settings each framework's compiler wants, are under [Use it in your project](#3-a-bundler-and-a-framework); they are built from the packed tarball and played to a solve in Chromium and WebKit by `pnpm test:frameworks`.
-
 ## The puzzle
 
 Each letter in a layout is a marble, and each marble has one partner. A line
@@ -627,28 +622,7 @@ hexagons, in the same square box as every board.
 | `language` | `en` (default), `ja` | what a screen reader hears |
 | `label`, `style`, `id` | | a description instead of the size; `style: true` puts `TSUNAGI_STYLE` inside so the drawing stands alone as an image; the prefix of the ids in the drawing, made from the drawing itself if left out so two never share one |
 
-A custom board is a look of colours: `{ paper: "#fbf8f1" | ["#f0cf95", "#d3a662"], frame, grid, ink, coordinate }`.
-Every colour is also a custom property on `.tsunagi` (`--tsu-paper`,
-`--tsu-paper-deep`, `--tsu-frame`, `--tsu-grid`, `--tsu-ink`, `--tsu-coordinate`,
-`--tsu-shu`, `--tsu-good`), so a page sets only what it wants different.
-The parts carry classes and data attributes to style or find them: `tsu-marble`
-(`data-pair`, `data-cell`), `tsu-bead`, `tsu-line` (`data-pair`, `data-cells`),
-`tsu-bridge`, `tsu-over-bridge`, `tsu-wall` (`data-edge`), `tsu-waypoint`, `tsu-portal` (`data-portal`, `data-cells`; its rings are `tsu-portal-end`
-and its link `tsu-portal-link`), `tsu-flag`, `tsu-blast`, `tsu-hex-cell`. Nothing in the drawing can be selected,
-dragged or double-tapped into a selection, and with reduced motion asked for
-nothing moves. `drawTsunagiCode(givens, size, options)` draws a level from its
-code, and `drawTsunagiMarble(pair, options)` one marble for a legend. `tsunagiGeometry(layout)`
-and `cellAtPoint(geometry, x, y)` say where every cell is in the drawing and which
-cell a point is over, so a page of your own can play it.
-
-A drawing is made of groups a page can redraw one at a time: each pair's washes are in
-`.tsu-washes > [data-pair]`, its little marbles in `.tsu-beads > [data-pair]` (and
-`.tsu-ghosts > [data-pair]` on a board that wraps) and its line is a `.tsu-line`. `drawTsunagiPair(layout, pair, id, options)`
-makes the three for one pair, so a finger moving through a cell redraws one or two pairs and not the
-thousands of elements of a 30×30 board (`mountTsunagi` does this; on a phone with the processor
-slowed four times, a move on a full 30×30 board took a median 2.7 ms to handle, where redrawing the
-whole drawing took 18.2). A board with bridges is redrawn whole, since a bridge's deck and the lines
-under it depend on every line.
+A custom board is a look of colours: `{ paper: "#fbf8f1" | ["#f0cf95", "#d3a662"], frame, grid, ink, coordinate }`, and every colour is also a custom property on `.tsunagi` (see [Theming](#theming)). The parts of the drawing carry classes and data attributes (`tsu-marble`, `tsu-line`, `tsu-wall`, `tsu-bridge`, `tsu-portal` and the rest) to style or find them, and a drawing is made of groups a page can redraw one pair at a time, so a finger moving through a cell redraws one or two pairs and not the whole of a 30×30 board. `drawTsunagiCode(givens, size, options)` draws a level from its code, `drawTsunagiMarble(pair, options)` one marble for a legend, and `tsunagiGeometry(layout)` and `cellAtPoint(geometry, x, y)` say where every cell is and which cell a point is over. All the classes, the groups and the measurements are in [docs/DRAWING.md](docs/DRAWING.md). Nothing in the drawing can be selected, dragged or double-tapped into a selection, and with reduced motion asked for nothing moves.
 
 ## Playing it in a page
 
@@ -669,28 +643,7 @@ const board = mountTsunagi(document.getElementById("here")!, {
 board?.undo(); board?.check(); board?.load({ size: 7, givens: other, answer: otherAnswer });
 ```
 
-It plays the way the site does. Press a marble (or the end of a line) and drag to
-its partner; drag back over a line to shorten it, cell by cell; tap a marble to
-clear its line; a line dragged into another cuts the other back. Drag into a
-portal and the line goes in and comes out of the other ring in the same drag, and the finger is
-taken to be over the end of the line from then on (`dragFinger`, `Reach`): move it a cell and the
-line moves a cell, where it now is; where that would take the finger off the board, lift it and press
-the end of the line again. Drag back over the portal and the line is as it was before it. Pointer events,
-captured on the press so a drag that leaves the board still ends, with
-`touch-action: none` so a finger drawing a line never scrolls the page. A big
-board (10×10 up) is looked at through a box with a zoom and move pad, the wheel,
-and the box's edge, which moves the view while a line is dragged near it. The box
-keeps one steady square, and the lines of words under it keep the room they need,
-so nothing moves as lines are drawn or messages come and go.
-
-Under the board, unless `controls: false`: **Undo**, **Restart**, **Check** (the
-marbles of pairs not joined flash, and it says how many) and, if `cheats` is on and
-the level has an `answer`, **Cheat**, which draws one unfinished line and marks the
-solve *helped*; a line of progress; and the lines a level's twists ask for: strokes
-left of a limit, the count to the next explosion, what the last explosion did. `chips`
-adds a row with the level's difficulty (1 to 5) and a chip for each challenge on it,
-pressed to say what it means. Everything a button does is also a method on the
-handle (`undo`, `restart`, `check`, `cheat`, `fit`, `load`, `set`, `destroy`).
+It plays the way the site does: press a marble (or the end of a line) and drag to its partner; drag back over a line to shorten it; tap a marble to clear its line; a line dragged into another cuts the other back, and a drag goes through a portal and comes out of the other ring. A big board (10×10 up) is looked at through a box with a zoom and move pad. Under the board are **Undo**, **Restart**, **Check** and, if `cheats` is on and the level has an `answer`, **Cheat**, then a line of progress and the lines a level's twists ask for. Everything a button does is also a method on the handle (`undo`, `restart`, `check`, `cheat`, `fit`, `load`, `set`, `destroy`). How a drag is read (pointer events, `dragFinger` and `Reach` through a portal), what the zoom pad does, and what each line under the board says are in [docs/PLAYING.md](docs/PLAYING.md).
 
 | Option | What it does |
 | --- | --- |
@@ -757,22 +710,7 @@ The entry points, `@johnmorrisdotca/tsunagi/levels-4` to `/levels-30`, `/levels-
 
 ### Levels with portals
 
-A portal is two rings inside the board: a line that goes into one comes out of the other, going
-the same way on, and both rings are cells it fills. They are written after the cells and the walls,
-`|portals3-40,17-52` (each pair as its two cells, the smaller first, the pairs in order, after `wrap` if
-there is one), and a second set of levels is made of boards with them: 32 a size at 5×5 to 10×10, 12×12
-and 15×15, in two blocks of sixteen, the first block's boards with one portal and the second's with two
-or three. They open a block at a time like the others and are numbered from 1 in their own set;
-a record that keeps a level by one number keeps a portal level as `levelSeed("portals", n)`, 1,000 and
-its number (`setOfSeed` reads it back), which no level of the first set reaches.
-
-The rules a portal keeps are small, and `checkTsunagiAnswer` holds every one. A portal cell is an empty
-cell: never a stone, a waypoint, a bridge or blocked, never beside another portal's, and a board with portals
-has no bridges and is no hexagon. A line steps into a portal cell and comes out of the other, going the same
-way on, into the cell beyond it: where that cell is off the board, blocked, across a wall or a stone of another
-pair, that way into the portal is no way. The two portal cells are one line's, and the portal is gone
-through once; where two ways through portals (or a portal and a plain step) would join the same two cells,
-the layout is refused (`decodeLayout` returns null), because an answer's cells could not tell them apart.
+A portal is two rings inside the board: a line that goes into one comes out of the other, going the same way on, and both rings are cells it fills. A second set of levels is made of boards with them: 32 a size at 5×5 to 10×10, 12×12 and 15×15, in two blocks of sixteen, opened a block at a time like the others and numbered from 1 in their own set. A record that keeps a level by one number keeps a portal level as `levelSeed("portals", n)`. How a portal is written in a layout code, the rules `checkTsunagiAnswer` holds it to, and the layouts that are refused are in [docs/PORTALS.md](docs/PORTALS.md).
 
 ### The level of the day
 
@@ -813,30 +751,17 @@ Each concern is an entry of its own, so a page loads only what it uses. Importin
 | Export | What it does |
 | --- | --- |
 | `decodeLayout(code, size)`, `encodeLayout(cells, walls, more)` | a layout's code and the `LinkLayout` it stands for: marbles (`ends`), cells, walls, waypoints, wrap, portals, hexagon |
-| `encodeAnswer(owners)`, `answerOf(layout, lines)`, `linesOfAnswer(layout, answer)` | an answer as a code: a letter for each cell's line, `#` blocked, `+` a bridge |
 | `checkTsunagiAnswer(size, layout, answer)` | whether an answer joins every pair as the rules allow, in O(cells); `{ ok: true }` or the first reason it does not |
 | `noLines`, `pressAt`, `dragTo`, `dragThrough`, `dragFinger`, `letGo` | drawing, as a finger does it: each takes the lines drawn so far and returns new ones; `dragFinger` keeps the finger's `Reach` over the end of a line that has been through a portal |
 | `joined`, `allJoined`, `unjoinedPairs`, `filled`, `ownersOf` | what the lines drawn so far amount to |
 | `encodeLines`, `decodeLines` | lines half drawn, as a code, to keep a game and come back to it |
 | `countSolutions(layout, limit, budget)` | counts answers up to `limit`, within a `budget` of search steps (dead ends, from 13×13), and returns one |
-| `countSolutionsSat(layout, limit, budget, guide, colours)` | the same count made by SAT, a solver that learns from its dead ends: what proves every 13×13 to 15×15 level, and what `countSolutions` is from 13×13; `colours` writes a cell's pair as a variable each (`one-hot`, the default) or as a binary number (`binary`, which a board of dozens of pairs needs) |
-| `countSolutionsOfLevel(layout, answer)` | how a level is proved and measured: the search of `countSolutions` to 15×15, and from 16×16 or with portals the SAT search started from the level's own answer, which finds it at once and looks for every other |
-| `reducedCandidate(size, random, options)`, `withPortals` | a big board made by taking clues away, with blocked cells, wrap, waypoints or portals; portals put into a filling |
-| `candidate`, `repairedCandidate`, `sparseCandidate`, `layoutOf` | a new board from a seeded `Random`: a random filling of lines, cut back to its ends |
-| `bridgeCandidate`, `wallCandidate`, `waypointCandidate`, `wrapCandidate`, `hexCandidate`, `bridgeAndWallCandidate` | a board with a twist |
-| `measureLevel`, `difficultyScores`, `orderByDifficulty` | how hard a board is: corners, guessing, cells not forced, its longest line |
 | `challengesOf`, `isTwist`, `twistRole`, `tsunagiMarks` | what a layout asks of a player, and a level's mark |
-| `transformed`, `relettered`, `symmetryKey` | a board turned, mirrored and relettered, and one key for all eight |
-| `cheatLine(layout, lines, answer)` | one line of the answer drawn in, for a player who asks for help |
 | `newTsunagiGame`, `pressGame`, `dragGame`, `liftGame`, `undoGame`, `restartGame`, `checkGame`, `cheatGame` | a game in play as pure functions: lines, strokes, Undo, explosions, a stroke limit, Check and Cheat; each returns a new game |
-| `tsunagiProgress`, `helpOf`, `helpOpensNext`, `strongestTsunagiHelp` | what a game stands at, and which help (Cheat, softened or no explosions) a solve used and what that costs |
-| `seededRandom(seed)` | the mulberry32 stream every generator draws from |
 | `openTsunagiLevels`, `nextTsunagiLevel`, `firstUnsolvedTsunagiLevel`, `tsunagiBand` | which levels a player may open, which comes next, and which third of a size a level is in; each takes the set (`classic` or `portals`) last |
-| `levelCountOf`, `levelSeed`, `setOfSeed` | how many levels a size has in a set, and the one number a record keeps a level of either set by |
 | `dailyTsunagiLevel(size, date)`, `tsunagiDay(date)`, `isTsunagiDay(text)` | the level of the day at a size, from the date alone; a date as `YYYY-MM-DD` in UTC; whether a text is a real one |
 
-Every function is pure: it returns new values and never changes what it was
-given.
+The rest of the calls, by job, are in [docs/API-CALLS.md](docs/API-CALLS.md). Every function is pure: it returns new values and never changes what it was given.
 
 ## Theming
 
@@ -893,14 +818,11 @@ A generator never runs on a server unless you ask it to. The check never searche
 
 ## Accessibility
 
-What the package does, and what it does not yet.
-
 - **A screen reader hears the board.** The drawing is a group with a label (the size, or the label you give it), and each marble, bridge, waypoint and portal is an image with its own label naming its pair and where it is. Row and column marks are for sighted use and are hidden from a screen reader. The words are in English and Japanese (`language`), and follow the page's `lang`.
 - **Progress is announced.** Under the playable board, the progress line, the message line and the line that says what Check found are live regions, so a change in them is spoken without moving focus.
 - **Colour is never the only way to tell pairs apart.** `marks: "numbers"` puts each pair's number on its marbles; there is a colour-blind colour set; and every pair also has its own cells washed in its colour, so a line is told by where it goes as well as what it is called. Contrast follows the board you choose, and the plain `paper` board follows the device's light or dark setting.
 - **Touch and pointer.** Buttons and chips are at least 44 px high, and the board has `touch-action: none`, so a finger drawing a line never scrolls the page. A line is drawn by pointer events, captured on the press, so a drag that leaves the board still ends. Ctrl or Cmd with Z undoes.
-- **Reduced motion.** With `prefers-reduced-motion: reduce`, nothing in the drawing moves: no flash, no burst, no sliding.
-- **Nothing is selected by accident.** The drawing cannot be selected, dragged or double-tapped into a selection.
+- **Reduced motion.** With `prefers-reduced-motion: reduce`, nothing in the drawing moves. The drawing cannot be selected, dragged or double-tapped into a selection.
 - **Not yet.** A line cannot be drawn from the keyboard: the cells cannot be walked with keys, and a person who cannot use a pointer cannot play a level today. It is on the [Roadmap](#roadmap). The check and the rules have no such limit, so a page of your own can offer a different way in, using the pure functions.
 
 ## Browser support
@@ -922,48 +844,12 @@ Left out on purpose: levels made from a seed when the page opens, because a fixe
 
 ## Making levels
 
+Levels are found by seeded generators, proved to have exactly one answer, ordered by measured difficulty and written by scripts in `scripts/`, so the same run writes the same files and a level already published keeps its number. The commands, the two ways big boards are made (clues taken away, and a solver that learns from its dead ends), the numbers measured on one core of a desk on 2026-10-05, and what each size takes are in [docs/MAKING-LEVELS.md](docs/MAKING-LEVELS.md).
+
 ```sh
 node scripts/tsunagi-levels.ts 7              # 7×7 again: its twists placed, its marks measured, every board kept at its number
 node scripts/tsunagi-levels.ts --grow 10      # 10×10 grown to whole blocks of sixteen and reordered, easiest first
 ```
-
-The script finds boards with a seeded generator, keeps those the solver proves
-have one answer, drops any that is another turned or mirrored, measures and
-orders them, and writes the size's file, its marks and its twists. Seeded, so
-the same run writes the same files. A board already published keeps its
-number unless a size is grown, and then `/renumbered` says where each old
-level went.
-
-13×13 to 15×15 are made in two steps, because their boards are found by the
-thousand on every core of a desk: `node scripts/tsunagi-pool.ts 15 plain 300`
-runs seeded jobs in parallel (`plain`, or a twist: `bridge`, `walls`, `wrap` …)
-and keeps each board proved to have one answer and measured, and
-`node scripts/tsunagi-levels-big.ts` takes the jobs recorded in it and writes
-the files. A job's boards depend only on its number, never on the machine.
-The plain boards of 13×13 and 14×14 take seconds and 15×15's about six minutes
-on twenty cores; the twist boards take longer, about an hour in all. Boards from 13×13
-to 15×15 have at most sixteen lines, the most colours there are, and are proved by
-`countSolutionsSat`: 12×12 was the ceiling until a solver that learns from its
-dead ends replaced the one that walks into them again.
-
-20×20, 25×25, 30×30 and the portal levels are made the other way round, because a board
-that big with that few lines is almost never found by luck and never mended in a
-useful time: `node scripts/tsunagi-reduce-pool.ts 30 plain 200` starts each board from a
-filling cut into pieces of four cells and joins neighbours while the solver, started from the
-filling's own answer, can still prove one answer within a budget of dead ends (the job's
-number sets the budget, 3,000 to 50,000: the bigger, the fewer lines and the harder the board),
-and keeps boards of at most 82 lines. `node scripts/tsunagi-levels-huge.ts` and
-`node scripts/tsunagi-levels-portals.ts` take the pools and write the levels, the marks and the
-twists. `node scripts/tsunagi-layouts.ts` then writes the layouts alone, which `layouts.test.ts` holds to the levels.
-
-Measured on one core of a desk, 2026-10-05, six attempts each: a 20×20 takes a median 3.4 seconds
-(range 1.3 to 7), a 25×25 10.9 (7 to 18) and a 30×30 24.5 at a budget of 6,000 (four attempts in six end
-in a board of at most 82 lines) or 66 at 25,000; with two portals 20×20 takes 3.6, 25×25 9.2 and 30×30
-44.7 seconds. Each board is then proved from its own answer in a fraction of a second to about a
-second. A 30×30 that wraps is the hardest to make, since every cell has four neighbours: it needs a
-budget of 200,000, about five minutes, and one attempt in three or four yields a board of 82 lines or
-fewer. The pools the fixed levels were chosen from took roughly an hour and a half of a twenty-core desk
-for 30×30 and under an hour for the other two sizes together.
 
 ## Architecture
 
@@ -972,72 +858,7 @@ with no DOM. The drawing is SVG text in an entry of its own, so a server that on
 answer never loads it, and the page's part (the mount and the element) is another. Each size's
 levels is an entry of its own, so a page loads only the size it shows.
 
-```text
-src/
-├── index.ts          the main entry: everything but the levels, the drawing and the page
-├── code.ts           layouts and answers as short codes, and the board each stands for
-├── steps.ts          where a line may go next on a board: walls, bridges, portals, wrap, hexagons
-├── lines.ts          the lines a player has drawn, and what a press and a drag do to them
-├── check.ts          whether an answer joins every pair as the rules allow
-├── solve.ts          the solver, which counts a board's answers up to a limit (4×4 to 12×12)
-├── solveSat.ts       the same count by SAT, for 13×13 and above and for portals: the board written as clauses
-├── sat.ts            a small SAT solver: clause learning, restarts, clauses added between solves
-├── generate.ts       new boards from a seed: lines laid at random, cut back to their ends
-├── reduce.ts         big boards made by taking clues away, with portals, wrap, waypoints and blocked cells
-├── twists.ts         boards with a twist: walls, bridges, waypoints, wrap, hexagons (portals are `reduce.ts`'s)
-├── sparse.ts         sparse boards: few marbles and long lines
-├── explosions.ts     explosions that break a line, and a limit on strokes
-├── difficulty.ts     how hard a level is, measured from its board and its answer
-├── ladder.ts         what a level asks of a player, read from its board
-├── ladder.types.ts   the challenges a board can have
-├── cheat.ts          one line of the answer drawn in, for a player who asks for help
-├── game.ts           a game in play as pure functions: strokes, Undo, explosions, Check, Cheat, help
-├── levels.ts         the "/levels" entry: each size's levels, loaded when asked
-├── levelCounts.ts    how many levels each size has
-├── daily.ts          the level of the day at a size, from the date alone
-├── levelBlocks.ts    levels in blocks of sixteen, and which a player may open
-├── renumber.ts       a record kept by level number, moved to the numbers levels have now
-├── levels.suite.ts   the proof each size's levels test runs: one answer, the one stored
-├── random.ts         the seeded random numbers every board is made from
-├── draw-entry.ts     the "/draw" entry: the drawing, its colours and boards, and where everything sits
-├── draw.ts           a board as SVG text: marbles, lines, walls, bridges under and over, wrap, hexagons
-├── geometry.ts       where every cell is in the drawing, and which cell a point is over
-├── colours.ts        the colour sets, and how a colour is shaded for a marble, a line and a wash
-├── boards.ts         the boards a drawing sits on: paper, wood and four felts, or a look of your own
-├── style.ts          the drawing's style: its colours as custom properties, a flash and a burst
-├── strings.ts        the words, in English and Japanese, for a screen reader and for the board's buttons
-├── play-entry.ts     the "/play" entry: a level played in any element
-├── mount.ts          mountTsunagi: draws a level into an element and plays it by touch and mouse
-├── viewport.ts       the arithmetic of zooming and moving a big board through its box
-├── playStyle.ts      the style of a playable board: its box, buttons, words and zoom pad
-├── element.ts        the "/element" entry: the <tsunagi-board> class
-├── element-define.ts the "/element/define" entry: defines the tag on the page
-├── version.ts        the package's version
-└── levels/
-    ├── size4.data.ts       the 4×4 levels, each a layout and its one answer
-    ├── size5.data.ts       5×5
-    ├── size6.data.ts       6×6
-    ├── size7.data.ts       7×7
-    ├── size8.data.ts       8×8
-    ├── size9.data.ts       9×9
-    ├── size10.data.ts      10×10
-    ├── size11.data.ts      11×11
-    ├── size12.data.ts      12×12
-    ├── size13.data.ts      13×13
-    ├── size14.data.ts      14×14
-    ├── size15.data.ts      15×15
-    ├── size20.data.ts      20×20
-    ├── size25.data.ts      25×25
-    ├── size30.data.ts      30×30
-    ├── portals.data.ts     the levels with portals, every size's
-    ├── layouts.data.ts     every level's board alone, for a server (made by scripts/tsunagi-layouts.ts)
-    ├── marks.data.ts       every level's difficulty, 1 to 5, and each twist's part in its block
-    └── renumbered.data.ts  where each old level went when the levels were renumbered
-```
-
-Tests sit beside the code they test (`*.test.ts`, one `levels.<size>.test.ts`
-a size). `scripts/` makes the levels and the twists, builds the demo and its API reference page and checks
-the package as npm packs it; `demo/` is the playable page, and `e2e/` its browser tests.
+The whole tree, with a line on each file, is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): the main entry (`index.ts`) and the codes and rules it exports, the solver and the SAT solver behind it, the generators, the game in play, the drawing, the page, and a data file for each size of levels. Tests sit beside the code they test (`*.test.ts`, one `levels.<size>.test.ts` a size). `scripts/` makes the levels and the twists, builds the demo and its API reference page and checks the package as npm packs it; `demo/` is the playable page, and `e2e/` its browser tests.
 
 ## The name
 
@@ -1112,7 +933,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make the che
 
 ## Changes
 
-Every release is written up in [CHANGELOG.md](./CHANGELOG.md), newest first, in the Keep a Changelog form, with the date of each. A level keeps its number, its board and its answer from one release to the next, so a solve kept by any version is still the same solve, and a change to what the package exports follows semantic versioning. The releases are also on the [releases page](https://github.com/johnmorrisdotca/tsunagi/releases), each with the tarball that npm publishes.
+Every release is written up in [CHANGELOG.md](./CHANGELOG.md), newest first, with its date. A level keeps its number, its board and its answer from one release to the next, so a solve kept by any version is still the same solve, and a change to what the package exports follows semantic versioning. The releases, each with its tarball, are on the [releases page](https://github.com/johnmorrisdotca/tsunagi/releases).
 
 ## Licence
 

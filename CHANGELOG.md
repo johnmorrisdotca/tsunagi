@@ -7,6 +7,18 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-10-06
+
+Nothing that was exported has changed.
+
+### Fixed
+
+- **npm showed the README cut off.** 1.6.2's README was 77,000 characters, and npm keeps and shows only the first 65,536, so the page ended in the middle of the Architecture tree, without The name, Where it comes from, Development, Contributing, Changes or Licence. The README is now under 64,000 characters, and a test fails if it grows past that. Nothing was removed: the source tree is in `docs/ARCHITECTURE.md`, the steps for making levels in `docs/MAKING-LEVELS.md`, the rules for portals in `docs/PORTALS.md`, the drawing's classes and groups in `docs/DRAWING.md`, how a board is played in `docs/PLAYING.md`, and the full list of calls in `docs/API-CALLS.md`; the README keeps a summary of each and links it.
+
+### Changed
+
+- The Architecture test reads `docs/ARCHITECTURE.md`.
+
 ## [1.6.2] - 2026-10-06
 
 Nothing that was exported has changed. npm shows the README from the tarball, so a README that is fuller is a release.

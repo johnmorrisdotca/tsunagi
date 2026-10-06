@@ -60,6 +60,10 @@ describe("the standard's checks catch what they are for", () => {
     expect(faults).toMatch(/@johnmorrisdotca\/sample@1; the package is at 2\.1\.0, so the pin is @2/);
   });
 
+  it("refuses a README longer than npm will show", () => {
+    expect(faultsFor(`# T\n\n${"word ".repeat(13_000)}\n`).join("\n")).toMatch(/npm shows only the first 65,536/);
+  });
+
   it("refuses a package whose files ship the pictures", () => {
     expect(lintReadme({ readme: "# T\n", pkg: { ...pkg, files: ["dist", "docs"] }, pictures: [], minSubjects: 0 }).join("\n")).toMatch(/"files" lists docs/);
   });
