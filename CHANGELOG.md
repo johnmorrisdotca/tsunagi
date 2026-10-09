@@ -8,6 +8,11 @@ board and its answer, so a solve kept by any version is still the same solve.
 ## [Unreleased]
 
 
+
+### Added
+
+- Share a package-independent embed builder for option controls, preview adapters, code tabs and shareable links.
+
 ### Changed
 
 - Group the package family by kind, alphabetize each group, and include the geography packages and REST in Pieces in the shared footer and README.
