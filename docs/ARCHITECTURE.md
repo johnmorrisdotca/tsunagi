@@ -45,6 +45,7 @@ src/
 ├── mount.ts          mountTsunagi: draws a level into an element and plays it by touch and mouse
 ├── viewport.ts       the arithmetic of zooming and moving a big board through its box
 ├── playStyle.ts      the style of a playable board: its box, buttons, words and zoom pad
+├── embed-day.ts       shared UTC date parsing and deterministic date seeds
 ├── element.ts        the "/element" entry: the <tsunagi-board> class
 ├── element-define.ts the "/element/define" entry: defines the tag on the page
 ├── version.ts        the package's version

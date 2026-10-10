@@ -46,7 +46,7 @@
 const OWNER = "johnmorrisdotca";
 
 /** The day this file was last changed, in every repository at once. A test records the file's hash beside it. */
-export const FAMILY_TEMPLATE_VERSION = "2026-10-09-embed-builder";
+export const FAMILY_TEMPLATE_VERSION = "2026-10-09-embed-builder-state";
 
 /** The packages, in the order the footer lists them. `kana` is the name as it is written in Japanese. */
 export const FAMILY = [
@@ -77,16 +77,16 @@ export const FAMILY = [
   { id: "chizu", name: "Chizu", kana: "地図" },
   { id: "hata", name: "Hata", kana: "旗" },
   { id: "kuni", name: "Kuni", kana: "国" },
-  { id: "rest-in-pieces", name: "REST in Pieces", kana: "レスト・イン・ピーシズ", repo: "https://github.com/spxis/rest-in-pieces", site: "https://spxis.github.io/rest-in-pieces/" },
+  { id: "rest-in-pieces", name: "REST in Pieces", kana: "レスト・イン・ピーシーズ", repo: "https://github.com/spxis/rest-in-pieces", site: "https://spxis.github.io/rest-in-pieces/" },
 ];
 
 /** The kinds, in display order, with members alphabetical within each kind. */
 export const FAMILY_GROUPS = [
-  { id: "board", en: "Games — board", ja: "ゲーム — ボード", members: ["domino", "gunjin", "narabe", "sugoroku", "tenka"] },
-  { id: "cards", en: "Games — cards & tiles", ja: "ゲーム — カードと牌", members: ["hitotsu", "jarajara", "kumimoji", "toranpu"] },
-  { id: "puzzles", en: "Games — puzzles", ja: "ゲーム — パズル", members: ["houseki", "jirai", "karakuri", "kazu", "kyuubu", "meikyuu", "suido", "tobiishi", "tsunagi"] },
-  { id: "random", en: "Games — dice & random", ja: "ゲーム — ダイスと乱数", members: ["korokoro", "tane"] },
-  { id: "language", en: "Language", ja: "言語", members: ["bushu", "hikidashi", "kotoba"] },
+  { id: "board", en: "Games — board", ja: "ボードゲーム", members: ["domino", "gunjin", "narabe", "sugoroku", "tenka"] },
+  { id: "cards", en: "Games — cards & tiles", ja: "カードと牌のゲーム", members: ["hitotsu", "jarajara", "kumimoji", "toranpu"] },
+  { id: "puzzles", en: "Games — puzzles", ja: "パズルゲーム", members: ["houseki", "jirai", "karakuri", "kazu", "kyuubu", "meikyuu", "suido", "tobiishi", "tsunagi"] },
+  { id: "random", en: "Games — dice & random", ja: "ダイスと乱数", members: ["korokoro", "tane"] },
+  { id: "language", en: "Language", ja: "ことばと文字", members: ["bushu", "hikidashi", "kotoba"] },
   { id: "geography", en: "Geography & data", ja: "地理とデータ", members: ["address-plus", "chizu", "hata", "kuni"] },
   { id: "developer", en: "Developer tools", ja: "開発ツール", members: ["rest-in-pieces"] },
 ];
@@ -121,7 +121,7 @@ export const FAMILY_PITCH = {
   gunjin: "five hidden-rank strategy games with pass-the-device play",
   karakuri: "eight hyper-casual puzzle games, some of them physics: draw a shield, pull pins, cut ropes, slide blocks, pour tubes",
   houseki: "gem and stone matching puzzles: falling triplets, stone collapse, colour chains and gem swap",
-  "address-plus": "parse and format addresses in the United States, Canada and Japan",
+  "address-plus": "parse and format addresses in the United States, Canada, Japan, Australia and the United Kingdom",
   "hata": "country and regional flags as SVG, at their true proportions and keyed by ISO code",
   "kuni": "countries and their regions, with ISO codes and names in English and Japanese",
   "rest-in-pieces": "seeded test data and REST APIs for frontend development, with latency and error drills",
@@ -129,10 +129,10 @@ export const FAMILY_PITCH = {
 
 /** Japanese pitches for the new geography and developer members; awaiting native review. */
 export const FAMILY_PITCH_JA = {
-  "address-plus": "アメリカ、カナダ、日本の住所を解析し、整形します",
-  "hata": "国と地域の旗を、本来の縦横比の SVG で収録し、ISO コードで引けます",
-  "kuni": "世界の国と行政区画を、ISO コードと英語・日本語の名前で収めています",
-  "rest-in-pieces": "フロントエンド開発向けの、シード付きテストデータと REST API。遅延やエラーも試せます",
+  "address-plus": "アメリカ、カナダ、日本、オーストラリア、イギリスの住所を解析・整形",
+  "hata": "国と行政区画の旗を、実際の縦横比のSVGで収録。ISOコードで引けます",
+  "kuni": "世界の国と行政区画を、ISOコードと英語・日本語の名称つきで収録",
+  "rest-in-pieces": "フロントエンド開発向けの、シード値で固定できるテストデータとREST API（遅延・エラーの再現つき）",
 };
 
 /**
@@ -152,7 +152,7 @@ export const FAMILY_CLOTHS = {
 /** The words the shared header and footer say themselves, in both languages. A page's own table is laid over these. */
 export const FAMILY_WORDS = {
   en: { family: "The family:", licence: "MIT", help: "Help", helpTip: "Show a short note under each option, saying what it does", cloth: "Table cloth", cloth_green: "Green", cloth_blue: "Blue", cloth_red: "Red", cloth_black: "Black", cloth_wood: "Wood", ...Object.fromEntries(FAMILY_GROUPS.map((group) => [`family_${group.id}`, group.en])) },
-  ja: { family: "姉妹パッケージ:", licence: "MIT", help: "説明", helpTip: "各項目の下に、その使い方を短く表示します", cloth: "テーブルの色", cloth_green: "緑", cloth_blue: "青", cloth_red: "赤", cloth_black: "黒", cloth_wood: "木目", ...Object.fromEntries(FAMILY_GROUPS.map((group) => [`family_${group.id}`, group.ja])) },
+  ja: { family: "ファミリー：", licence: "MIT", help: "説明", helpTip: "各項目の下に、その使い方を短く表示します", cloth: "テーブルの色", cloth_green: "緑", cloth_blue: "青", cloth_red: "赤", cloth_black: "黒", cloth_wood: "木目", ...Object.fromEntries(FAMILY_GROUPS.map((group) => [`family_${group.id}`, group.ja])) },
 };
 
 const escape = (text) => String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -562,7 +562,14 @@ export function familyEmbedBuilder(config) {
     if (missing.length) throw new Error(`Embed options need rows or reasons: ${missing.join(", ")}`);
     return true;
   }
-  const api = { makers, formats, options, groups, leftOut, cdn, entriesFor, attributesFor, embedAddress, frameSide, codeFor, toAddress, fromAddress, validateCoverage,
+  /** Restore a copied setup from schema defaults; starter choices apply only on a fresh visit. */
+  function restoreState(address, initial = {}, list = options) {
+    const asked = fromAddress(address, list);
+    const linked = new globalThis.URLSearchParams(String(address ?? "").replace(/^#/, "")).has("make");
+    return { maker: asked.maker, settings: { ...(linked ? {} : initial[asked.maker]), ...asked.settings } };
+  }
+
+  const api = { makers, formats, options, groups, leftOut, cdn, entriesFor, attributesFor, embedAddress, frameSide, codeFor, toAddress, fromAddress, restoreState, validateCoverage,
     allCode: (maker, list, settings) => Object.fromEntries(specFor(maker).formats.map((format) => [format, codeFor(maker, format, list, settings)])),
     liveFor: (maker, list, settings) => ({ call: entriesFor(list, settings, maker), attrs: specFor(maker).element === undefined ? [] : attributesFor(list, settings, maker) }),
   };
@@ -577,10 +584,10 @@ export function familyEmbedBuilder(config) {
     const optionGroups = api.groups;
     const makerList = api.makers;
     const formatList = api.formats;
-    const { codeFor, fromAddress, toAddress } = api;
-    const asked = fromAddress(globalThis.location.hash, optionList);
+    const { codeFor, toAddress } = api;
+    const asked = restoreState(globalThis.location.hash, START, optionList);
     let maker = asked.maker;
-    let settings = { ...START[maker], ...asked.settings };
+    let settings = asked.settings;
     let format = new globalThis.URLSearchParams(globalThis.location.hash.replace(/^#/, "")).get("show") ?? "";
     let preview = null;
     let previewKey = "";
@@ -676,6 +683,7 @@ export function familyEmbedBuilder(config) {
     function setValue(option, value, slowly = false) {
       if (value === undefined || value === "") delete settings[option.id];
       else settings[option.id] = value;
+      keepAddress();
       changed(slowly);
     }
 
@@ -913,8 +921,8 @@ export function familyEmbedBuilder(config) {
         into.textContent = "";
       }
     };
-    $("bld-copy").addEventListener("click", () => copy($("bld-code").textContent, $("bld-code-copied"), "copied"));
-    $("bld-link").addEventListener("click", () => copy(globalThis.location.href, $("bld-copied"), "linkCopied"));
+    $("bld-copy").addEventListener("click", () => { changed(); if ($("bld-code").textContent !== "") void copy($("bld-code").textContent, $("bld-code-copied"), "copied"); });
+    $("bld-link").addEventListener("click", () => { keepAddress(); void copy(globalThis.location.href, $("bld-copied"), "linkCopied"); });
 
     draw();
     globalThis.document.documentElement.dataset.ready = "true";

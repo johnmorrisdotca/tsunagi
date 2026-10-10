@@ -17,6 +17,8 @@ with `One` at the end of its name is the singular, said in English when the coun
 | `check` | Check | 確かめる |
 | `cheat` | Cheat | ヒント |
 | `cheatTitle` | Draws one unfinished line. A solve that used it counts as helped. | 未完成の線を一本引きます。使った解答は、助けを借りたものとして数えます。 |
+| `keyboardHelp` | Tsunagi keyboard board. Arrow keys move; Enter or Space begins or ends a line on a marble. Escape cancels a line. On hexagons, Q and E reach the other neighbours. | キーボードで遊ぶ繋の盤。矢印キーで移動し、玉の上でEnterかSpaceを押すと線を引き始めたり、終えたりします。Escapeで線を取り消します。六角形の盤では、QとEで残りの隣のマスに移動します。 |
+| `keyboardCell` | Row {row}, column {col} | {row}行{col}列 |
 | `hint` | Press a marble and drag to its partner. Drag back to shorten a line; tap a marble to clear it. | 玉を押して、相手の玉までなぞります。線の上を戻ると短くなり、玉をタップすると線が消えます。 |
 | `progress` | {joined} of {pairs} joined · {percent}% of the board | {pairs}組中{joined}組がつながっています・盤の{percent}% |
 | `fullButEmpty` | Every pair joined; {n} cells are still empty. | すべての組がつながりました。空きマスが{n}つ残っています。 |

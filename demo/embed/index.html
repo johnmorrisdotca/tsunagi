@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><meta name="color-scheme" content="light dark"><title>Tsunagi · line puzzle</title>
+<style>html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}body{display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box}</style></head><body><script type="module">
+import "../dist/element-define.js";
+import { decodeLayout, decodeLines, checkTsunagiAnswer, dailyTsunagiLevel } from "../dist/index.js";
+import { TSUNAGI_LEVEL_COUNTS, TSUNAGI_PORTAL_COUNTS, loadTsunagiLevels } from "../dist/levels.js";
+import { TSUNAGI_BOARD_NAMES } from "../dist/boards.js";
+import { TSUNAGI_COLOUR_SET_NAMES } from "../dist/colours.js";
+import { embedDay, dailySeed } from "../dist/embed-day.js";
+const query=new URLSearchParams(location.search.length>1?location.search:location.hash.slice(1));const board=document.createElement("tsunagi-board");
+const set=query.get("set")==="portals"?"portals":"classic";const counts=set==="portals"?TSUNAGI_PORTAL_COUNTS:TSUNAGI_LEVEL_COUNTS;
+const asked=Number(query.get("grid")??query.get("size"));const grid=Number.isInteger(asked)&&counts[asked]!==undefined?asked:7;board.setAttribute("grid",String(grid));board.setAttribute("set",set);
+let day=null;try{day=embedDay(query.get("daily"));if(day!==null)board.setAttribute("daily",query.get("daily"));}catch{}
+const requested=Number(query.get("level"));const level=Number.isInteger(requested)&&requested>=1&&requested<=counts[grid]?requested:1;board.setAttribute("level",String(level));
+for(const[name,values]of Object.entries({size:["small","medium","large"],theme:["auto","light","dark"],lang:["en","ja"],marks:["colours","numbers"],fill:["marbles","lines"],board:TSUNAGI_BOARD_NAMES,"colour-set":TSUNAGI_COLOUR_SET_NAMES,zoom:["auto","on","off","false","no","0"],explosions:["on","soft","off","false","no","0"]}))if(values.includes(query.get(name)))board.setAttribute(name,query.get(name));
+for(const name of["coordinates","cheats","controls","chips"]){const value=query.get(name)?.trim().toLowerCase();if(value!==undefined&&["","on","true","1","off","false","no","0"].includes(value))board.setAttribute(name,value);}
+const width=Number(query.get("width"));if(query.has("width")&&Number.isFinite(width)&&width>=200&&width<=2000)board.setAttribute("width",String(width));if(query.has("label")&&query.get("label").length<=200)board.setAttribute("label",query.get("label"));if(query.get("lang")==="ja")document.documentElement.lang="ja";
+const given=query.get("givens");let givens=given&&given.length<=3000&&decodeLayout(given,grid)?given:null;
+if(givens!==null){board.setAttribute("givens",givens);const answer=query.get("answer");if(answer&&answer.length<=3000&&checkTsunagiAnswer(grid,givens,answer).ok)board.setAttribute("answer",answer);}else{const rows=await loadTsunagiLevels(grid,set);const number=day===null?level:set==="portals"?dailySeed(day,`tsunagi/portals/${grid}`)%counts[grid]+1:dailyTsunagiLevel(grid,day);givens=rows[number-1][0];}
+const progress=query.get("progress");if(progress&&progress.length<=12000&&decodeLines(decodeLayout(givens,grid),progress)!==null)board.setAttribute("progress",progress);
+for(const type of["tsunagi-load","tsunagi-error","tsunagi-change","tsunagi-stroke","tsunagi-explosion","tsunagi-solve"])board.addEventListener(type,event=>{if(parent!==window)parent.postMessage({type:event.type,detail:JSON.parse(JSON.stringify(event.detail))},"*");});document.body.append(board);
+</script></body></html>

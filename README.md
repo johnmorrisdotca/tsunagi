@@ -1,7 +1,7 @@
 <h1 align="center">Tsunagi <sub>つなぎ</sub></h1>
 
 <p align="center"><strong>A line-joining logic puzzle for JavaScript and TypeScript.</strong><br>
-Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints, portals and hexagon boards, a difficulty measure, and 2,368 levels from 4×4 to 30×30, and 256 more with portals, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch and mouse in any page with one call or one tag. No dependencies.</p>
+Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints, portals and hexagon boards, a difficulty measure, and 2,368 levels from 4×4 to 30×30, and 256 more with portals, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch, mouse and keyboard in any page with one call or one tag. No dependencies.</p>
 
 <p align="center">
   <a href="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml/badge.svg"></a>
@@ -57,7 +57,7 @@ allJoined(layout, lines);                        // has every pair been joined?
 checkTsunagiAnswer(5, givens, answerOf(layout, lines));   // { ok: true } or { ok: false, reason }
 ```
 
-And in a page, a level to play, by touch and mouse, with nothing else to set up:
+And in a page, a level to play, by touch, mouse and keyboard, with nothing else to set up:
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/tsunagi@1/dist/element-define.js"></script>
@@ -86,7 +86,7 @@ And in a page, a level to play, by touch and mouse, with nothing else to set up:
 - **Big boards, made by taking clues away.** A 30×30 board with one answer is not found by luck: `reducedCandidate` starts from a filling cut into short lines and joins them while the solver can still prove one answer, so a board comes out with a cheap proof by construction (a median 3 seconds at 20×20, 11 at 25×25 and 25 to 66 at 30×30, on one core of a desk, measured 2026-10-05). 20×20, 25×25 and 30×30 have 64 levels each; see [Making levels](docs/MAKING-LEVELS.md).
 - **A difficulty measure**, so a level has a mark from 1 to 5 and the levels of a size run easiest first.
 - **Drawn as SVG text**, in an entry of its own: colours or numbers on the marbles, dots or lines, four colour sets, six boards, bridges drawn as bridges. A server that only checks answers never loads it.
-- **Played in any page** by touch and mouse, with Undo, Restart, Check, Cheat and the zoom pad a big board needs, as one function call (`mountTsunagi`) or one tag (`<tsunagi-board>`).
+- **Played in any page** by touch, mouse and keyboard, with Undo, Restart, Check, Cheat and the zoom pad a big board needs, as one function call (`mountTsunagi`) or one tag (`<tsunagi-board>`).
 - **Games as short strings**: a layout, an answer, a game half drawn, each a code a database column can keep.
 - **English and Japanese**, in the board's words and the demo.
 - **No dependencies**, no network requests, no sound, and nothing stored outside the page it is in.
@@ -177,6 +177,8 @@ Every picture is a real board, drawn by the package, taken from [the demo](https
 </td>
 </tr>
 </table>
+
+[Build a fixed or daily puzzle embed](https://johnmorrisdotca.github.io/tsunagi/builder.html). Use `grid` and `daily` for the puzzle, `size` and `width` for display, and `theme` and `label` for presentation. The [embed guide](docs/embeds.md) covers properties and event messages.
 
 ## Use it in your project
 
@@ -694,7 +696,7 @@ Each concern is an entry of its own, so a page loads only what it uses. Importin
 | --- | --- |
 | `@johnmorrisdotca/tsunagi` | the rules, the solver, the generator, the levels' counts, and `game.ts`'s pure play functions: everything but the boards, the drawing and the page |
 | `@johnmorrisdotca/tsunagi/draw` | `drawTsunagi` and the rest of the drawing as SVG text, the colour sets, the boards, the style, and where everything sits in the drawing; no page needed |
-| `@johnmorrisdotca/tsunagi/play` | `mountTsunagi`: a level played in any element by touch and mouse, with its buttons, words, zoom pad and events |
+| `@johnmorrisdotca/tsunagi/play` | `mountTsunagi`: a level played in any element by touch, mouse and keyboard, with its buttons, words, zoom pad and events |
 | `@johnmorrisdotca/tsunagi/element` | the `TsunagiBoard` class behind `<tsunagi-board>`, to extend or to define under another name |
 | `@johnmorrisdotca/tsunagi/element/define` | defines `<tsunagi-board>` on the page, for its effect |
 | `@johnmorrisdotca/tsunagi/levels` | `loadTsunagiLevels(size, set)`, `loadEveryTsunagiLevel()`, `tsunagiLevelsOf(size, set)`, `tsunagiLevelOf(size, layout, set)`, each size fetched only when loaded |
@@ -781,7 +783,7 @@ A generator never runs on a server unless you ask it to. The check never searche
 - **Colour is never the only way to tell pairs apart.** `marks: "numbers"` puts each pair's number on its marbles; there is a colour-blind colour set; and every pair also has its own cells washed in its colour, so a line is told by where it goes as well as what it is called. Contrast follows the board you choose, and the plain `paper` board follows the device's light or dark setting.
 - **Touch and pointer.** Buttons and chips are at least 44 px high, and the board has `touch-action: none`, so a finger drawing a line never scrolls the page. A line is drawn by pointer events, captured on the press, so a drag that leaves the board still ends. Ctrl or Cmd with Z undoes.
 - **Reduced motion.** With `prefers-reduced-motion: reduce`, nothing in the drawing moves. The drawing cannot be selected, dragged or double-tapped into a selection.
-- **Not yet.** A line cannot be drawn from the keyboard: the cells cannot be walked with keys, and a person who cannot use a pointer cannot play a level today. It is on the [Roadmap](#roadmap). The check and the rules have no such limit, so a page of your own can offer a different way in, using the pure functions.
+- **Keyboard.** Tab to the board, move with the arrow keys, and press Enter or Space on a marble to start a line. Arrow keys draw; Enter or Space finishes, and Escape cancels. Q and E reach the extra neighbours on hexagon boards. The cursor follows a line through portals and stays visible while zoomed. Row and column are announced.
 
 ## Browser support
 
@@ -795,7 +797,7 @@ English and Japanese, chosen by the `language` option, the host's `lang` or the 
 
 Not here yet, and each welcome as an [issue](https://github.com/johnmorrisdotca/tsunagi/issues):
 
-- Drawing a line from the keyboard. A line is drawn by pointer today; Ctrl or Cmd with Z undoes, and the drawing is described to a screen reader, but the cells cannot be walked with keys.
+- More keyboard tutorials for the portal and hexagon boards.
 - A command line: check an answer, count a board's answers, and print a level as text.
 
 Left out on purpose: levels made from a seed when the page opens, because a fixed level is what lets times be compared; and any account, ranking or storage. A page keeps its own games: the events hand them over.
@@ -881,14 +883,14 @@ Tsunagi is one of twenty-eight packages, each made for the same site, each at
 
 **Geography & data**
 
-- [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada and Japan. [Demo](https://johnmorrisdotca.github.io/address-plus/).
+- [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada, Japan, Australia and the United Kingdom. [Demo](https://johnmorrisdotca.github.io/address-plus/).
 - [Chizu](https://github.com/johnmorrisdotca/chizu) (地図): maps of the world and of countries' regions, in English and Japanese, with a quiz and callouts. [Demo](https://johnmorrisdotca.github.io/chizu/).
 - [Hata](https://github.com/johnmorrisdotca/hata) (旗): country and regional flags as SVG, at their true proportions and keyed by ISO code. [Demo](https://johnmorrisdotca.github.io/hata/).
 - [Kuni](https://github.com/johnmorrisdotca/kuni) (国): countries and their regions, with ISO codes and names in English and Japanese. [Demo](https://johnmorrisdotca.github.io/kuni/).
 
 **Developer tools**
 
-- [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
+- [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシーズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
 
 
 **This package is Tsunagi.** The demos of all twenty-eight share one header and footer, so each links the rest.

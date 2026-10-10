@@ -1,8 +1,8 @@
 import type { TsunagiBoardLook, TsunagiBoardName } from "./boards.ts";
 import type { TsunagiColour, TsunagiColourSetName, TsunagiFill, TsunagiMarks } from "./colours.ts";
-import { CELL_BRIDGE } from "./code.ts";
+import { CELL_BRIDGE, CELL_BLOCKED } from "./code.ts";
 import type { TsunagiSet } from "./levelCounts.ts";
-import { answerOf, encodeLines, type Lines } from "./lines.ts";
+import { answerOf, encodeLines, NO_REACH, type Lines } from "./lines.ts";
 import { drawTsunagi, drawTsunagiPair } from "./draw.ts";
 import { cellAtPoint, tsunagiGeometry, type TsunagiGeometry } from "./geometry.ts";
 import {
@@ -248,7 +248,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   });
   const tell = (name: string, info: TsunagiEventDetail, callback?: (detail: TsunagiEventDetail) => void): void => {
     callback?.(info);
-    host.dispatchEvent(new CustomEvent(name, { detail: info, bubbles: true }));
+    host.dispatchEvent(new CustomEvent(name, { detail: JSON.parse(JSON.stringify(info)), bubbles: true, composed: true }));
   };
   const say = (key: string, values: Record<string, string | number> = {}): string => tsunagiSay(language, key, values);
 
@@ -377,6 +377,36 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     return true;
   }
 
+  let keyboardCell = game.layout.ends[0]?.[0] ?? 0;
+  const keyboardStatus = create(document, "p", "tsp-key-status");
+  keyboardStatus.setAttribute("aria-live", "polite");
+  host.append(keyboardStatus);
+  box.tabIndex = 0;
+  box.setAttribute("role", "application");
+  function paintKeyboard(): void {
+    if (keyboardCell >= game.layout.cells.length || game.layout.cells[keyboardCell] === CELL_BLOCKED) keyboardCell = game.layout.ends[0]?.[0] ?? 0;
+    box.dataset.keyboardCell = String(keyboardCell);
+    box.setAttribute("aria-label", say("keyboardHelp"));
+    keyboardStatus.textContent = say("keyboardCell", { row: Math.floor(keyboardCell / size) + 1, col: keyboardCell % size + 1 });
+    const svg = inner.querySelector("svg");
+    if (!svg) return;
+    svg.querySelector(".tsp-key-cursor")?.remove();
+    const point = geometry.centre(keyboardCell);
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("class", "tsp-key-cursor"); circle.setAttribute("aria-hidden", "true");
+    circle.setAttribute("cx", String(point.x)); circle.setAttribute("cy", String(point.y)); circle.setAttribute("r", "44"); svg.append(circle);
+  }
+  function showKeyboardCell(): void {
+    if (view.zoom <= 1) return;
+    const svg = inner.querySelector("svg"); const matrix = svg?.getScreenCTM();
+    if (!svg || !matrix) return;
+    const centre = geometry.centre(keyboardCell); const point = svg.createSVGPoint(); point.x = centre.x; point.y = centre.y;
+    const at = point.matrixTransform(matrix); const rect = box.getBoundingClientRect(); const margin = 28;
+    const dx = at.x < rect.left + margin ? rect.left + margin - at.x : at.x > rect.right - margin ? rect.right - margin - at.x : 0;
+    const dy = at.y < rect.top + margin ? rect.top + margin - at.y : at.y > rect.bottom - margin ? rect.bottom - margin - at.y : 0;
+    if (dx || dy) { view = keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width); applyView(); }
+  }
+
   function render(force = false): void {
     const g = game;
     const over = g.solved || tsunagiProgress(g).outOfStrokes;
@@ -391,6 +421,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     }
     box.dataset.over = String(over);
     words();
+    paintKeyboard();
   }
 
   /** Bring the game's flags and bursts onto the board for a moment. */
@@ -458,6 +489,9 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   function lift(event: PointerEvent): void {
     if (pointer === null || pointer.id !== event.pointerId) return;
     pointer = null;
+    finishStroke();
+  }
+  function finishStroke(): void {
     const before = game;
     game = liftGame(before);
     const stroked = game.strokes !== before.strokes;
@@ -497,10 +531,29 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     applyView();
   };
   const onKey = (event: KeyboardEvent): void => {
-    if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z") {
+    if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z") { event.preventDefault(); api.undo(); return; }
+    if (event.target !== box || pointer !== null || event.ctrlKey || event.metaKey || event.altKey) return;
+    const key = event.key.toLowerCase();
+    if (key === "enter" || key === " ") {
       event.preventDefault();
-      api.undo();
+      if (game.drawing !== null) finishStroke();
+      else { const before = game; game = pressGame(game, keyboardCell); after(before); paintKeyboard(); }
+      return;
     }
+    if (key === "escape" && game.drawing !== null) {
+      event.preventDefault(); const before = game;
+      game = { ...game, lines: game.before ?? game.lines, drawing: null, before: null }; after(before); paintKeyboard(); return;
+    }
+    const move = ({ arrowup: [-1, 0], arrowright: [0, 1], arrowdown: [1, 0], arrowleft: [0, -1], ...(game.layout.hex ? { q: [1, -1], e: [-1, 1] } : {}) } as Record<string, number[]>)[key];
+    if (!move) return;
+    event.preventDefault();
+    let row = Math.floor(keyboardCell / size) + move[0]; let col = keyboardCell % size + move[1];
+    if (game.layout.wrap) { row = (row + size) % size; col = (col + size) % size; }
+    if (row < 0 || col < 0 || row >= size || col >= size) return;
+    const next = row * size + col; if (game.layout.cells[next] === CELL_BLOCKED) return;
+    if (game.drawing !== null) { const before = game; game = dragGame(game, next); if (game === before) return; keyboardCell = game.lines[game.drawing!]?.at(-1) ?? next; game = { ...game, reach: NO_REACH }; after(before); }
+    else keyboardCell = next;
+    paintKeyboard(); showKeyboardCell();
   };
   box.addEventListener("pointerdown", onDown);
   box.addEventListener("pointermove", onMove);
@@ -537,6 +590,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     window.clearTimeout(flagTimer);
     window.clearTimeout(blastTimer);
     game = next;
+    keyboardCell = next.layout.ends[0]?.[0] ?? 0;
     shownFlags = null;
     shownBlast = null;
     solvedTold = next.solved;

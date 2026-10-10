@@ -8,6 +8,6 @@
  *
  * A tag already defined is left as it is, and on a server, where there is no page, nothing happens.
  */
-import { TsunagiBoard } from "./element.ts";
-
-if (typeof customElements !== "undefined" && customElements.get("tsunagi-board") === undefined) customElements.define("tsunagi-board", TsunagiBoard);
+import { defineBoard } from "./element.ts";
+defineBoard();
+export * from "./element.ts";

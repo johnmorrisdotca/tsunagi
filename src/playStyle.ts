@@ -22,6 +22,10 @@ export const TSUNAGI_PLAY_STYLE = `${TSUNAGI_STYLE}
 :root[data-theme="dark"] .tsunagi-play { --tsp-ink: #ece8dc; --tsp-muted: #a09d93; --tsp-rule: #3a3d38; --tsp-surface: #1d201e; --tsp-accent: #ff8a6b; --tsp-good: #6fcf97; }
 .tsunagi-play *, .tsunagi-play *::before, .tsunagi-play *::after { box-sizing: border-box; }
 .tsunagi-play .tsp-box { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: pointer; }
+.tsunagi-play .tsp-box:focus-visible { outline: 3px solid var(--tsp-accent); outline-offset: 2px; }
+.tsunagi-play .tsp-key-cursor { fill: none; stroke: var(--tsp-accent); stroke-width: 3px; vector-effect: non-scaling-stroke; pointer-events: none; visibility: hidden; }
+.tsunagi-play .tsp-box:focus-visible .tsp-key-cursor { visibility: visible; }
+.tsunagi-play .tsp-key-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .tsunagi-play .tsp-box[data-over="true"] { cursor: default; }
 .tsunagi-play .tsp-inner { position: absolute; top: 0; left: 0; width: 100%; transform-origin: 0 0; }
 .tsunagi-play .tsp-pad, .tsunagi-play .tsp-chips, .tsunagi-play .tsp-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
