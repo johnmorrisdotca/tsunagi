@@ -5,10 +5,34 @@ import { TSUNAGI_BOARD_NAMES } from "./dist/boards.js";
 import { TSUNAGI_COLOUR_SET_NAMES } from "./dist/colours.js";
 import { embedDay } from "./dist/embed-day.js";
 import "./dist/element-define.js";
-import { familyEmbedBuilder } from "./family-embed-builder.js";
+import { familyEmbedBuilder, FAMILY_EMBED_BUILDER_WORDS } from "./family-embed-builder.js";
 const words = {
-  en: { pitch: "Choose a line puzzle or a UTC daily level, preview it, and copy the code for your page.", name: "Tsunagi means joining in Japanese.", nameLink: "About the name", foot: "The setup is in the link. No game or personal data is stored.", toGallery: "The puzzles", previewTitle: "Your puzzle", makerLabel: "What to build", makerBoard: "A board", makerBoardSays: "Join the matching marbles and fill the board.", notSet: "Not set", on: "On", off: "Off", reset: "Reset", startAgain: "Start again", copy: "Copy", copied: "Copied.", copyLink: "Copy a link to this puzzle", linkCopied: "The link is copied.", codeTitle: "The code", codeText: "Choose how to include this puzzle on your page.", defaultIs: "Default: {value}", badDay: "Use a real UTC date written YYYY-MM-DD, today or off.", badLevel: "Choose a level that exists at this grid size." },
-  ja: { pitch: "繋のパズル、またはUTCの日替わり問題を選び、表示を確認して、ページに載せるコードをコピーします。", name: "「繋」は英語の joining に当たる日本語です。", nameLink: "名前について", foot: "設定はリンクに入ります。ゲームや個人情報は保存しません。", toGallery: "パズルの一覧", previewTitle: "あなたのパズル", makerLabel: "作るもの", makerBoard: "盤", makerBoardSays: "同じ玉をつないで、盤を埋めます。", notSet: "指定なし", on: "オン", off: "オフ", reset: "元に戻す", startAgain: "最初からやり直す", copy: "コピー", copied: "コピーしました。", copyLink: "このパズルへのリンクをコピー", linkCopied: "リンクをコピーしました。", codeTitle: "コード", codeText: "ページへの載せ方を選びます。", defaultIs: "初期値: {value}", badDay: "実際の日付をYYYY-MM-DDで指定するか、today、offを指定してください。UTCの日付を使います。", badLevel: "この盤の大きさにある問題を選んでください。" },
+  en: {
+    ...FAMILY_EMBED_BUILDER_WORDS.en,
+    pitch: "Choose a line puzzle or a UTC daily level, preview it, and copy the code for your page.",
+    name: "Tsunagi means joining in Japanese.",
+    nameLink: "About the name",
+    foot: "The setup is in the link. No game or personal data is stored.",
+    toGallery: "The puzzles",
+    makerBoard: "A board",
+    makerBoardSays: "Join the matching marbles and fill the board.",
+    copyLink: "Copy a link to this puzzle",
+    badDay: "Use a real UTC date written YYYY-MM-DD, today or off.",
+    badLevel: "Choose a level that exists at this grid size."
+  },
+  ja: {
+    ...FAMILY_EMBED_BUILDER_WORDS.ja,
+    pitch: "繋のパズル、またはUTCの日替わり問題を選び、表示を確認して、ページに埋め込むコードをコピーできます。",
+    name: "「繋」は英語の joining に当たる日本語です。",
+    nameLink: "名前について",
+    foot: "設定はリンクに入ります。ゲームや個人情報は保存しません。",
+    toGallery: "パズルの一覧",
+    makerBoard: "盤",
+    makerBoardSays: "同じ玉をつないで、盤を埋めます。",
+    copyLink: "このパズルへのリンクをコピー",
+    badDay: "実在する日付をYYYY-MM-DD形式で入力するか、today または off を指定してください。UTCの日付を使います。",
+    badLevel: "この盤の大きさにある問題を選んでください。"
+  },
 };
 const row = (id, kind, en, ja, extra = {}) => ({ id, kind, group: "board", names: { board: id, ...(id === "size" ? {} : { mount: ({ grid: "size", lang: "language", "colour-set": "colours" }[id] ?? id) }) }, say: { en: { label: en[0], help: en[1] }, ja: { label: ja[0], help: ja[1] } }, ...extra });
 const options = [
@@ -42,7 +66,7 @@ let mounted;
 const page = globalThis.familyLanguage({ id: "tsunagi", words, onChange: () => mounted?.draw() });
 const countOf = (settings) => (settings.set === "portals" ? TSUNAGI_PORTAL_COUNTS : TSUNAGI_LEVEL_COUNTS)[Number(settings.grid ?? 7)];
 function problem(settings) { try { const day = embedDay(settings.daily); const count = countOf(settings); if (count === undefined) return "badLevel"; return day !== null || (Number.isInteger(Number(settings.level ?? 1)) && Number(settings.level ?? 1) >= 1 && Number(settings.level ?? 1) <= count) ? null : "badLevel"; } catch { return "badDay"; } }
-const builder = familyEmbedBuilder({ id: "tsunagi", packageName: "@johnmorrisdotca/tsunagi", major: VERSION.split(".")[0], site: "https://johnmorrisdotca.github.io/tsunagi/", title: "Tsunagi · line puzzle", options, leftOut, groups: { board: { en: "The puzzle", ja: "パズルの設定" } }, makers: { board: { names: "board", element: "board", tag: "tsunagi-board", embed: "embed/", required: ["grid", "level"], description: "makerBoardSays", formats: ["element", "iframe", "module", "react", "vue", "svelte", "angular", "html", "url"], width: 640, height: (settings) => heights[key(settings)] ?? ({ small: 680, medium: 840, large: 1000 }[settings.size] ?? 840) } }, code: ({ maker, format, settings }) => {
+const builder = familyEmbedBuilder({ id: "tsunagi", packageName: "@johnmorrisdotca/tsunagi", major: VERSION.split(".")[0], site: "https://johnmorrisdotca.github.io/tsunagi/", title: "Tsunagi · line puzzle", titleJa: "繋のパズルの埋め込み", options, leftOut, groups: { board: { en: "The puzzle", ja: "パズルの設定" } }, makers: { board: { names: "board", element: "board", tag: "tsunagi-board", embed: "embed/", required: ["grid", "level"], description: "makerBoardSays", formats: ["element", "iframe", "module", "react", "vue", "svelte", "angular", "html", "url"], width: 640, height: (settings) => heights[key(settings)] ?? ({ small: 680, medium: 840, large: 1000 }[settings.size] ?? 840) } }, code: ({ maker, format, settings }) => {
   if (problem(settings) !== null) return null;
   if ((format === "iframe" || format === "url") && settings.lang === undefined) return builder.codeFor(maker, format, options, { ...settings, lang: page.lang });
   return undefined;

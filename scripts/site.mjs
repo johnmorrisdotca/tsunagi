@@ -4,7 +4,7 @@
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
 import { API_CSS, apiPage } from "./api.mjs";
-import { FAMILY_SCRIPT, familyEmbedBuilder, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
+import { FAMILY_SCRIPT, FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
 
 const id = "tsunagi";
 const ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f3efe4'%3E繋%3C/text%3E%3C/svg%3E";
@@ -108,7 +108,7 @@ console.log("site/ is ready: serve it, or let the Pages workflow publish it.");
 
 for (const file of ["builder.js", "builder.css"]) cpSync(`demo/${file}`, `site/${file}`);
 cpSync("demo/embed", "site/embed", { recursive: true });
-writeFileSync("site/family-embed-builder.js", `export ${familyEmbedBuilder.toString()};\n`);
+writeFileSync("site/family-embed-builder.js", `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`);
 const builderParts = {
   builderHead: familyHead({ id, title: "Tsunagi · build a line-puzzle embed", description: "Choose a fixed or daily line puzzle, preview it and copy the embed code." }),
   builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }] }),
