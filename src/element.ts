@@ -45,11 +45,31 @@ const isOn = (value: string | null): boolean => value !== null && !["false", "of
 const offAlias = (value: string | null): string | null => value !== null && ["false", "no", "0"].includes(value.trim().toLowerCase()) ? "off" : value;
 const oneOf = <T extends string>(value: string | null, allowed: readonly T[]): T | undefined => (allowed.includes(value as T) ? (value as T) : undefined);
 
-/** Every mounted-board option, kept complete by TypeScript and checked by the builder. */
+/** Every mounted-board option, kept complete by TypeScript and checked by the builder.
+ * @example
+ * ```ts
+ * import { TSUNAGI_EMBED_OPTION_KEYS } from "@johnmorrisdotca/tsunagi/element";
+ * console.log(typeof TSUNAGI_EMBED_OPTION_KEYS); // object
+ * ```
+ */
 export const TSUNAGI_EMBED_OPTION_KEYS = Object.keys({ size: true, givens: true, answer: true, level: true, set: true, lines: true, explosions: true, cheats: true, controls: true, chips: true, zoom: true, language: true, marks: true, fill: true, colours: true, board: true, coordinates: true, onChange: true, onStroke: true, onExplosion: true, onSolve: true } satisfies Record<keyof TsunagiMountOptions, boolean>);
-/** Host callbacks and custom drawing palettes, which cannot be put in an attribute. */
+/** Host callbacks and custom drawing palettes, which cannot be put in an attribute.
+ * @example
+ * ```ts
+ * import type { TsunagiElementOptions } from "@johnmorrisdotca/tsunagi/element";
+ * const options: TsunagiElementOptions = {};
+ * console.log(Object.keys(options).length); // 0
+ * ```
+ */
 export type TsunagiElementOptions = Pick<TsunagiMountOptions, "onChange" | "onStroke" | "onExplosion" | "onSolve"> & { colours?: readonly TsunagiColour[]; board?: TsunagiBoardLook };
 
+/** Native custom element with reflected setup and presentation.
+ * @example
+ * ```ts
+ * import { TsunagiBoard } from "@johnmorrisdotca/tsunagi/element";
+ * console.log(TsunagiBoard.observedAttributes.includes("lang")); // true
+ * ```
+ */
 export class TsunagiBoard extends ElementBase {
   static observedAttributes = ["size", "level", "set", "givens", "answer", "marks", "fill", "colour-set", "board", "coordinates", "explosions", "cheats", "controls", "chips", "zoom", "lang", "progress", "grid", "daily", "theme", "width", "label"];
 
@@ -289,7 +309,16 @@ export class TsunagiBoard extends ElementBase {
   }
 }
 
-/** Register a standard or custom board tag, preserving a definition. Safe without a browser. */
+/** Register a standard or custom board tag, preserving a definition. Safe without a browser.
+ * @param tag - The custom tag name; omitted to use the package default.
+ * @returns Nothing; existing definitions and server imports remain safe.
+ * @example
+ * ```ts
+ * import { defineBoard } from "@johnmorrisdotca/tsunagi/element";
+ * defineBoard();
+ * console.log(typeof defineBoard); // function
+ * ```
+ */
 export function defineBoard(tag = "tsunagi-board"): void {
   if (typeof customElements === "undefined" || customElements.get(tag) !== undefined) return;
   customElements.define(tag, tag === "tsunagi-board" ? TsunagiBoard : class extends TsunagiBoard {});

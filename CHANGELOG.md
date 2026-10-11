@@ -11,8 +11,6 @@ board and its answer, so a solve kept by any version is still the same solve.
 - Add reflected display/grid properties, preserve live progress and methods, and make events composed and JSON-safe.
 - Add keyboard line drawing, a visible cursor and spoken coordinates, including hexagon neighbours and portal jumps.
 
-
-
 ### Added
 
 - Share a package-independent embed builder for option controls, preview adapters, code tabs and shareable links.
@@ -20,6 +18,8 @@ board and its answer, so a solve kept by any version is still the same solve.
 ### Changed
 
 - Group the package family by kind, alphabetize each group, and include the geography packages and REST in Pieces in the shared footer and README.
+
+- Update the shared family description for addresses in all seven supported countries, including France and Germany.
 
 ## [1.6.3] - 2026-10-06
 

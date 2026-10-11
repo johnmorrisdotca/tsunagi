@@ -9,6 +9,13 @@
  */
 export type TsunagiLanguage = "en" | "ja";
 
+/** Native board words, with the same keys in every shipped language.
+ * @example
+ * ```ts
+ * import { TSUNAGI_STRINGS } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_STRINGS.en.board);
+ * ```
+ */
 export const TSUNAGI_STRINGS: Record<TsunagiLanguage, Record<string, string>> = {
   en: {
     board: "Tsunagi board, {size} by {size}",

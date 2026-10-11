@@ -150,7 +150,17 @@ function create<K extends keyof HTMLElementTagNameMap>(document: Document, tag: 
   return element;
 }
 
-/** Draw a level into `host` and play it. Returns the handle that drives it, or null for a layout code that is no layout at that size. */
+/** Draw a level into `host` and play it. Returns the handle that drives it, or null for a layout code that is no layout at that size.
+ * @param host - The HTMLElement that owns the native interface.
+ * @param options - Native settings and callbacks for this mounted interface.
+ * @returns The native mounted handle, or null for unsupported settings.
+ * @example
+ * ```ts
+ * import { mountTsunagi } from "@johnmorrisdotca/tsunagi/play";
+ * const show = (host: HTMLElement, options: Parameters<typeof mountTsunagi>[1]) => mountTsunagi(host, options);
+ * console.log(typeof show); // function
+ * ```
+ */
 export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): TsunagiMount | null {
   const document = host.ownerDocument;
   const first = newTsunagiGame(options.givens, options.size, { answer: options.answer, explosions: options.explosions, cheats: options.cheats, lines: options.lines });
