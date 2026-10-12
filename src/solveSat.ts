@@ -28,10 +28,32 @@ import { bridgesOf, stepTable } from "./steps.ts";
  * can be given as a guide: the search starts from them, so the answer it was
  * made from is found first and every other answer is looked for from there.
  */
-/** How a cell's pair is written as variables: a variable for each pair (the way every level to 15×15 was proved), or a binary number, which a board of many pairs can afford. */
+/** How a cell's pair is written as variables: a variable for each pair (the way every level to 15×15 was proved), or a binary number, which a board of many pairs can afford.
+ *
+ * @example
+ * ```ts
+ * import type { SatColours } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: SatColours = "one-hot";
+ * console.log(value);
+ * ```
+ */
 export type SatColours = "one-hot" | "binary";
 
-/** The clauses a layout comes to, ready to be searched. */
+/** The clauses a layout comes to, ready to be searched.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, edgeModel } from "@johnmorrisdotca/tsunagi";
+ * import type { EdgeModel } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const value: EdgeModel = edgeModel(layout)!;
+ * console.log(value);
+ * ```
+ */
 export type EdgeModel = {
   sat: Sat;
   total: number;
@@ -71,6 +93,19 @@ const subsets = (items: readonly number[], size: number, each: (picked: number[]
  * A layout written down as clauses (see the top of this file), or null where
  * it cannot be solved at all: a stone its pair does not name, or a cell with
  * too few ways in and out to hold a line.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param colours - The palette or SAT colour encoding specified by the signature.
+ * @returns The SAT edge model, or null when the layout cannot support a complete solution.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, edgeModel } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(edgeModel(layout)?.total);
+ * ```
  */
 export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): EdgeModel | null {
   const { size, cells, ends } = layout;
@@ -218,6 +253,22 @@ export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): 
  * portal cells too); `colours` says how a cell's pair is written as variables,
  * and the default is the way every level up to 15×15 was proved: another way
  * writes another search, with other counts.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param limit - Stop after finding this many solutions.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param guide - Optional known answer lines guiding the SAT search; null without a guide.
+ * @param colours - The palette or SAT colour encoding specified by the signature.
+ * @returns Counts a layout's answers by SAT, up to `limit`. `budget` is a number of conflicts; `guide` is the lines the layout was made from (cells in order, portal cells too); `colours` says how a cell's pair is written as variables, and the default is the way every level up to 15×15 was proved: another way writes another search, with other counts.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { countSolutionsSat, decodeLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(countSolutionsSat(layout,2,20000).count);
+ * ```
  */
 export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY, guide: readonly (readonly number[])[] | null = null, colours: SatColours = "one-hot"): SolveCount {
   const { cells, ends } = layout;

@@ -42,6 +42,7 @@
  * with play, read from production first), and the difficulty marks every level
  * shows (`levels/marks.data.ts`).
  */
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
 import { candidate, repairedCandidate, symmetryKey, type LinkCandidate } from "../src/generate.ts";
@@ -246,7 +247,7 @@ for (const size of asked.length > 0 ? asked : Object.keys(PLAN).map(Number)) {
   const ordered = order.map((at) => all[at]!);
   const twisted = withTwists(size, ordered, keep.get(size) ?? new Set(), PLAN_TWISTS[size]!);
   const levels = twisted.levels;
-  writeFileSync(`src/levels/size${size}.data.ts`, fileFor(size, levels));
+  writeFileSync(`src/levels/size${size}.data.ts`, withLevelExamples(fileFor(size, levels), `@johnmorrisdotca/tsunagi/levels-${size}`));
   marks[size] = marksOf(levels, size);
   const layouts = levels.map(([layout]) => layout);
   roles[size] = Object.fromEntries(layouts.flatMap((_, at) => {
@@ -265,7 +266,7 @@ for (const size of asked.length > 0 ? asked : Object.keys(PLAN).map(Number)) {
 }
 writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles, { ...TSUNAGI_PORTAL_MARKS }));
 if (Object.values(moves).some((to) => to.some((level, from) => level !== from + 1))) {
-  writeFileSync("src/levels/renumbered.data.ts", renumberedFile(moves));
+  writeFileSync("src/levels/renumbered.data.ts", withLevelExamples(renumberedFile(moves), "@johnmorrisdotca/tsunagi/renumbered"));
   if (migrationAt !== undefined) {
     mkdirSync(migrationAt, { recursive: true });
     writeFileSync(`${migrationAt}/migration.sql`, migrationFor(moved, bands));

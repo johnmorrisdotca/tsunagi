@@ -13,20 +13,71 @@
 
 import { PAIR_LETTERS } from "./code.ts";
 
-/** A colour as hue (0 to 360), saturation and lightness (each 0 to 100). */
+/** A colour as hue (0 to 360), saturation and lightness (each 0 to 100).
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiColour } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiColour = [120,50,40];
+ * console.log(value);
+ * ```
+ */
 export type TsunagiColour = readonly [number, number, number];
 
-/** How the pairs are told apart: by colour, or by the number on each pair's marbles. */
+/** How the pairs are told apart: by colour, or by the number on each pair's marbles.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiMarks } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiMarks = "numbers";
+ * console.log(value);
+ * ```
+ */
 export type TsunagiMarks = "colours" | "numbers";
 
-/** Marbles along every line (the dots), or the line alone. */
+/** Marbles along every line (the dots), or the line alone.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiFill } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiFill = "marbles";
+ * console.log(value);
+ * ```
+ */
 export type TsunagiFill = "marbles" | "lines";
 
-/** The colour sets there are. */
+/** The colour sets there are.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_COLOUR_SET_NAMES } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_COLOUR_SET_NAMES);
+ * ```
+ */
 export const TSUNAGI_COLOUR_SET_NAMES = ["marble", "bright", "colour-blind", "soft"] as const;
+/** A supported named palette for the native board.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiColourSetName } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiColourSetName = "marble";
+ * console.log(value);
+ * ```
+ */
 export type TsunagiColourSetName = (typeof TSUNAGI_COLOUR_SET_NAMES)[number];
 
-/** The sets' default: the one itsutsu.com plays in. */
+/** The sets' default: the one itsutsu.com plays in.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_DEFAULT_COLOUR_SET } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_DEFAULT_COLOUR_SET);
+ * ```
+ */
 export const TSUNAGI_DEFAULT_COLOUR_SET: TsunagiColourSetName = "marble";
 
 function fromHex(hex: string): TsunagiColour {
@@ -98,6 +149,12 @@ const SIXTEEN: Record<TsunagiColourSetName, readonly TsunagiColour[]> = {
  * Every set carries a colour for each of the eighty-two pairs a board can have (`PAIR_LETTERS`): its
  * sixteen, which every board to 15×15 has been drawn in, then the same hues again turned round the colour
  * wheel and made lighter or darker, round after round, so that no two pairs of a 30×30 board wear exactly one colour.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_COLOUR_SETS } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_COLOUR_SETS);
+ * ```
  */
 export const TSUNAGI_COLOUR_SETS: Record<TsunagiColourSetName, readonly TsunagiColour[]> = Object.fromEntries(
   TSUNAGI_COLOUR_SET_NAMES.map((name) => [name, extended(SIXTEEN[name], name === "soft")]),
@@ -108,6 +165,12 @@ export const TSUNAGI_COLOUR_SETS: Record<TsunagiColourSetName, readonly TsunagiC
  * are drawn alike, in one of these colours and with one of these letters, so
  * that they can be told from any other pair and from a marble. They are used
  * round and round, and a portal past the last of the letters is given its number.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_PORTAL_COLOURS } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_PORTAL_COLOURS);
+ * ```
  */
 export const TSUNAGI_PORTAL_COLOURS: readonly TsunagiColour[] = [
   [276, 62, 52],
@@ -120,54 +183,155 @@ export const TSUNAGI_PORTAL_COLOURS: readonly TsunagiColour[] = [
   [16, 86, 46],
 ];
 
-/** The letters that mark portals: Greek, which no marble or number is. */
+/** The letters that mark portals: Greek, which no marble or number is.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_PORTAL_GLYPHS } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_PORTAL_GLYPHS);
+ * ```
+ */
 export const TSUNAGI_PORTAL_GLYPHS = "αβγδεζηθικλμνξοπρστυφχψω";
 
-/** The mark of portal `index`, from 0: its Greek letter, or its number once the letters are used up. */
+/** The mark of portal `index`, from 0: its Greek letter, or its number once the letters are used up.
+ *
+ * @param index - The zero-based portal index.
+ * @returns The mark of portal `index`, from 0: its Greek letter, or its number once the letters are used up.
+ * @example
+ * ```ts
+ * import { portalMark } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(portalMark(0));
+ * ```
+ */
 export function portalMark(index: number): string {
   return TSUNAGI_PORTAL_GLYPHS[index] ?? String(index + 1);
 }
 
-/** A colour set as asked: one of the named sets, or colours of your own (used round and round when a board has more pairs than you gave). */
+/** A colour set as asked: one of the named sets, or colours of your own (used round and round when a board has more pairs than you gave).
+ *
+ * @param set - The native level set or palette specified by the signature.
+ * @returns A colour set as asked: one of the named sets, or colours of your own (used round and round when a board has more pairs than you gave).
+ * @example
+ * ```ts
+ * import { tsunagiColourSet } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(tsunagiColourSet("marble").length);
+ * ```
+ */
 export function tsunagiColourSet(set: TsunagiColourSetName | readonly TsunagiColour[] | undefined): readonly TsunagiColour[] {
   if (set === undefined) return TSUNAGI_COLOUR_SETS[TSUNAGI_DEFAULT_COLOUR_SET];
   if (typeof set === "string") return TSUNAGI_COLOUR_SETS[set] ?? TSUNAGI_COLOUR_SETS[TSUNAGI_DEFAULT_COLOUR_SET];
   return set.length > 0 ? set : TSUNAGI_COLOUR_SETS[TSUNAGI_DEFAULT_COLOUR_SET];
 }
 
-/** The colour of a pair in a set, round and round. */
+/** The colour of a pair in a set, round and round.
+ *
+ * @param set - The native level set or palette specified by the signature.
+ * @param pair - The zero-based pair index.
+ * @returns The colour of a pair in a set, round and round.
+ * @example
+ * ```ts
+ * import { colourOfPair, tsunagiColourSet } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(colourOfPair(tsunagiColourSet("marble"),0));
+ * ```
+ */
 export function colourOfPair(set: readonly TsunagiColour[], pair: number): TsunagiColour {
   return set[((pair % set.length) + set.length) % set.length]!;
 }
 
-/** A colour as a CSS string, lightened or darkened by `shift` percentage points, at an opacity. */
+/** A colour as a CSS string, lightened or darkened by `shift` percentage points, at an opacity.
+ *
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @param shift - The lightness adjustment.
+ * @param alpha - The opacity used in the CSS colour.
+ * @returns A colour as a CSS string, lightened or darkened by `shift` percentage points, at an opacity.
+ * @example
+ * ```ts
+ * import { hsl } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(hsl([120,50,40]));
+ * ```
+ */
 export function hsl([hue, saturation, lightness]: TsunagiColour, shift = 0, alpha = 1): string {
   const light = Math.max(4, Math.min(97, lightness + shift));
   return alpha === 1 ? `hsl(${hue}, ${saturation}%, ${light}%)` : `hsla(${hue}, ${saturation}%, ${light}%, ${alpha})`;
 }
 
-/** The plain shell marble a number is written on: highlight, body, rim, and the ink. */
+/** The plain shell marble a number is written on: highlight, body, rim, and the ink.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_SHELL } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_SHELL);
+ * ```
+ */
 export const TSUNAGI_SHELL = { light: "#ffffff", body: "#ececec", rim: "#bfbfbf", ink: "#1a1a1a" } as const;
 
-/** A marble's shading: the highlight at its upper left, its body, and its rim, and the ink its number is written in. */
+/** A marble's shading: the highlight at its upper left, its body, and its rim, and the ink its number is written in.
+ *
+ * @param colour - The hue, saturation and lightness triple.
+ * @param marks - Whether marbles show colours or numbers.
+ * @returns A marble's shading: the highlight at its upper left, its body, and its rim, and the ink its number is written in.
+ * @example
+ * ```ts
+ * import { marbleShades } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(marbleShades([120,50,40],"colours"));
+ * ```
+ */
 export function marbleShades(colour: TsunagiColour, marks: TsunagiMarks): { light: string; body: string; rim: string; ink: string } {
   if (marks === "numbers") return TSUNAGI_SHELL;
   return { light: hsl(colour, 28), body: hsl(colour), rim: hsl(colour, -22), ink: colour[2] > 55 ? "#1a1a1a" : "#ffffff" };
 }
 
-/** A marble on a line's way between its ends: the pair's colour, or for numbers the line's own soft tint, with nothing written on it. */
+/** A marble on a line's way between its ends: the pair's colour, or for numbers the line's own soft tint, with nothing written on it.
+ *
+ * @param colour - The hue, saturation and lightness triple.
+ * @param marks - Whether marbles show colours or numbers.
+ * @returns A marble on a line's way between its ends: the pair's colour, or for numbers the line's own soft tint, with nothing written on it.
+ * @example
+ * ```ts
+ * import { beadShades } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(beadShades([120,50,40],"numbers"));
+ * ```
+ */
 export function beadShades(colour: TsunagiColour, marks: TsunagiMarks): { light: string; body: string; rim: string } {
   if (marks === "colours") return marbleShades(colour, marks);
   const tint: TsunagiColour = [colour[0], 30, 62];
   return { light: hsl(tint, 22), body: hsl(tint), rim: hsl(tint, -18) };
 }
 
-/** The stroke a pair's line is drawn in: its colour, or a soft tint of it for numbers. */
+/** The stroke a pair's line is drawn in: its colour, or a soft tint of it for numbers.
+ *
+ * @param colour - The hue, saturation and lightness triple.
+ * @param marks - Whether marbles show colours or numbers.
+ * @returns The stroke a pair's line is drawn in: its colour, or a soft tint of it for numbers.
+ * @example
+ * ```ts
+ * import { lineColour } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(lineColour([120,50,40],"colours"));
+ * ```
+ */
 export function lineColour(colour: TsunagiColour, marks: TsunagiMarks): string {
   return marks === "numbers" ? hsl([colour[0], 30, 62]) : hsl(colour);
 }
 
-/** The faint wash a line leaves on the cells it runs through. */
+/** The faint wash a line leaves on the cells it runs through.
+ *
+ * @param colour - The hue, saturation and lightness triple.
+ * @param marks - Whether marbles show colours or numbers.
+ * @returns The faint wash a line leaves on the cells it runs through.
+ * @example
+ * ```ts
+ * import { washColour } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(washColour([120,50,40],"colours"));
+ * ```
+ */
 export function washColour(colour: TsunagiColour, marks: TsunagiMarks): string {
   return marks === "numbers" ? hsl([colour[0], 30, 70], 0, 0.22) : hsl(colour, 8, 0.28);
 }

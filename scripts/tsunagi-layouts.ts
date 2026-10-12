@@ -9,6 +9,7 @@
  * fails when it is not what the level files say, so it is run after any script that
  * writes one of them.
  */
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import { writeFileSync } from "node:fs";
 
 import { TSUNAGI_PORTAL_SIZES, TSUNAGI_SIZES } from "../src/levelCounts.ts";
@@ -24,7 +25,7 @@ const table = (all: Record<number, string[]>) =>
 
 writeFileSync(
   "src/levels/layouts.data.ts",
-  [
+  withLevelExamples([
     "/**",
     " * EVERY LEVEL'S BOARD WITHOUT ITS ANSWER, by size and in level order: what a server needs to know",
     " * a level when it checks a solve or lists who solved which level. `@johnmorrisdotca/tsunagi/layouts`.",
@@ -41,6 +42,6 @@ writeFileSync(
     ...table(portals),
     "};",
     "",
-  ].join("\n"),
+  ].join("\n"), "@johnmorrisdotca/tsunagi/layouts"),
 );
 console.log(`${Object.values(classic).flat().length} layouts, ${Object.values(portals).flat().length} with portals`);

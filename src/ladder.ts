@@ -15,11 +15,29 @@ export type { Challenge, TwistRole };
  * [now 15th] would be a sort of experience and the 10th [16th] is the hardest".
  *
  * Imports carry their `.ts` so the level script can read the same rules.
+ *
+ * @example
+ * ```ts
+ * import { CHALLENGES } from "@johnmorrisdotca/tsunagi";
+ * console.log(CHALLENGES);
+ * ```
  */
 
 export const CHALLENGES: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "portals", "explosions", "strokes", "hexagon", "sparse"];
 
-/** The challenges on a board, in the order the ladder teaches them. */
+/** The challenges on a board, in the order the ladder teaches them.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns The challenges on a board, in the order the ladder teaches them.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { challengesOf } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(challengesOf(givens));
+ * ```
+ */
 export function challengesOf(layout: string): Challenge[] {
   const cells = layoutCells(layout);
   const tail = layout.slice(cells.length).split(LINK_WALLS).filter(Boolean);
@@ -41,7 +59,19 @@ export function challengesOf(layout: string): Challenge[] {
   return out;
 }
 
-/** Whether a board is a twist: any challenge on it. */
+/** Whether a board is a twist: any challenge on it.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns Whether a board is a twist: any challenge on it.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { isTwist } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(isTwist(givens));
+ * ```
+ */
 export function isTwist(layout: string): boolean {
   return challengesOf(layout).length > 0;
 }
@@ -50,6 +80,17 @@ export function isTwist(layout: string): boolean {
  * A level's part in its block's lesson, or null for a level that has none (1 to
  * 14, or a 15th or 16th left plain because somebody had played it). `newOnes`
  * are the challenges no earlier level of the size has: what a 15th introduces.
+ *
+ * @param layouts - The layout codes in one level collection.
+ * @param level - The one-based level number.
+ * @returns A level's part in its block's lesson, or null for a level that has none (1 to 14, or a 15th or 16th left plain because somebody had played it). `newOnes` are the challenges no earlier level of the size has: what a 15th introduces.
+ * @example
+ * ```ts
+ * import { twistRole } from "@johnmorrisdotca/tsunagi";
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ *
+ * console.log(twistRole(TSUNAGI_4.map(([code])=>code),15));
+ * ```
  */
 export function twistRole(layouts: readonly string[], level: number): TwistRole | null {
   const slot = ((level - 1) % TSUNAGI_BLOCK) + 1;
@@ -61,13 +102,37 @@ export function twistRole(layouts: readonly string[], level: number): TwistRole 
   return { role: slot === TSUNAGI_BLOCK - 1 ? "teaches" : "tests", challenges, newOnes: challenges.filter((each) => !before.has(each)) };
 }
 
-/** A level's measured difficulty, 1 (easiest) to 5, or null for a level the marks do not have. */
+/** A level's measured difficulty, 1 (easiest) to 5, or null for a level the marks do not have.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param level - The one-based level number.
+ * @param set - The native level set or palette specified by the signature.
+ * @returns A level's measured difficulty, 1 (easiest) to 5, or null for a level the marks do not have.
+ * @example
+ * ```ts
+ * import { tsunagiMarks } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(tsunagiMarks(4,1));
+ * ```
+ */
 export function tsunagiMarks(size: number, level: number, set: TsunagiSet = "classic"): number | null {
   const digit = (set === "portals" ? TSUNAGI_PORTAL_MARKS : TSUNAGI_MARKS)[size]?.[level - 1];
   return digit === undefined ? null : Number(digit);
 }
 
-/** A level's part in its block's lesson, from the data the level script wrote (`marks.data.ts`), without its size's boards; null for none. */
+/** A level's part in its block's lesson, from the data the level script wrote (`marks.data.ts`), without its size's boards; null for none.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param level - The one-based level number.
+ * @param set - The native level set or palette specified by the signature.
+ * @returns A level's part in its block's lesson, from the data the level script wrote (`marks.data.ts`), without its size's boards; null for none.
+ * @example
+ * ```ts
+ * import { tsunagiRole } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(tsunagiRole(4,15));
+ * ```
+ */
 export function tsunagiRole(size: number, level: number, set: TsunagiSet = "classic"): TwistRole | null {
   // The portal levels have no lesson of their own: every one of them is the twist.
   return set === "portals" ? null : (TSUNAGI_ROLES[size]?.[level] ?? null);

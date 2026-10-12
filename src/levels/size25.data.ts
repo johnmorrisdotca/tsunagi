@@ -7,6 +7,12 @@
  * (the character of the line through every cell). Every level is proved to have
  * exactly one answer by `levels.test.ts`, no two are the same board under a turn
  * or a mirror, and `difficulty.test.ts` holds the order to the measure.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_25 } from "@johnmorrisdotca/tsunagi/levels-25";
+ * console.log(TSUNAGI_25.length, TSUNAGI_25[0][0]);
+ * ```
  */
 export const TSUNAGI_25: readonly (readonly [string, string])[] = [
   ["....AB......BC..........C.D......DE..EF......F.............GH.IJ........K..............L..MN.OPQ.......R....RS..TU..MN..VP......SW..W.........L................I.......U.........X....XHY.Z......O...........0..12...Z34..........5.0.G.1...Y...6...V......758.9a.............b......7..a.2......4.....c.....d8......6.T.....................ef.g........c.......h..9......f..i...........j..k........Q...l.........h..........i....................m..gn........J.....jo............l....p.dq..o......rse...b...........tk..s...............q.A......u...r...............t.vu.m......n........w..w3...........vKp......x.......................x", "AAAAABBBBBBBBCCCCCCCCCCCCADDDDDDDDEEEEFFFFFFFFJJJJAGGGGGGGGGHIIJJJJJJJJJKKJAGSSSSSSSSHILLLMNNOPQQQKJAGSRRRRRRSHITULMMNOPVPQKJAGSSWWWWHHHITULLLLOPVPQKJAGXXXXXXHIIITUUUUUOPVPQKJAGXGGGGXHYYZTTTTTTOPVPQKJAGGG00G112YZZZ344TPPVPQKJA5500GG122YY33364TPVVPQKJA75899a2233336664TPbbPQKJA7789aa2336666444TPbcPQKJAd889993366TTTTTTTPbcPQKJAdoooo93effggggQQQPbcPQKJAdohho93eeffffgQiQPbbPQKJAdojhok33eeeeegQiQPlbPQKJAdojhokk3ssssegiiQPlbPQKJAdojjook3smmsegnQQPlbPQKJAdoojjok3smsseenQPPlbPQKpAdqoookk3smsrsenQPbbbPQKpAAqqttk33smsrssnQPPPPPQKpqAAqt333uumsrrsnQQQQQQQKpqqqqt3vuummssssnnKKKKKKKpwwww33vvvvvvvvvvvKpppppppxxxxxxxxxxxxxxxxxxxxxxxxx"],

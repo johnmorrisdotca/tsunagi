@@ -10,6 +10,15 @@
  */
 import type { TwistRole } from "../ladder.types.ts";
 
+/** The native difficulty digits for each classic size, one digit per level in level order.
+ *
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_MARKS } from "@johnmorrisdotca/tsunagi/marks";
+ * console.log(Object.keys(TSUNAGI_MARKS));
+ * ```
+ */
 export const TSUNAGI_MARKS: Readonly<Record<number, string>> = {
   4: "111111111111111111111111111111151111111111111112111111111111114411111111112111141122222222222245222222222222222522222222222222442222222222222244222222222222224533333333333333253333333343344455",
   5: "1111111111111114111111111111111111111111111111122222222222222224222222222222221522222222222222342222222222222224222222222222221322222222222222142222222222233335333333333333332433333333333333443333333333333323333333333333334533333334334444354444444444444445",
@@ -28,6 +37,15 @@ export const TSUNAGI_MARKS: Readonly<Record<number, string>> = {
   30: "1112222222222333333333333333334433333333333333223444444444444444",
 };
 
+/** The teaching or testing role of classic twist levels, keyed by size and one-based level number.
+ *
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_ROLES } from "@johnmorrisdotca/tsunagi/marks";
+ * console.log(Object.keys(TSUNAGI_ROLES));
+ * ```
+ */
 export const TSUNAGI_ROLES: Readonly<Record<number, Readonly<Record<number, TwistRole>>>> = {
   4: {"31":{"role":"teaches","challenges":["bridges"],"newOnes":["bridges"]},"32":{"role":"tests","challenges":["bridges"],"newOnes":[]},"47":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"48":{"role":"tests","challenges":["walls"],"newOnes":[]},"63":{"role":"teaches","challenges":["waypoints"],"newOnes":["waypoints"]},"64":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"79":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"80":{"role":"tests","challenges":["wrap"],"newOnes":[]},"95":{"role":"teaches","challenges":["bridges","explosions"],"newOnes":["explosions"]},"96":{"role":"tests","challenges":["bridges","walls","explosions"],"newOnes":[]},"111":{"role":"teaches","challenges":["walls","strokes"],"newOnes":["strokes"]},"112":{"role":"tests","challenges":["bridges","walls","strokes"],"newOnes":[]},"127":{"role":"teaches","challenges":["waypoints"],"newOnes":[]},"128":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"143":{"role":"teaches","challenges":["wrap"],"newOnes":[]},"144":{"role":"tests","challenges":["wrap"],"newOnes":[]},"159":{"role":"teaches","challenges":["bridges"],"newOnes":[]},"160":{"role":"tests","challenges":["bridges","walls"],"newOnes":[]},"175":{"role":"teaches","challenges":["walls","explosions"],"newOnes":[]},"176":{"role":"tests","challenges":["bridges","walls","explosions"],"newOnes":[]},"191":{"role":"teaches","challenges":["waypoints"],"newOnes":[]},"192":{"role":"tests","challenges":["waypoints"],"newOnes":[]}},
   5: {"15":{"role":"teaches","challenges":["bridges"],"newOnes":["bridges"]},"16":{"role":"tests","challenges":["bridges"],"newOnes":[]},"47":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"48":{"role":"tests","challenges":["walls"],"newOnes":[]},"63":{"role":"teaches","challenges":["waypoints"],"newOnes":["waypoints"]},"64":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"79":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"80":{"role":"tests","challenges":["wrap"],"newOnes":[]},"95":{"role":"teaches","challenges":["bridges","explosions"],"newOnes":["explosions"]},"96":{"role":"tests","challenges":["bridges","walls","explosions"],"newOnes":[]},"111":{"role":"teaches","challenges":["walls","strokes"],"newOnes":["strokes"]},"112":{"role":"tests","challenges":["bridges","walls","strokes"],"newOnes":[]},"127":{"role":"teaches","challenges":["hexagon"],"newOnes":["hexagon"]},"128":{"role":"tests","challenges":["hexagon"],"newOnes":[]},"143":{"role":"teaches","challenges":["sparse"],"newOnes":["sparse"]},"144":{"role":"tests","challenges":["sparse"],"newOnes":[]},"159":{"role":"teaches","challenges":["bridges"],"newOnes":[]},"160":{"role":"tests","challenges":["bridges","walls"],"newOnes":[]},"175":{"role":"teaches","challenges":["walls","explosions"],"newOnes":[]},"176":{"role":"tests","challenges":["bridges","walls","explosions"],"newOnes":[]},"191":{"role":"teaches","challenges":["waypoints"],"newOnes":[]},"192":{"role":"tests","challenges":["waypoints"],"newOnes":[]},"207":{"role":"teaches","challenges":["hexagon"],"newOnes":[]},"208":{"role":"tests","challenges":["hexagon"],"newOnes":[]},"223":{"role":"teaches","challenges":["bridges"],"newOnes":[]},"224":{"role":"tests","challenges":["bridges","walls"],"newOnes":[]},"239":{"role":"teaches","challenges":["walls","strokes"],"newOnes":[]},"240":{"role":"tests","challenges":["bridges","walls","strokes"],"newOnes":[]},"255":{"role":"teaches","challenges":["waypoints","explosions"],"newOnes":[]},"256":{"role":"tests","challenges":["waypoints","explosions"],"newOnes":[]}},
@@ -46,6 +64,15 @@ export const TSUNAGI_ROLES: Readonly<Record<number, Readonly<Record<number, Twis
   30: {"15":{"role":"teaches","challenges":["walls"],"newOnes":["walls"]},"16":{"role":"tests","challenges":["walls"],"newOnes":[]},"31":{"role":"teaches","challenges":["wrap"],"newOnes":["wrap"]},"32":{"role":"tests","challenges":["wrap"],"newOnes":[]},"47":{"role":"teaches","challenges":["portals"],"newOnes":["portals"]},"48":{"role":"tests","challenges":["portals"],"newOnes":[]},"63":{"role":"teaches","challenges":["explosions"],"newOnes":["explosions"]},"64":{"role":"tests","challenges":["explosions"],"newOnes":[]}},
 };
 
+/** The native difficulty digits for portal levels, one digit per level in level order.
+ *
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_PORTAL_MARKS } from "@johnmorrisdotca/tsunagi/marks";
+ * console.log(Object.keys(TSUNAGI_PORTAL_MARKS));
+ * ```
+ */
 export const TSUNAGI_PORTAL_MARKS: Readonly<Record<number, string>> = {
   5: "11111222222333451111222222233345",
   6: "11122222333444451111122222233445",

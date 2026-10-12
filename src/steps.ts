@@ -17,6 +17,14 @@ import { CELL_BRIDGE, type LinkLayout, layoutNeighbours, portalExit } from "./co
  *    the portal is no step at all.
  *
  * Imports carry their `.ts` so the level script can run this under plain node.
+ *
+ * @example
+ * ```ts
+ * import type { Step } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: Step = {to:1,over:-1,across:true,through:[]};
+ * console.log(value);
+ * ```
  */
 export type Step = {
   /** The cell the line reaches. */
@@ -31,7 +39,20 @@ export type Step = {
 
 const NO_CELLS: readonly number[] = [];
 
-/** Every cell's steps on a board, worked out once. */
+/** Every cell's steps on a board, worked out once.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns Every cell's steps on a board, worked out once.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, stepTable } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(stepTable(layout)[0]);
+ * ```
+ */
 export function stepTable(layout: LinkLayout): Step[][] {
   const { size, cells } = layout;
   const around = layoutNeighbours(layout);
@@ -58,7 +79,20 @@ export function stepTable(layout: LinkLayout): Step[][] {
   });
 }
 
-/** The bridges of a board. */
+/** The bridges of a board.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns The bridges of a board.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { bridgesOf, decodeLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(bridgesOf(layout));
+ * ```
+ */
 export function bridgesOf(layout: LinkLayout): number[] {
   return layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
 }

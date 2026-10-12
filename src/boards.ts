@@ -6,7 +6,17 @@
  * and `black`. Or a look of your own: every part of one is a colour.
  */
 
-/** What a board is made of: every part a CSS colour. */
+/** What a board is made of: every part a CSS colour.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiBoardLook } from "@johnmorrisdotca/tsunagi/draw";
+ * import { tsunagiBoardLook } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiBoardLook = tsunagiBoardLook("paper");
+ * console.log(value);
+ * ```
+ */
 export type TsunagiBoardLook = {
   /** The playing surface: one colour, or two, a light and a deep one, laid as a soft gradient. */
   paper: string | readonly [string, string];
@@ -20,14 +30,45 @@ export type TsunagiBoardLook = {
   coordinate: string;
 };
 
-/** The ready-made boards. */
+/** The ready-made boards.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_BOARD_NAMES } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_BOARD_NAMES);
+ * ```
+ */
 export const TSUNAGI_BOARD_NAMES = ["paper", "wood", "green", "blue", "red", "black"] as const;
+/** A supported named native board appearance.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiBoardName } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiBoardName = "paper";
+ * console.log(value);
+ * ```
+ */
 export type TsunagiBoardName = (typeof TSUNAGI_BOARD_NAMES)[number];
 
-/** The default: paper, which takes its colours from the page (`--tsu-paper` and the rest of `TSUNAGI_STYLE`), light or dark. */
+/** The default: paper, which takes its colours from the page (`--tsu-paper` and the rest of `TSUNAGI_STYLE`), light or dark.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_DEFAULT_BOARD } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_DEFAULT_BOARD);
+ * ```
+ */
 export const TSUNAGI_DEFAULT_BOARD: TsunagiBoardName = "paper";
 
-/** Every ready-made board's look. `paper` is the page's own light look, written out; drawn by name it is left to the style, so a page can change it. */
+/** Every ready-made board's look. `paper` is the page's own light look, written out; drawn by name it is left to the style, so a page can change it.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_BOARDS } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_BOARDS);
+ * ```
+ */
 export const TSUNAGI_BOARDS: Record<TsunagiBoardName, TsunagiBoardLook> = {
   paper: { paper: "#fbf8f1", frame: "#a98954", grid: "#cfc6b2", ink: "#1f2320", coordinate: "#7c5a30" },
   wood: { paper: ["#f0cf95", "#d3a662"], frame: "#8a5a24", grid: "#8a6a35", ink: "#5b3d1c", coordinate: "#7c5a30" },
@@ -37,7 +78,17 @@ export const TSUNAGI_BOARDS: Record<TsunagiBoardName, TsunagiBoardLook> = {
   black: { paper: ["#3a3d42", "#1d1f22"], frame: "#0b0c0e", grid: "#6d737c", ink: "#9aa0a8", coordinate: "#565b63" },
 };
 
-/** A board as asked: a ready-made one by name, or a look of your own. */
+/** A board as asked: a ready-made one by name, or a look of your own.
+ *
+ * @param board - The named board appearance or host-defined colours.
+ * @returns A board as asked: a ready-made one by name, or a look of your own.
+ * @example
+ * ```ts
+ * import { tsunagiBoardLook } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(tsunagiBoardLook("paper").paper);
+ * ```
+ */
 export function tsunagiBoardLook(board: TsunagiBoardName | TsunagiBoardLook | undefined): TsunagiBoardLook {
   if (board === undefined) return TSUNAGI_BOARDS[TSUNAGI_DEFAULT_BOARD];
   if (typeof board === "string") return TSUNAGI_BOARDS[board] ?? TSUNAGI_BOARDS[TSUNAGI_DEFAULT_BOARD];

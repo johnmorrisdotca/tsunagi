@@ -18,11 +18,38 @@ import type { Lines } from "./lines.ts";
  *
  * A stroke that solves the level sets nothing off: the level is done first.
  * Pure, like the rest of the drawing rules: new lines, the old ones untouched.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines } from "@johnmorrisdotca/tsunagi";
+ * import type { Explosion } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * const value: Explosion = {lines,hit:[0],cells:[0]};
+ * console.log(value);
+ * ```
  */
 
 export type Explosion = { lines: Lines; hit: number[]; cells: number[] };
 
-/** Strokes left before the next explosion: 1 means the next stroke sets one off. Null on a board without them. */
+/** Strokes left before the next explosion: 1 means the next stroke sets one off. Null on a board without them.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param strokes - The number of completed strokes.
+ * @returns Strokes left before the next explosion: 1 means the next stroke sets one off. null on a board without them.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, strokesToExplosion } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(strokesToExplosion(layout,0));
+ * ```
+ */
 export function strokesToExplosion(layout: LinkLayout, strokes: number): number | null {
   if (layout.explosions === null) return null;
   const every = layout.explosions.every;
@@ -50,6 +77,23 @@ function halved(layout: LinkLayout, line: readonly number[]): number[] {
  * What the `stroke`-th stroke sets off, from the lines as it left them; null when
  * it sets nothing off: a board without explosions, a stroke between them, or no
  * line drawn to break. `givens` is the level's layout code, the "seed".
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param givens - The original native layout code.
+ * @param lines - The native cell lists for every pair.
+ * @param stroke - The completed stroke number whose explosion is examined.
+ * @returns What the `stroke`-th stroke sets off, from the lines as it left them; null when it sets nothing off: a board without explosions, a stroke between them, or no line drawn to break. `givens` is the level's layout code, the "seed".
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, explosionAfter, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(explosionAfter(layout,givens,solvedLines,1));
+ * ```
  */
 export function explosionAfter(layout: LinkLayout, givens: string, lines: Lines, stroke: number): Explosion | null {
   const rule = layout.explosions;
@@ -80,6 +124,16 @@ export function explosionAfter(layout: LinkLayout, givens: string, lines: Lines,
  * SOFTENED — a boom in place of a blast, and half as often — or OFF. John's
  * row: "a set-up option to soften or switch them off". Either way the solve is
  * kept as helped (`solveHelp.ts`).
+ *
+ * @param rule - The stored explosion rule, or null when none.
+ * @param choice - The selected native explosion mode.
+ * @returns The selected explosion rule, or null when explosions are absent or disabled.
+ * @example
+ * ```ts
+ * import { explosionsAsChosen } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(explosionsAsChosen({every:5,blast:true},"soft"));
+ * ```
  */
 export function explosionsAsChosen(rule: LinkLayout["explosions"], choice: "on" | "soft" | "off"): LinkLayout["explosions"] {
   if (rule === null || choice === "off") return null;

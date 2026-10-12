@@ -6,6 +6,14 @@
  *
  * `{name}` in a line is a value filled in; a line `foo` that has a `fooOne`
  * beside it is said as `fooOne` when its `{n}` is 1.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiLanguage } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiLanguage = "ja";
+ * console.log(value);
+ * ```
  */
 export type TsunagiLanguage = "en" | "ja";
 
@@ -145,7 +153,19 @@ export const TSUNAGI_STRINGS: Record<TsunagiLanguage, Record<string, string>> = 
   },
 };
 
-/** A line in a language, with its values filled in; the line itself if there is none by that name. */
+/** A line in a language, with its values filled in; the line itself if there is none by that name.
+ *
+ * @param language - The English or Japanese display language.
+ * @param key - The localized word identifier.
+ * @param values - Replacement text or numbers keyed by braces.
+ * @returns A line in a language, with its values filled in; the line itself if there is none by that name.
+ * @example
+ * ```ts
+ * import { tsunagiSay } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(tsunagiSay("en","undo"));
+ * ```
+ */
 export function tsunagiSay(language: TsunagiLanguage, key: string, values: Record<string, string | number> = {}): string {
   const table = TSUNAGI_STRINGS[language] ?? TSUNAGI_STRINGS.en;
   const one = values.n === 1 ? table[`${key}One`] : undefined;
@@ -153,7 +173,17 @@ export function tsunagiSay(language: TsunagiLanguage, key: string, values: Recor
   return line.replace(/\{(\w+)\}/g, (whole, name: string) => (name in values ? String(values[name]) : whole));
 }
 
-/** The language a piece of text is in: Japanese for anything starting `ja`, English for everything else. */
+/** The language a piece of text is in: Japanese for anything starting `ja`, English for everything else.
+ *
+ * @param tag - The custom-element tag name to register.
+ * @returns The language a piece of text is in: Japanese for anything starting `ja`, English for everything else.
+ * @example
+ * ```ts
+ * import { tsunagiLanguageOf } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(tsunagiLanguageOf("ja-JP"));
+ * ```
+ */
 export function tsunagiLanguageOf(tag: string | null | undefined): TsunagiLanguage {
   return String(tag ?? "").toLowerCase().startsWith("ja") ? "ja" : "en";
 }

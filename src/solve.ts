@@ -12,6 +12,12 @@ import { bridgesOf, stepTable, type Step } from "./steps.ts";
  * there `nodes` and `branches` count its decisions and dead ends instead of
  * positions (see `countSolutionsSat`), and the measure of difficulty reads them
  * the same way.
+ *
+ * @example
+ * ```ts
+ * import { SAT_FROM_SIZE } from "@johnmorrisdotca/tsunagi";
+ * console.log(SAT_FROM_SIZE);
+ * ```
  */
 export const SAT_FROM_SIZE = 13;
 
@@ -20,6 +26,12 @@ export const SAT_FROM_SIZE = 13;
  * than a variable for each pair, which a board of dozens of pairs needs: every
  * level to 15×15 was proved the first way and keeps its counts. Any board with
  * portals is counted by SAT, and written the second way, whatever its side.
+ *
+ * @example
+ * ```ts
+ * import { SAT_BINARY_FROM_SIZE } from "@johnmorrisdotca/tsunagi";
+ * console.log(SAT_BINARY_FROM_SIZE);
+ * ```
  */
 export const SAT_BINARY_FROM_SIZE = 16;
 
@@ -62,6 +74,18 @@ const EMPTY: number = CELL_EMPTY;
  *     cells (or each other), or the line can never close;
  *   - every region of empty cells is touched at both ends by some unfinished
  *     line, or nothing could ever fill it.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { countSolutions, decodeLayout } from "@johnmorrisdotca/tsunagi";
+ * import type { SolveCount } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const value: SolveCount = countSolutions(layout,2,20000);
+ * console.log(value);
+ * ```
  */
 export type SolveCount = {
   /** Answers found, never more than the limit asked for. */
@@ -78,6 +102,22 @@ export type SolveCount = {
   gaveUp: boolean;
 };
 
+/** Count valid complete answers up to a limit within a bounded search budget.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param limit - Stop after finding this many solutions.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @returns Count valid complete answers up to a limit within a bounded search budget.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { countSolutions, decodeLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(countSolutions(layout,2,20000).count);
+ * ```
+ */
 export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
   // For a big board, or one with portals, `budget` is a number of dead ends, not of positions.
   if (layout.size >= SAT_FROM_SIZE || layout.portalPairs.length > 0) return countSolutionsSat(layout, limit, budget, null, layout.size >= SAT_BINARY_FROM_SIZE || layout.portalPairs.length > 0 ? "binary" : "one-hot");
@@ -288,6 +328,22 @@ export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.PO
  * proving there is none costs, which is how a big level was made to be cheap
  * (`reduce.ts`) and what its difficulty measures. Still a proof: the count is
  * of every answer, and a level whose stored answer is not the one found fails.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @param limit - Stop after finding this many solutions.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @returns How a level is proved and measured: `countSolutions` for a board the search of this file has always counted (4×4 to 15×15, no portals), and for a bigger one, or one with portals, the SAT search started from the level's own answer (`countSolutionsSat`, binary pairs). The answer is found at once and every other answer is looked for from there, so what the count costs is what proving there is none costs, which is how a big level was made to be cheap (`reduce.ts`) and what its difficulty measures. Still a proof: the count is of every answer, and a level whose stored answer is not the one found fails.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { countSolutionsOfLevel, decodeLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(countSolutionsOfLevel(layout,answer,2,20000).count);
+ * ```
  */
 export function countSolutionsOfLevel(layout: LinkLayout, answer: string, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
   if (layout.size < SAT_BINARY_FROM_SIZE && layout.portalPairs.length === 0) return countSolutions(layout, limit, budget);

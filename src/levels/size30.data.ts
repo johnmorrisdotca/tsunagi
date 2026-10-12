@@ -7,6 +7,12 @@
  * (the character of the line through every cell). Every level is proved to have
  * exactly one answer by `levels.test.ts`, no two are the same board under a turn
  * or a mirror, and `difficulty.test.ts` holds the order to the measure.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_30 } from "@johnmorrisdotca/tsunagi/levels-30";
+ * console.log(TSUNAGI_30.length, TSUNAGI_30[0][0]);
+ * ```
  */
 export const TSUNAGI_30: readonly (readonly [string, string])[] = [
   [".........AB..........BC.D...........................E.....C...........F.....................G.........................DH.........IJ......JK.........L..A...M..........NO......O..F..PQ...R.............MS...T..U.....I...RV........................W................X........H......Y.................T....Z.Q..W..........0........1.......2E3.......4...................567.....89a.bc.cY....................9.8...............U...........d...bV.ef.....S...g.............d..h.i..fjX.k............N....0a...l..k.j.......Z......m.n.......ol...........p.........q4.re..st.................3..qn.......u...tui...........vm................w.....p............o..............g.x......h.....ws.yz.z!.!y....@.......vr.$...................................$1.........K...x.........6........7G.........%...............5@................................2*......*L..(..............()..)[......[%.P]......]{..........{}..},..,", "AAAAAAAAAABBBBBBBBBBBBCCDDDDDDAEEEEEEEEEEEEEEEEEEEEEECCCCCCDAEGGGGGGGGFFFFFFFFFFFFFFFFFFDDAEGIIIIIIGGGGGGGGGGGGGGGGGGFDHAEEINNNNIIJJJJJJJJKKKKKKKKGFLHAAEINMMNNNNNNNNNNOOOOOOOOKGFLHPQEINRMMMMMMMMMMMMMMSSSSTKGULHPQEINRRRVVVVVVVVVVVjjjjSTKGULHPQEWNNYYYYYYYYYYYYVjXXjSTKGULHPQEWWNY4444444444YVjjXjSTKGULZPQEEWNN4000000004YVVjXjS1KGULZP22E33N4099944444YYVjXjS1KGULZP25673N40989abbcccYVjXjS1KGULZP25673N40988abVVVVVVjXjS1KGULZP25673N40dddabVeefffjXjS1KGgLZP25673N4000dahheiiifjXjk1KGgLZP25673N44400aheellikkjjk1KGgLZP25673mnn44hhheooliikkkk1KGgLpP25673mnqq4hreeosttiiiii1KGgLpP25673mnqnhhrooosuttttui1KGgLpP2567vmnnnhrrosssuuuuuuw1KGgLpP2567vhhhhhroosyyyyyyyyw1KGgLxP2567vhrrrrrwssyzzz!!!yw1KG@LxP2567vrr$$$$wwwwwwwwwwww1KG@LxP2567777777$$$$1111111111KG@LxP256666666777777777GGGGGGGG@L%P255555555555555@@@@@@@@@@@@L%P2222222222222222222********L%P(((((((((((((((())))[[[[[[[[%PP]]]]]]]]{{{{{{{{{{{{}}}},,,,"],

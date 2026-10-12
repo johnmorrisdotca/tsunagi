@@ -13,6 +13,7 @@
  * (`difficulty.ts`), orders the block by it, and writes `src/levels/portals.data.ts` and the
  * portal levels' marks in `src/levels/marks.data.ts`. Nothing of the first set is touched.
  */
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 import { PAIR_LETTERS } from "../src/code.ts";
@@ -107,5 +108,5 @@ for (const size of asked.length > 0 ? asked : TSUNAGI_PORTAL_SIZES) {
   console.log(`${size}×${size}: ${levels.length} portal levels, ${Math.round((performance.now() - started) / 1000)} s`);
 }
 const sorted = Object.fromEntries(Object.entries(written).sort(([a], [b]) => Number(a) - Number(b)));
-writeFileSync("src/levels/portals.data.ts", fileFor(sorted));
+writeFileSync("src/levels/portals.data.ts", withLevelExamples(fileFor(sorted), "@johnmorrisdotca/tsunagi/levels-portals"));
 writeFileSync("src/levels/marks.data.ts", marksFile({ ...TSUNAGI_MARKS }, { ...TSUNAGI_ROLES }, portalMarks));

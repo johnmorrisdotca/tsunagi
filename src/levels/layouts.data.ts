@@ -4,6 +4,12 @@
  *
  * WRITTEN BY `node scripts/tsunagi-layouts.ts`, NEVER BY HAND, from the level files; `layouts.test.ts`
  * fails when it is not what they say.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_LAYOUTS } from "@johnmorrisdotca/tsunagi/layouts";
+ * console.log(Object.keys(TSUNAGI_LAYOUTS));
+ * ```
  */
 export const TSUNAGI_LAYOUTS: Readonly<Record<number, readonly string[]>> = {
   4: [
@@ -2406,7 +2412,14 @@ export const TSUNAGI_LAYOUTS: Readonly<Record<number, readonly string[]>> = {
   ],
 };
 
-/** The levels with portals, by size. */
+/** The levels with portals, by size.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_PORTAL_LAYOUTS } from "@johnmorrisdotca/tsunagi/layouts";
+ * console.log(Object.keys(TSUNAGI_PORTAL_LAYOUTS));
+ * ```
+ */
 export const TSUNAGI_PORTAL_LAYOUTS: Readonly<Record<number, readonly string[]>> = {
   5: [
     ".AB..CDE....A.....E.CD..B|portals0-23",

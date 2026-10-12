@@ -50,6 +50,17 @@ function unique(size: number, paths: readonly number[][], budget: number): { lay
  * kept only while the board still has exactly one answer — so what is left is
  * as few lines as this filling allows without a second answer creeping in. A
  * board that does not get down to `sparseMost` is dropped.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @returns One sparse candidate level, or null. From a filling proved to have one answer, lines are joined one join at a time, in a random order, and a join is kept only while the board still has exactly one answer — so what is left is as few lines as this filling allows without a second answer creeping in. A board that does not get down to `sparseMost` is dropped.
+ * @example
+ * ```ts no-run
+ * import { seededRandom, sparseCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(sparseCandidate(4,seededRandom(42),20000));
+ * ```
  */
 export function sparseCandidate(size: number, random: Random, budget: number): LinkCandidate | null {
   const filled = randomFilling(size, random, size * size);

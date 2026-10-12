@@ -14,6 +14,23 @@ import { joined, letGo, withoutPortalTail, type Lines } from "./lines.ts";
  * to before the first cell it would share — on a bridge only where both go the
  * same way over it, since two lines may cross there. Null when there is nothing
  * to draw: every line already the answer's. Pure: new lines, the old untouched.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @returns The updated lines and helped pair, or null when every pair is already joined.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { cheatLine, decodeLayout, linesOfAnswer, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(cheatLine(layout,lines,solvedLines));
+ * ```
  */
 export function cheatLine(layout: LinkLayout, lines: Lines, answer: Lines): { lines: Lines; pair: number } | null {
   const same = (a: readonly number[], b: readonly number[]) => a.length === b.length && (a.every((cell, at) => cell === b[at]) || a.every((cell, at) => cell === b[b.length - 1 - at]));

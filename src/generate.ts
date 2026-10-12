@@ -19,7 +19,21 @@ import type { Random } from "./random.ts";
  * spoiled by a line that could shortcut through its own bend.
  */
 
-/** One candidate: its layout and answer codes, and what the solver said about it. */
+/** One candidate: its layout and answer codes, and what the solver said about it.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, symmetryKey, turnsIn } from "@johnmorrisdotca/tsunagi";
+ * import type { LinkCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const value: LinkCandidate = {layout:givens,answer,pairs:layout.ends.length,nodes:1,branches:0,turns:turnsIn(answer,layout),key:symmetryKey(givens,4)};
+ * console.log(value);
+ * ```
+ */
 export type LinkCandidate = {
   layout: string;
   answer: string;
@@ -50,13 +64,47 @@ const RETREATS = 400;
 /** How a blocked cell is marked while a grid is filled: an owner no line has. */
 const BLOCKED_MARK = 32_000;
 
-/** What a board has besides its lines: the cells no line enters, the bridges two lines cross, and the walls between cells. */
+/** What a board has besides its lines: the cells no line enters, the bridges two lines cross, and the walls between cells.
+ *
+ * @example
+ * ```ts
+ * import type { LinkExtras } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: LinkExtras = {blocked:new Set([0]),walls:new Set(["1-2"])};
+ * console.log(value);
+ * ```
+ */
 export type LinkExtras = { blocked?: ReadonlySet<number>; bridges?: ReadonlySet<number>; walls?: ReadonlySet<string>; waypoints?: ReadonlySet<number>; wrap?: boolean; hex?: boolean; sparse?: boolean; portals?: readonly (readonly [number, number])[] };
 
-/** How a filling is laid, where it need not be the way it always was: how often a line takes its tightest way on, and whether it may start beside the tightest cell as well as on it. */
+/** How a filling is laid, where it need not be the way it always was: how often a line takes its tightest way on, and whether it may start beside the tightest cell as well as on it.
+ *
+ * @example
+ * ```ts
+ * import type { FillingStyle } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: FillingStyle = {greed:0.5,looseStart:false};
+ * console.log(value);
+ * ```
+ */
 export type FillingStyle = { greed?: number; looseStart?: boolean };
 
-/** Grid lines that fill every cell, as lists of cells; null when this attempt painted itself into a corner. */
+/** Grid lines that fill every cell, as lists of cells; null when this attempt painted itself into a corner.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param blocked - Cells unavailable to generated paths.
+ * @param wrap - Whether opposite board edges connect.
+ * @param hex - Whether to use hexagonal neighbours.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns Grid lines that fill every cell, as lists of cells; null when this attempt painted itself into a corner.
+ * @example
+ * ```ts no-run
+ * import { randomFilling, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(randomFilling(4,seededRandom(42),8));
+ * ```
+ */
 export function randomFilling(size: number, random: Random, longest: number, blocked: ReadonlySet<number> = new Set(), wrap = false, hex = false, style: FillingStyle = {}): number[][] | null {
   const total = size * size;
   // On a board that wraps, the lines may run off one edge and on at the other.
@@ -146,6 +194,22 @@ function absorb(run: number[], paths: number[][], owner: Int16Array, around: num
  * The layout and answer the lines leave: their ends as stones, lettered in
  * reading order, with whatever else the board has — blocked cells, bridges
  * (in two lines' paths, drawn `+`) and walls.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param paths - The complete grid-filling cell paths.
+ * @param extras - Optional blocked cells and native twists.
+ * @returns The layout and answer the lines leave: their ends as stones, lettered in reading order, with whatever else the board has — blocked cells, bridges (in two lines' paths, drawn `+`) and walls.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, layoutOf, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(layoutOf(4,solvedLines.map(line=>[...line])));
+ * ```
  */
 export function layoutOf(size: number, paths: readonly number[][], extras: LinkExtras = {}): { layout: string; answer: string } {
   const total = size * size;
@@ -174,7 +238,22 @@ function movedTo(size: number, at: number, turn: number, mirror: boolean): numbe
   return r * size + c;
 }
 
-/** A layout code turned or mirrored: `turn` quarter turns, then a mirror across the vertical when `mirror`. Its walls turn with it. */
+/** A layout code turned or mirrored: `turn` quarter turns, then a mirror across the vertical when `mirror`. Its walls turn with it.
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @param size - The number of cells on each side of the board.
+ * @param turn - The number of quarter turns.
+ * @param mirror - Whether to reflect the board.
+ * @returns A layout code turned or mirrored: `turn` quarter turns, then a mirror across the vertical when `mirror`. Its walls turn with it.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { transformed } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(transformed(givens,4,1,true));
+ * ```
+ */
 export function transformed(code: string, size: number, turn: number, mirror: boolean): string {
   const cells = layoutCells(code);
   const out = new Array<string>(size * size);
@@ -204,7 +283,19 @@ export function transformed(code: string, size: number, turn: number, mirror: bo
   return [out.join(""), ...segments].join(LINK_WALLS);
 }
 
-/** A code's letters renamed in reading order of first appearance: the one spelling of a layout or answer. */
+/** A code's letters renamed in reading order of first appearance: the one spelling of a layout or answer.
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @returns A code's letters renamed in reading order of first appearance: the one spelling of a layout or answer.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { relettered } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(relettered(givens));
+ * ```
+ */
 export function relettered(code: string): string {
   const cells = layoutCells(code);
   const names = new Map<string, string>();
@@ -227,6 +318,18 @@ export function relettered(code: string): string {
  * are the same board. A hexagon is only turned the ways that keep its lattice
  * — half round, and the two diagonal mirrors (a quarter turn then a mirror) —
  * since a quarter turn alone would make its slanting neighbours the wrong pair.
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @param size - The number of cells on each side of the board.
+ * @returns The least spelling of a layout over its eight turns and mirrors: equal keys are the same board. A hexagon is only turned the ways that keep its lattice — half round, and the two diagonal mirrors (a quarter turn then a mirror) — since a quarter turn alone would make its slanting neighbours the wrong pair.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { symmetryKey } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(symmetryKey(givens,4));
+ * ```
  */
 export function symmetryKey(code: string, size: number): string {
   let least: string | null = null;
@@ -241,7 +344,22 @@ export function symmetryKey(code: string, size: number): string {
   return least!;
 }
 
-/** How many times an answer's lines turn a corner, over all of them: a line going straight over a bridge turns nowhere on it. */
+/** How many times an answer's lines turn a corner, over all of them: a line going straight over a bridge turns nowhere on it.
+ *
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @param layout - The decoded native board and its rule settings.
+ * @returns How many times an answer's lines turn a corner, over all of them: a line going straight over a bridge turns nowhere on it.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, turnsIn } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(turnsIn(answer,layout));
+ * ```
+ */
 export function turnsIn(answer: string, layout: LinkLayout): number {
   const steps = stepTable(layout);
   let turns = 0;
@@ -260,6 +378,18 @@ export function turnsIn(answer: string, layout: LinkLayout): number {
  * proof that the layout has exactly one answer — the filling's own. A layout
  * the solver cannot settle inside `budget` positions is dropped rather than
  * trusted.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @returns One candidate level, or null: a filling, its layout, and the solver's proof that the layout has exactly one answer — the filling's own. A layout the solver cannot settle inside `budget` positions is dropped rather than trusted.
+ * @example
+ * ```ts no-run
+ * import { candidate, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(candidate(4,seededRandom(42),8,20000));
+ * ```
  */
 export function candidate(size: number, random: Random, longest: number, budget: number): LinkCandidate | null {
   const paths = randomFilling(size, random, longest);
@@ -305,6 +435,19 @@ function splitAt(paths: readonly number[][], cell: number): number[][] | null {
  * Numberlink generator's move; in the 2026-09-26 spike it took 0.4 rounds on
  * average at 12×12 and doubled what luck alone made. Null when the solver
  * gives up, the lines pass `most`, or no cut can be made.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param most - The maximum repairs, waypoints or pairs specified by this signature.
+ * @returns A proved unique candidate, or null when the bounded repairs/search fail.
+ * @example
+ * ```ts no-run
+ * import { repairedCandidate, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(repairedCandidate(4,seededRandom(42),8,20000,3));
+ * ```
  */
 export function repairedCandidate(size: number, random: Random, longest: number, budget: number, most: number): LinkCandidate | null {
   let paths = randomFilling(size, random, longest);

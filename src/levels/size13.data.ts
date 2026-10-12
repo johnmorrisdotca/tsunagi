@@ -7,6 +7,12 @@
  * (the letter of the line through every cell). Every level is proved to have
  * exactly one answer by `levels.test.ts`, no two are the same board under a turn
  * or a mirror, and `difficulty.test.ts` holds the order to the measure.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_13 } from "@johnmorrisdotca/tsunagi/levels-13";
+ * console.log(TSUNAGI_13.length, TSUNAGI_13[0][0]);
+ * ```
  */
 export const TSUNAGI_13: readonly (readonly [string, string])[] = [
   ["............ABCD..E.......F.G............H.....I.......................J..F.....H............G............DI.KJK..........................C..............EB.A............", "BBBBBBBBBBBBABCDDDEEEEEEBAFCGGDDDDDDEBAFCHGIIIIIDEBAFCHGIKKKDDEBAFCHGIKJKDFEBAFCHGIKJKDFEBAFCGGIKJKDFEBAFCDIIKJKDFEBAFCDDDDDDDFEBAFCCCCCCCCFEBAFFFFFFFFFFEBAAAAAAAAAAAAAA"],

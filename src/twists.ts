@@ -24,6 +24,19 @@ import type { Random } from "./random.ts";
  * the answer uses, so its answer stands — until it has one, and then every
  * wall that is not needed for that is taken away again. What is left is walls
  * a player has to use to find the answer.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, symmetryKey, turnsIn } from "@johnmorrisdotca/tsunagi";
+ * import type { TwistCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const value: TwistCandidate = {...{layout:givens,answer,pairs:layout.ends.length,nodes:1,branches:0,turns:turnsIn(answer,layout),key:symmetryKey(givens,4)},bridges:0,walls:0,blocked:0};
+ * console.log(value);
+ * ```
  */
 
 export type TwistCandidate = LinkCandidate & {
@@ -106,7 +119,22 @@ function bridgedFilling(size: number, random: Random, longest: number, want: num
   return { paths, bridges };
 }
 
-/** A board with `want` bridges, or null where this filling offers no place for them or the board has more than one answer. */
+/** A board with `want` bridges, or null where this filling offers no place for them or the board has more than one answer.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param want - The requested number of bridges.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns A board with `want` bridges, or null where this filling offers no place for them or the board has more than one answer.
+ * @example
+ * ```ts no-run
+ * import { bridgeCandidate, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(bridgeCandidate(5,seededRandom(42),10,20000,1));
+ * ```
+ */
 export function bridgeCandidate(size: number, random: Random, longest: number, budget: number, want: number, style: FillingStyle = {}): TwistCandidate | null {
   const made = bridgedFilling(size, random, longest, want, style);
   if (made === null) return null;
@@ -149,7 +177,23 @@ function wallsNeeded(decoded: LinkLayout, answer: string, random: Random, budget
   return walls;
 }
 
-/** A board with `blockedWanted` blocked cells and as many walls as it needs (at most `mostWalls`) to have one answer, or null. */
+/** A board with `blockedWanted` blocked cells and as many walls as it needs (at most `mostWalls`) to have one answer, or null.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param blockedWanted - The requested number of blocked cells.
+ * @param mostWalls - The maximum walls to add.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns A board with `blockedWanted` blocked cells and as many walls as it needs (at most `mostWalls`) to have one answer, or null.
+ * @example
+ * ```ts no-run
+ * import { seededRandom, wallCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(wallCandidate(4,seededRandom(42),8,20000,1,2));
+ * ```
+ */
 export function wallCandidate(size: number, random: Random, longest: number, budget: number, blockedWanted: number, mostWalls: number, style: FillingStyle = {}): TwistCandidate | null {
   const blocked = new Set<number>();
   while (blocked.size < blockedWanted) blocked.add(Math.floor(random() * size * size));
@@ -164,7 +208,23 @@ export function wallCandidate(size: number, random: Random, longest: number, bud
   return proved(layout, answer, size, budget, { bridges: 0, walls: walls.size, blocked: blocked.size });
 }
 
-/** A board with bridges and the walls it needs besides: both twists at once, for the blocks after both are taught. */
+/** A board with bridges and the walls it needs besides: both twists at once, for the blocks after both are taught.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param bridgesWanted - The requested number of bridges.
+ * @param mostWalls - The maximum walls to add.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns A proved board with the requested twists, or null when generation or uniqueness proof fails.
+ * @example
+ * ```ts no-run
+ * import { bridgeAndWallCandidate, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(bridgeAndWallCandidate(5,seededRandom(42),10,20000,1,2));
+ * ```
+ */
 export function bridgeAndWallCandidate(size: number, random: Random, longest: number, budget: number, bridgesWanted: number, mostWalls: number, style: FillingStyle = {}): TwistCandidate | null {
   const made = bridgedFilling(size, random, longest, bridgesWanted, style);
   if (made === null) return null;
@@ -182,6 +242,20 @@ export function bridgeAndWallCandidate(size: number, random: Random, longest: nu
  * waypoints — cells in the middle of the answer's lines, each kept for the line
  * through it — until it has one, and then each taken away again where it is not
  * needed: every waypoint left is one a player has to use. At most `most`.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param most - The maximum repairs, waypoints or pairs specified by this signature.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns A proved board using waypoints, or null when the requested bounded attempt cannot produce one.
+ * @example
+ * ```ts no-run
+ * import { seededRandom, waypointCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(waypointCandidate(4,seededRandom(42),8,20000,2));
+ * ```
  */
 export function waypointCandidate(size: number, random: Random, longest: number, budget: number, most: number, style: FillingStyle = {}): TwistCandidate | null {
   const filling = randomFilling(size, random, longest, new Set(), false, false, style);
@@ -219,6 +293,19 @@ export function waypointCandidate(size: number, random: Random, longest: number,
  * other — kept only where at least one line of the answer does, so the wrap is
  * a thing the board asks for, and only with exactly one answer under the wrap
  * rules.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns A proved wrapped board, or null when no required wrapping unique board was produced.
+ * @example
+ * ```ts no-run
+ * import { seededRandom, wrapCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(wrapCandidate(4,seededRandom(42),8,20000));
+ * ```
  */
 export function wrapCandidate(size: number, random: Random, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
   const filling = randomFilling(size, random, longest, new Set(), true, false, style);
@@ -233,6 +320,19 @@ export function wrapCandidate(size: number, random: Random, longest: number, bud
  * A HEXAGON: the board as Hexversi's honeycomb, the square's corners off the
  * board, filled with lines that may step along either slant as well as the four
  * ways a square allows (`hexNeighboursOf`). Only an odd side has a hexagon.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param longest - The maximum desired path length in cells.
+ * @param budget - The maximum search-work budget; exhaustion must be treated as inconclusive.
+ * @param style - Optional preferences for the seeded filling process.
+ * @returns A proved hexagonal board, or null when generation or uniqueness proof fails.
+ * @example
+ * ```ts no-run
+ * import { hexCandidate, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(hexCandidate(5,seededRandom(42),10,20000));
+ * ```
  */
 export function hexCandidate(size: number, random: Random, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
   if (size % 2 === 0) return null;

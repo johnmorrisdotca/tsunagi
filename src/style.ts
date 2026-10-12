@@ -12,6 +12,12 @@
  * `--tsu-coordinate`, `--tsu-shu`, `--tsu-good`), so a page's own style needs to set only the ones it
  * wants different. Paper follows the page's light or dark. With reduced motion
  * asked for, nothing moves.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_STYLE } from "@johnmorrisdotca/tsunagi/draw";
+ * console.log(TSUNAGI_STYLE);
+ * ```
  */
 export const TSUNAGI_STYLE = `
 .tsunagi {

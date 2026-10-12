@@ -25,12 +25,29 @@ import { countSolutionsSat } from "./solveSat.ts";
  * Only the level scripts call this.
  */
 
-/** The most lines a board can have: as many as there are characters to name them. */
+/** The most lines a board can have: as many as there are characters to name them.
+ *
+ * @example
+ * ```ts
+ * import { MOST_PAIRS } from "@johnmorrisdotca/tsunagi";
+ * console.log(MOST_PAIRS);
+ * ```
+ */
 export const MOST_PAIRS = PAIR_LETTERS.length;
 
 /** The shortest a line's piece may be, in cells, as in `generate.ts`. */
 const SHORTEST = 3;
 
+/** Budgets and geometry choices for generating a puzzle by reducing clues.
+ *
+ * @example
+ * ```ts
+ * import type { ReduceOptions } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: ReduceOptions = {budget:20000,longest:8,most:8};
+ * console.log(value);
+ * ```
+ */
 export type ReduceOptions = {
   /** Dead ends the solver may meet proving one join leaves the board with one answer. Default 20,000. */
   budget?: number;
@@ -58,7 +75,21 @@ export type ReduceOptions = {
   measure?: number;
 };
 
-/** What a made board has besides its lines. */
+/** What a made board has besides its lines.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, symmetryKey, turnsIn } from "@johnmorrisdotca/tsunagi";
+ * import type { ReducedCandidate } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const value: ReducedCandidate = {...{layout:givens,answer,pairs:layout.ends.length,nodes:1,branches:0,turns:turnsIn(answer,layout),key:symmetryKey(givens,4)},portals:0,waypoints:0,wrap:false,blocked:0};
+ * console.log(value);
+ * ```
+ */
 export type ReducedCandidate = LinkCandidate & { portals: number; waypoints: number; wrap: boolean; blocked: number };
 
 /** A line's cell, one step `by` on (-1, +1, -size, +size), across the join where it wraps; -1 off the edge. */
@@ -92,6 +123,24 @@ function tidy(layout: LinkLayout, lines: readonly (readonly number[])[]): boolea
  * b on from P2 the way P1 is on from a, a new line runs A up to P1, the portal,
  * and B on from b; what is left of A after P1 and of B before P2 are lines of
  * their own, or nothing. Null where `count` portals cannot be made.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param paths - The complete grid-filling cell paths.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param count - The number of portals or levels specified by this signature.
+ * @param wrap - Whether opposite board edges connect.
+ * @returns The transformed paths and portal pairs, or null when no compatible portal placement exists.
+ * @example
+ * ```ts no-run
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, linesOfAnswer, seededRandom, withPortals } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(withPortals(4,solvedLines.map(line=>[...line]),seededRandom(42),1,false));
+ * ```
  */
 export function withPortals(size: number, paths: readonly number[][], random: Random, count: number, wrap: boolean): { paths: number[][]; pairs: [number, number][] } | null {
   const total = size * size;
@@ -168,6 +217,17 @@ type Piece = { path: number; cells: number[] };
  * One board made by taking clues away, or null. The filling's lines are cut into
  * pieces of about `piece` cells and joined again at random while one answer can
  * be proved within `budget` dead ends; see the top of this file.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @returns One board made by taking clues away, or null. The filling's lines are cut into pieces of about `piece` cells and joined again at random while one answer can be proved within `budget` dead ends; see the top of this file.
+ * @example
+ * ```ts no-run
+ * import { reducedCandidate, seededRandom } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(reducedCandidate(4,seededRandom(42),{budget:20000,longest:8,most:8}));
+ * ```
  */
 export function reducedCandidate(size: number, random: Random, options: ReduceOptions = {}): ReducedCandidate | null {
   const total = size * size;

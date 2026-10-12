@@ -25,6 +25,14 @@ import { TSUNAGI_STYLE } from "./style.ts";
  * The drawing holds still: the same board is the same box whatever is drawn on
  * it, and a page redraws it as lines change. Colours and numbers on the
  * marbles, dots or only lines, a colour set and a board are all options.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiDrawOptions } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const value: TsunagiDrawOptions = {marks:"numbers",coordinates:true};
+ * console.log(value);
+ * ```
  */
 
 export type TsunagiDrawOptions = {
@@ -142,6 +150,20 @@ function beadSvg(geometry: TsunagiGeometry, cell: number, pair: number): string 
  * (`data-edge`), `tsu-waypoint`, `tsu-portal` (`data-portal`, `data-cells`;
  * its two rings are `tsu-portal-end`, its link `tsu-portal-link`), `tsu-flag`,
  * `tsu-blast`, `tsu-hex-cell`.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @returns A board as SVG text, with the lines in `options.lines` drawn on it. The drawing is `class="tsunagi"`; its colours and its two movements are `TSUNAGI_STYLE`. Its parts carry classes and data attributes a page can style or find: `tsu-marble`, `tsu-bead`, `tsu-line` (`data-pair`, `data-cells`), `tsu-bridge` (`data-cell`, `data-across`), `tsu-over-bridge`, `tsu-wall` (`data-edge`), `tsu-waypoint`, `tsu-portal` (`data-portal`, `data-cells`; its two rings are `tsu-portal-end`, its link `tsu-portal-link`), `tsu-flag`, `tsu-blast`, `tsu-hex-cell`.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout } from "@johnmorrisdotca/tsunagi";
+ * import { drawTsunagi } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(drawTsunagi(layout,{marks:"numbers"}).startsWith("<svg"));
+ * ```
  */
 export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}): string {
   const lines = options.lines ?? noLines(layout);
@@ -324,13 +346,38 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
   return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 ${round(side)} ${round(side)}" role="group" aria-label="${escape(label)}" data-size="${size}" data-marks="${marks}" data-fill="${fill}" data-board="${boardName}" data-solved="${solved}"${flags}>${body.replaceAll("__ID__", id)}</svg>`;
 }
 
-/** A level's layout code drawn, or an empty string for a code that is no layout at that size. */
+/** A level's layout code drawn, or an empty string for a code that is no layout at that size.
+ *
+ * @param givens - The original native layout code.
+ * @param size - The number of cells on each side of the board.
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @returns A level's layout code drawn, or an empty string for a code that is no layout at that size.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { drawTsunagiCode } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(drawTsunagiCode(givens,4).startsWith("<svg"));
+ * ```
+ */
 export function drawTsunagiCode(givens: string, size: number, options: TsunagiDrawOptions = {}): string {
   const layout = decodeLayout(givens, size);
   return layout === null ? "" : drawTsunagi(layout, options);
 }
 
-/** One marble on its own, as SVG text: for a legend or an icon. `pair` is which of the board's pairs it is, from 0. */
+/** One marble on its own, as SVG text: for a legend or an icon. `pair` is which of the board's pairs it is, from 0.
+ *
+ * @param pair - The zero-based pair index.
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @returns One marble on its own, as SVG text: for a legend or an icon. `pair` is which of the board's pairs it is, from 0.
+ * @example
+ * ```ts
+ * import { drawTsunagiMarble } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * console.log(drawTsunagiMarble(0,{marks:"numbers"}).length);
+ * ```
+ */
 export function drawTsunagiMarble(pair: number, options: { marks?: TsunagiMarks; colours?: TsunagiColourSetName | readonly TsunagiColour[]; label?: string; style?: boolean; id?: string } = {}): string {
   const marks = options.marks ?? "colours";
   const colours = tsunagiColourSet(options.colours);
@@ -350,6 +397,22 @@ export function drawTsunagiMarble(pair: number, options: { marks?: TsunagiMarks;
  * that pair's). `id` is the drawing's own (`<svg>`'s paper gradient is `<id>-paper`),
  * so the pieces use its gradients. Boards with bridges are drawn whole, since a bridge's
  * deck and the lines under it depend on every line.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param pair - The zero-based pair index.
+ * @param id - An SVG identifier prefix for this drawing.
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @returns What one pair's line is made of in a drawing, for a page that keeps a drawing in its DOM and redraws only the pair whose line changed: its washes and its little marbles, each to go inside the group of that pair's (`.tsu-washes > [data-pair]` and `.tsu-beads > [data-pair]`, and `.tsu-ghosts > [data-pair]` on a board that wraps), and its line (a `.tsu-line` for the `.tsu-lines` group, to replace any of that pair's). `id` is the drawing's own (`<svg>`'s paper gradient is `<id>-paper`), so the pieces use its gradients. Boards with bridges are drawn whole, since a bridge's deck and the lines under it depend on every line.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout } from "@johnmorrisdotca/tsunagi";
+ * import { drawTsunagiPair } from "@johnmorrisdotca/tsunagi/draw";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(drawTsunagiPair(layout,0,"sample").line.length);
+ * ```
  */
 export function drawTsunagiPair(layout: LinkLayout, pair: number, id: string, options: TsunagiDrawOptions = {}): { washes: string; line: string; beads: string; ghosts: string } {
   const lines = options.lines ?? noLines(layout);

@@ -51,7 +51,16 @@ import { edgeNudge, keptView, TSUNAGI_FITTED, TSUNAGI_ZOOM_FROM, zoomedAbout, ty
  * `drawTsunagi`'s, and both are usable alone.
  */
 
-/** What a board looks like: every option `drawTsunagi` takes that does not depend on the lines. */
+/** What a board looks like: every option `drawTsunagi` takes that does not depend on the lines.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiLook } from "@johnmorrisdotca/tsunagi/play";
+ *
+ * const value: TsunagiLook = {marks:"numbers",fill:"lines",board:"paper"};
+ * console.log(value);
+ * ```
+ */
 export type TsunagiLook = {
   marks?: TsunagiMarks;
   fill?: TsunagiFill;
@@ -60,7 +69,23 @@ export type TsunagiLook = {
   coordinates?: boolean;
 };
 
-/** What a mounted board tells of itself in every event. */
+/** What a mounted board tells of itself in every event.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { answerOf, decodeLayout, encodeLines, newTsunagiGame, noLines, tsunagiProgress } from "@johnmorrisdotca/tsunagi";
+ * import type { TsunagiEventDetail } from "@johnmorrisdotca/tsunagi/play";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * const value: TsunagiEventDetail = {lines,code:encodeLines(layout,lines),progress:tsunagiProgress(game),answer:answerOf(layout,lines),helped:null};
+ * console.log(value);
+ * ```
+ */
 export type TsunagiEventDetail = {
   /** The lines drawn so far. */
   lines: Lines;
@@ -74,6 +99,19 @@ export type TsunagiEventDetail = {
   explosion?: { kind: "boom" | "blast"; cells: readonly number[] };
 };
 
+/** The puzzle, native display choices, controls and event callbacks for mounting a board.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import type { TsunagiMountOptions } from "@johnmorrisdotca/tsunagi/play";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const value: TsunagiMountOptions = {size:4,givens,answer,controls:true};
+ * console.log(value);
+ * ```
+ */
 export type TsunagiMountOptions = TsunagiLook & {
   /** The board's size: how many cells across. */
   size: number;
@@ -105,6 +143,23 @@ export type TsunagiMountOptions = TsunagiLook & {
   onSolve?: (detail: TsunagiEventDetail) => void;
 };
 
+/** The mounted native board handle and its game, display, action and cleanup methods.
+ *
+ * @example
+ * ```ts no-run
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import type { TsunagiMount } from "@johnmorrisdotca/tsunagi/play";
+ * import { mountTsunagi } from "@johnmorrisdotca/tsunagi/play";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const host = document.createElement("div");
+ * document.body.append(host);
+ * const board: TsunagiMount | null = mountTsunagi(host,{size:4,givens,answer,controls:true});
+ * console.log(board?.progress().pairs);
+ * board?.destroy();
+ * ```
+ */
 export type TsunagiMount = {
   readonly host: HTMLElement;
   /** The game as it stands. */
@@ -132,7 +187,20 @@ const LINK_MS = 1800;
 
 const CHALLENGE_KEYS: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "portals", "explosions", "strokes", "hexagon", "sparse"];
 
-/** Put the style in the page once: in the document's head, or in the shadow root the host is in. */
+/** Put the style in the page once: in the document's head, or in the shadow root the host is in.
+ *
+ * @param host - The DOM host for the native board or its scoped styles.
+ * @returns Nothing; native scoped play styles are installed for the host.
+ * @example
+ * ```ts no-run
+ * import { ensureTsunagiPlayStyle } from "@johnmorrisdotca/tsunagi/play";
+ *
+ * const host = document.createElement("div");
+ * document.body.append(host);
+ * ensureTsunagiPlayStyle(host);
+ * console.log(host.tagName);
+ * ```
+ */
 export function ensureTsunagiPlayStyle(host: Element): void {
   const root = host.getRootNode();
   const target: ParentNode = typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : host.ownerDocument.head;

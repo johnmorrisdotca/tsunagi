@@ -53,12 +53,41 @@
  *
  * Imports carry their `.ts` so the level script (`scripts/tsunagi-levels.ts`)
  * can run this under plain node.
+ *
+ * @example
+ * ```ts
+ * import { LINK_EMPTY } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_EMPTY);
+ * ```
  */
 
 export const LINK_EMPTY = ".";
+/** The blocked-cell marker in a layout code.
+ *
+ * @example
+ * ```ts
+ * import { LINK_BLOCKED } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_BLOCKED);
+ * ```
+ */
 export const LINK_BLOCKED = "#";
+/** The bridge-cell marker in a layout code.
+ *
+ * @example
+ * ```ts
+ * import { LINK_BRIDGE } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_BRIDGE);
+ * ```
+ */
 export const LINK_BRIDGE = "+";
-/** Where the walls start, after the cells. */
+/** Where the walls start, after the cells.
+ *
+ * @example
+ * ```ts
+ * import { LINK_WALLS } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_WALLS);
+ * ```
+ */
 export const LINK_WALLS = "|";
 
 /**
@@ -71,16 +100,48 @@ export const LINK_WALLS = "|";
  * the lower case of, or, on a board that uses every capital and digit, one of
  * the pairs after them. The board says which by what it uses (`stoneLetters`):
  * a board of thirty-six pairs or more has no waypoints.
+ *
+ * @example
+ * ```ts
+ * import { PAIR_LETTERS } from "@johnmorrisdotca/tsunagi";
+ * console.log(PAIR_LETTERS);
+ * ```
  */
 export const PAIR_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz!@$%*()[]{},:;=?^_~/";
 
-/** The waypoints a layout may carry: a pair's capital in lower case, so only the first twenty-six pairs can have one. */
+/** The waypoints a layout may carry: a pair's capital in lower case, so only the first twenty-six pairs can have one.
+ *
+ * @example
+ * ```ts
+ * import { WAYPOINT_LETTERS } from "@johnmorrisdotca/tsunagi";
+ * console.log(WAYPOINT_LETTERS);
+ * ```
+ */
 export const WAYPOINT_LETTERS = "abcdefghijklmnopqrstuvwxyz";
 
-/** How many of `PAIR_LETTERS` are not small letters: a board that uses all of them has small letters for stones. */
+/** How many of `PAIR_LETTERS` are not small letters: a board that uses all of them has small letters for stones.
+ *
+ * @example
+ * ```ts
+ * import { CAPITAL_PAIRS } from "@johnmorrisdotca/tsunagi";
+ * console.log(CAPITAL_PAIRS);
+ * ```
+ */
 export const CAPITAL_PAIRS = 36;
 
-/** The characters that name pairs in a layout's cells: the first thirty-six (capitals and digits), or all eighty-two where the board uses every one of the thirty-six, which is when its small letters are stones and not waypoints. */
+/** The characters that name pairs in a layout's cells: the first thirty-six (capitals and digits), or all eighty-two where the board uses every one of the thirty-six, which is when its small letters are stones and not waypoints.
+ *
+ * @param cells - The row-major decoded cell values.
+ * @returns The characters that name pairs in a layout's cells: the first thirty-six (capitals and digits), or all eighty-two where the board uses every one of the thirty-six, which is when its small letters are stones and not waypoints.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { stoneLetters } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(stoneLetters(givens));
+ * ```
+ */
 export function stoneLetters(cells: string): string {
   const used = new Set<string>();
   for (const char of cells) {
@@ -90,11 +151,48 @@ export function stoneLetters(cells: string): string {
   return PAIR_LETTERS.slice(0, CAPITAL_PAIRS);
 }
 
-/** A cell in a decoded layout: an empty cell, a blocked one, or a stone of pair `n` (0 for A). */
+/** A cell in a decoded layout: an empty cell, a blocked one, or a stone of pair `n` (0 for A).
+ *
+ * @example
+ * ```ts
+ * import { CELL_EMPTY } from "@johnmorrisdotca/tsunagi";
+ * console.log(CELL_EMPTY);
+ * ```
+ */
 export const CELL_EMPTY = -1;
+/** The decoded blocked-cell sentinel.
+ *
+ * @example
+ * ```ts
+ * import { CELL_BLOCKED } from "@johnmorrisdotca/tsunagi";
+ * console.log(CELL_BLOCKED);
+ * ```
+ */
 export const CELL_BLOCKED = -2;
+/** The decoded bridge-cell sentinel.
+ *
+ * @example
+ * ```ts
+ * import { CELL_BRIDGE } from "@johnmorrisdotca/tsunagi";
+ * console.log(CELL_BRIDGE);
+ * ```
+ */
 export const CELL_BRIDGE = -3;
 
+/** A decoded board with pairs, cells, walls, waypoints, wrapping, portals and optional limits.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout } from "@johnmorrisdotca/tsunagi";
+ * import type { LinkLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const value: LinkLayout = layout;
+ * console.log(value);
+ * ```
+ */
 export type LinkLayout = {
   size: number;
   /** One per cell: `CELL_EMPTY` (a waypoint too), `CELL_BLOCKED`, `CELL_BRIDGE`, or the pair a stone belongs to. */
@@ -129,7 +227,17 @@ export type LinkLayout = {
  */
 const TAIL_ORDER = ["hex", "sparse", "wrap", "portals", "explosion", "strokes"] as const;
 
-/** Which of the tail's words a segment is, and what it says; null for none of them (the walls list). */
+/** Which of the tail's words a segment is, and what it says; null for none of them (the walls list).
+ *
+ * @param segment - One native layout-code suffix segment.
+ * @returns Which of the tail's words a segment is, and what it says; null for none of them (the walls list).
+ * @example
+ * ```ts
+ * import { tailWord } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(tailWord("strokes5"));
+ * ```
+ */
 export function tailWord(segment: string): { word: (typeof TAIL_ORDER)[number]; every?: number; blast?: boolean; list?: string } | null {
   if (segment === LINK_WRAP) return { word: "wrap" };
   if (segment.startsWith(LINK_PORTALS) && /^portals\d+-\d+(,\d+-\d+)*$/.test(segment)) return { word: "portals", list: segment.slice(LINK_PORTALS.length) };
@@ -142,29 +250,88 @@ export function tailWord(segment: string): { word: (typeof TAIL_ORDER)[number]; 
   return null;
 }
 
-/** The segment after the cells that makes a board wrap. */
+/** The segment after the cells that makes a board wrap.
+ *
+ * @example
+ * ```ts
+ * import { LINK_WRAP } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_WRAP);
+ * ```
+ */
 export const LINK_WRAP = "wrap";
 
-/** The word after the cells that begins a list of portals, each as its two cells. */
+/** The word after the cells that begins a list of portals, each as its two cells.
+ *
+ * @example
+ * ```ts
+ * import { LINK_PORTALS } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_PORTALS);
+ * ```
+ */
 export const LINK_PORTALS = "portals";
 
-/** The segment after the cells that makes a board a hexagon of hexagons. */
+/** The segment after the cells that makes a board a hexagon of hexagons.
+ *
+ * @example
+ * ```ts
+ * import { LINK_HEX } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_HEX);
+ * ```
+ */
 export const LINK_HEX = "hex";
 
-/** The segment after the cells that says a board has few, long lines. */
+/** The segment after the cells that says a board has few, long lines.
+ *
+ * @example
+ * ```ts
+ * import { LINK_SPARSE } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_SPARSE);
+ * ```
+ */
 export const LINK_SPARSE = "sparse";
 
-/** The most lines a sparse board of this side has: two thirds of the side — six on a 9×9, where nine is usual. */
+/** The most lines a sparse board of this side has: two thirds of the side — six on a 9×9, where nine is usual.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @returns The most lines a sparse board of this side has: two thirds of the side — six on a 9×9, where nine is usual.
+ * @example
+ * ```ts
+ * import { sparseMost } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(sparseMost(9));
+ * ```
+ */
 export function sparseMost(size: number): number {
   return Math.floor((2 * size) / 3);
 }
 
-/** The hexagon's radius on a board of this side: R, for a side of 2R + 1. */
+/** The hexagon's radius on a board of this side: R, for a side of 2R + 1.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @returns The hexagon's radius on a board of this side: R, for a side of 2R + 1.
+ * @example
+ * ```ts
+ * import { hexRadius } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(hexRadius(7));
+ * ```
+ */
 export function hexRadius(size: number): number {
   return Math.floor(size / 2);
 }
 
-/** Whether a cell of the square is inside the hexagon: at most R lattice steps from the middle. */
+/** Whether a cell of the square is inside the hexagon: at most R lattice steps from the middle.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param at - The zero-based cell index.
+ * @returns Whether a cell of the square is inside the hexagon: at most R lattice steps from the middle.
+ * @example
+ * ```ts
+ * import { inHex } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(inHex(7,24));
+ * ```
+ */
 export function inHex(size: number, at: number): boolean {
   const radius = hexRadius(size);
   const x = (at % size) - radius;
@@ -172,7 +339,18 @@ export function inHex(size: number, at: number): boolean {
   return Math.max(Math.abs(x), Math.abs(z), Math.abs(x + z)) <= radius;
 }
 
-/** An edge between two neighbouring cells, the same whichever way round they are named. */
+/** An edge between two neighbouring cells, the same whichever way round they are named.
+ *
+ * @param a - The first cell index.
+ * @param b - The second cell index.
+ * @returns An edge between two neighbouring cells, the same whichever way round they are named.
+ * @example
+ * ```ts
+ * import { edgeKey } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(edgeKey(1,2));
+ * ```
+ */
 export function edgeKey(a: number, b: number): string {
   return a < b ? `${a}-${b}` : `${b}-${a}`;
 }
@@ -182,6 +360,18 @@ export function edgeKey(a: number, b: number): string {
  * wrong length, a stray character, a letter used other than twice, or letters
  * not named in reading order. Null rather than a best guess — see AGENTS.md
  * "Nothing Answers What It Cannot Answer".
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @param size - The number of cells on each side of the board.
+ * @returns A layout read from its code, or null for a string that is not one: the wrong length, a stray character, a letter used other than twice, or letters not named in reading order. null rather than a best guess — see AGENTS.md "Nothing Answers What It Cannot Answer".
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(decodeLayout(givens,4)?.ends.length);
+ * ```
  */
 export function decodeLayout(code: string, size: number): LinkLayout | null {
   if (typeof code !== "string") return null;
@@ -282,7 +472,22 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
   return layout;
 }
 
-/** The cell a line comes out at after stepping from `from` into portal cell `into`: beyond the other portal, the same way on; -1 where there is none (off the board, or across a wall). */
+/** The cell a line comes out at after stepping from `from` into portal cell `into`: beyond the other portal, the same way on; -1 where there is none (off the board, or across a wall).
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param from - The preceding cell of a portal step.
+ * @param into - The cell entered by the step.
+ * @returns The cell a line comes out at after stepping from `from` into portal cell `into`: beyond the other portal, the same way on; -1 where there is none (off the board, or across a wall).
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, portalExit } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(portalExit(layout,0,1));
+ * ```
+ */
 export function portalExit(layout: LinkLayout, from: number, into: number): number {
   const { size } = layout;
   const other = layout.portals.get(into);
@@ -293,7 +498,20 @@ export function portalExit(layout: LinkLayout, from: number, into: number): numb
   return edgeOpen(layout, other, out) ? out : -1;
 }
 
-/** Whether two ways for a line to go from one cell to another exist on a board with portals (a portal and a step beside it, or two portals, or one in two directions), which an answer's cells could not tell apart. */
+/** Whether two ways for a line to go from one cell to another exist on a board with portals (a portal and a step beside it, or two portals, or one in two directions), which an answer's cells could not tell apart.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns Whether two ways for a line to go from one cell to another exist on a board with portals (a portal and a step beside it, or two portals, or one in two directions), which an answer's cells could not tell apart.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, portalsAreAmbiguous } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(portalsAreAmbiguous(layout));
+ * ```
+ */
 export function portalsAreAmbiguous(layout: LinkLayout): boolean {
   const { size, wrap } = layout;
   // Each way through a portal as the entry that makes it (from, into) and the entry that makes it backwards (out, the other cell).
@@ -355,14 +573,35 @@ function readWalls(list: string, size: number): Set<string> | null {
   return walls;
 }
 
-/** Edges in the one order a layout writes them: by their first cell, then their second. */
+/** Edges in the one order a layout writes them: by their first cell, then their second.
+ *
+ * @param x - The horizontal point, edge-code or coordinate value specified by this signature.
+ * @param y - The vertical point, edge-code or coordinate value specified by this signature.
+ * @returns Edges in the one order a layout writes them: by their first cell, then their second.
+ * @example
+ * ```ts
+ * import { compareEdges } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(compareEdges("1-2","1-5"));
+ * ```
+ */
 export function compareEdges(x: string, y: string): number {
   const [xa, xb] = x.split("-").map(Number) as [number, number];
   const [ya, yb] = y.split("-").map(Number) as [number, number];
   return xa - ya || xb - yb;
 }
 
-/** The walls as a layout writes them, after the cells: nothing where there are none. */
+/** The walls as a layout writes them, after the cells: nothing where there are none.
+ *
+ * @param walls - The blocked undirected edges as a-b strings.
+ * @returns The walls as a layout writes them, after the cells: nothing where there are none.
+ * @example
+ * ```ts
+ * import { encodeWalls } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(encodeWalls(new Set(["1-2","1-5"])));
+ * ```
+ */
 export function encodeWalls(walls: Iterable<string>): string {
   const list = [...walls].sort(compareEdges);
   return list.length === 0 ? "" : `${LINK_WALLS}${list.join(",")}`;
@@ -371,7 +610,22 @@ export function encodeWalls(walls: Iterable<string>): string {
 /** What a pair past `PAIR_LETTERS` is written as: a character no layout reads. */
 const NO_LETTER = "?";
 
-/** A layout's code, from its cells, walls, waypoints and whether it wraps: the inverse of `decodeLayout`. */
+/** A layout's code, from its cells, walls, waypoints and whether it wraps: the inverse of `decodeLayout`.
+ *
+ * @param cells - The row-major decoded cell values.
+ * @param walls - The blocked undirected edges as a-b strings.
+ * @param more - Optional suffix rules and decorations for the encoded layout.
+ * @returns A layout's code, from its cells, walls, waypoints and whether it wraps: the inverse of `decodeLayout`.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, encodeLayout } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(encodeLayout(layout.cells,layout.walls));
+ * ```
+ */
 export function encodeLayout(cells: readonly number[], walls: Iterable<string> = [], more: { waypoints?: ReadonlyMap<number, number>; wrap?: boolean; hex?: boolean; sparse?: boolean; portals?: Iterable<readonly [number, number]>; strokes?: number | null; explosions?: LinkLayout["explosions"] } = {}): string {
   const lastPair = Math.max(-1, ...cells);
   // A pair past the last letter has no spelling: it is written `?`, which no layout reads, so a filling of too many lines is refused rather than thrown on.
@@ -390,24 +644,73 @@ export function encodeLayout(cells: readonly number[], walls: Iterable<string> =
   return grid + encodeWalls(walls) + words + boom + limit;
 }
 
-/** The portals as a layout writes them, after `wrap`: each pair as its smaller cell and its larger, the pairs in order; nothing where there are none. */
+/** The portals as a layout writes them, after `wrap`: each pair as its smaller cell and its larger, the pairs in order; nothing where there are none.
+ *
+ * @param pairs - The portal-cell pairs.
+ * @returns The portals as a layout writes them, after `wrap`: each pair as its smaller cell and its larger, the pairs in order; nothing where there are none.
+ * @example
+ * ```ts
+ * import { encodePortals } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(encodePortals([[3,40]]));
+ * ```
+ */
 export function encodePortals(pairs: Iterable<readonly [number, number]>): string {
   const list = [...pairs].map(([a, b]): [number, number] => (a < b ? [a, b] : [b, a])).sort((x, y) => x[0] - y[0]);
   return list.length === 0 ? "" : `${LINK_PORTALS}${list.map(([a, b]) => `${a}-${b}`).join(",")}`;
 }
 
-/** A finished grid's code: the letter of the line through each cell, `#` where blocked, `+` on a bridge. */
+/** A finished grid's code: the letter of the line through each cell, `#` where blocked, `+` on a bridge.
+ *
+ * @param owners - The owning pair index for each filled cell.
+ * @returns A finished grid's code: the letter of the line through each cell, `#` where blocked, `+` on a bridge.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, encodeAnswer, linesOfAnswer, ownersOf } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(encodeAnswer(ownersOf(layout,solvedLines)));
+ * ```
+ */
 export function encodeAnswer(owners: readonly number[]): string {
   return owners.map((owner) => (owner === CELL_BLOCKED ? LINK_BLOCKED : owner === CELL_BRIDGE ? LINK_BRIDGE : owner < 0 ? LINK_EMPTY : PAIR_LETTERS[owner]!)).join("");
 }
 
-/** A layout's cells without its walls or wrap: the part of the code one character a cell. */
+/** A layout's cells without its walls or wrap: the part of the code one character a cell.
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @returns A layout's cells without its walls or wrap: the part of the code one character a cell.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { layoutCells } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(layoutCells(givens));
+ * ```
+ */
 export function layoutCells(code: string): string {
   const bar = code.indexOf(LINK_WALLS);
   return bar === -1 ? code : code.slice(0, bar);
 }
 
-/** The cell beside `at` one step `by` (-1, +1, -size, +size) on a board that wraps: off one edge and in at the other. */
+/** The cell beside `at` one step `by` (-1, +1, -size, +size) on a board that wraps: off one edge and in at the other.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param at - The zero-based cell index.
+ * @param by - The signed cell-index step.
+ * @returns The cell beside `at` one step `by` (-1, +1, -size, +size) on a board that wraps: off one edge and in at the other.
+ * @example
+ * ```ts
+ * import { wrappedStep } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(wrappedStep(4,3,1));
+ * ```
+ */
 export function wrappedStep(size: number, at: number, by: number): number {
   const row = Math.floor(at / size);
   const col = at % size;
@@ -423,6 +726,19 @@ export function wrappedStep(size: number, at: number, by: number): number {
  * right edge is +1, though the cells' numbers differ by size - 1. On a
  * hexagon, the two slanting steps too: up-right (1 - size) and down-left
  * (size - 1). Zero for cells that are not neighbours.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param a - The first cell index.
+ * @param b - The second cell index.
+ * @param wrap - Whether opposite board edges connect.
+ * @param hex - Whether to use hexagonal neighbours.
+ * @returns The way from `a` to its neighbour `b` as a step (-1, +1, -size, +size), counting a step across a wrapped edge as the step it is — right off the right edge is +1, though the cells' numbers differ by size - 1. On a hexagon, the two slanting steps too: up-right (1 - size) and down-left (size - 1). Zero for cells that are not neighbours.
+ * @example
+ * ```ts
+ * import { stepBetween } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(stepBetween(4,0,1,false));
+ * ```
  */
 export function stepBetween(size: number, a: number, b: number, wrap: boolean, hex = false): number {
   if (hex) return hexNeighboursOf(size, a).includes(b) ? b - a : 0;
@@ -435,12 +751,42 @@ export function stepBetween(size: number, a: number, b: number, wrap: boolean, h
   return 0;
 }
 
-/** A layout's step from `a` to its neighbour `b` (`stepBetween` on its own kind of board), or 0. */
+/** A layout's step from `a` to its neighbour `b` (`stepBetween` on its own kind of board), or 0.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param a - The first cell index.
+ * @param b - The second cell index.
+ * @returns A layout's step from `a` to its neighbour `b` (`stepBetween` on its own kind of board), or 0.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, layoutStep } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(layoutStep(layout,0,1));
+ * ```
+ */
 export function layoutStep(layout: LinkLayout, a: number, b: number): number {
   return stepBetween(layout.size, a, b, layout.wrap, layout.hex);
 }
 
-/** Whether a line may step from cell `a` to its neighbour `b`: no wall between them. */
+/** Whether a line may step from cell `a` to its neighbour `b`: no wall between them.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param a - The first cell index.
+ * @param b - The second cell index.
+ * @returns Whether a line may step from cell `a` to its neighbour `b`: no wall between them.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, edgeOpen } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(edgeOpen(layout,0,1));
+ * ```
+ */
 export function edgeOpen(layout: LinkLayout, a: number, b: number): boolean {
   return !layout.walls.has(edgeKey(a, b));
 }
@@ -449,6 +795,18 @@ export function edgeOpen(layout: LinkLayout, a: number, b: number): boolean {
  * Each cell's neighbours a line may step to on this board: the four around it,
  * less any across a wall. A bridge is a neighbour like any cell; what a line
  * does on one (go straight over) is the caller's to know.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns Each cell's neighbours a line may step to on this board: the four around it, less any across a wall. A bridge is a neighbour like any cell; what a line does on one (go straight over) is the caller's to know.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, layoutNeighbours } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(layoutNeighbours(layout)[0]);
+ * ```
  */
 export function layoutNeighbours(layout: LinkLayout): number[][] {
   const { size } = layout;
@@ -458,7 +816,18 @@ export function layoutNeighbours(layout: LinkLayout): number[][] {
   return layout.walls.size === 0 ? table : table.map((around, at) => around.filter((next) => edgeOpen(layout, at, next)));
 }
 
-/** The four neighbours of a cell on a square grid, as indexes; fewer at an edge. */
+/** The four neighbours of a cell on a square grid, as indexes; fewer at an edge.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param at - The zero-based cell index.
+ * @returns The four neighbours of a cell on a square grid, as indexes; fewer at an edge.
+ * @example
+ * ```ts
+ * import { neighboursOf } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(neighboursOf(4,0));
+ * ```
+ */
 export function neighboursOf(size: number, at: number): number[] {
   const row = Math.floor(at / size);
   const col = at % size;
@@ -470,7 +839,18 @@ export function neighboursOf(size: number, at: number): number[] {
   return out;
 }
 
-/** The six neighbours of a cell on the hexagon lattice, as indexes; fewer at an edge of the square (the hexagon's own edge is its `#` cells). */
+/** The six neighbours of a cell on the hexagon lattice, as indexes; fewer at an edge of the square (the hexagon's own edge is its `#` cells).
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param at - The zero-based cell index.
+ * @returns The six neighbours of a cell on the hexagon lattice, as indexes; fewer at an edge of the square (the hexagon's own edge is its `#` cells).
+ * @example
+ * ```ts
+ * import { hexNeighboursOf } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(hexNeighboursOf(7,24));
+ * ```
+ */
 export function hexNeighboursOf(size: number, at: number): number[] {
   const row = Math.floor(at / size);
   const col = at % size;
@@ -484,12 +864,32 @@ export function hexNeighboursOf(size: number, at: number): number[] {
   return out;
 }
 
-/** Every cell's six neighbours on the hexagon lattice, worked out once for a size. */
+/** Every cell's six neighbours on the hexagon lattice, worked out once for a size.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @returns Every cell's six neighbours on the hexagon lattice, worked out once for a size.
+ * @example
+ * ```ts
+ * import { hexNeighbourTable } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(hexNeighbourTable(7)[24]);
+ * ```
+ */
 export function hexNeighbourTable(size: number): number[][] {
   return Array.from({ length: size * size }, (_, at) => hexNeighboursOf(size, at));
 }
 
-/** Every cell's neighbours, worked out once for a size. */
+/** Every cell's neighbours, worked out once for a size.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @returns Every cell's neighbours, worked out once for a size.
+ * @example
+ * ```ts
+ * import { neighbourTable } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(neighbourTable(4)[0]);
+ * ```
+ */
 export function neighbourTable(size: number): number[][] {
   return Array.from({ length: size * size }, (_, at) => neighboursOf(size, at));
 }

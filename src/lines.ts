@@ -30,21 +30,78 @@ import { stepTable } from "./steps.ts";
  *    A bridge is in a line's list between the cells either side of it, and a
  *    line let go with its tip on a bridge ends before it. Pressing on a bridge
  *    draws nothing: two lines may be there.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines } from "@johnmorrisdotca/tsunagi";
+ * import type { Lines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * const value: Lines = lines;
+ * console.log(value);
+ * ```
  */
 export type Lines = readonly (readonly number[])[];
 
+/** The initial lines rooted at each pair’s first endpoint.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @returns The initial lines rooted at each pair’s first endpoint.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(noLines(layout));
+ * ```
+ */
 export function noLines(layout: LinkLayout): Lines {
   return layout.ends.map(() => []);
 }
 
-/** The pair whose line (or stone) holds each cell, `CELL_EMPTY` for none, `CELL_BLOCKED` where blocked, `CELL_BRIDGE` on a bridge (two lines may be there). */
+/** The pair whose line (or stone) holds each cell, `CELL_EMPTY` for none, `CELL_BLOCKED` where blocked, `CELL_BRIDGE` on a bridge (two lines may be there).
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @returns The pair whose line (or stone) holds each cell, `CELL_EMPTY` for none, `CELL_BLOCKED` where blocked, `CELL_BRIDGE` on a bridge (two lines may be there).
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines, ownersOf } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(ownersOf(layout,lines));
+ * ```
+ */
 export function ownersOf(layout: LinkLayout, lines: Lines): number[] {
   const owners = layout.cells.map((cell) => (cell === CELL_BLOCKED || cell === CELL_BRIDGE ? cell : cell >= 0 ? cell : CELL_EMPTY));
   lines.forEach((line, pair) => line.forEach((cell) => owners[cell] !== CELL_BRIDGE && (owners[cell] = pair)));
   return owners;
 }
 
-/** The pair going over a bridge each way, or -1: across (left to right) and down. */
+/** The pair going over a bridge each way, or -1: across (left to right) and down.
+ *
+ * @param lines - The native cell lists for every pair.
+ * @param bridge - The zero-based bridge-cell index.
+ * @returns The pair going over a bridge each way, or -1: across (left to right) and down.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines, overBridge } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(overBridge(lines,5));
+ * ```
+ */
 export function overBridge(lines: Lines, bridge: number): { across: number; down: number } {
   const out = { across: -1, down: -1 };
   lines.forEach((line, pair) => {
@@ -56,14 +113,47 @@ export function overBridge(lines: Lines, bridge: number): { across: number; down
   return out;
 }
 
-/** Whether a pair's line runs from one of its stones to the other. */
+/** Whether a pair's line runs from one of its stones to the other.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @param pair - The zero-based pair index.
+ * @returns Whether a pair's line runs from one of its stones to the other.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, joined, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(joined(layout,solvedLines,0));
+ * ```
+ */
 export function joined(layout: LinkLayout, lines: Lines, pair: number): boolean {
   const line = lines[pair]!;
   const [a, b] = layout.ends[pair]!;
   return line.length >= 2 && ((line[0] === a && line[line.length - 1] === b) || (line[0] === b && line[line.length - 1] === a));
 }
 
-/** Solved: every pair joined, every open cell on a line, and every bridge gone over both ways. */
+/** Solved: every pair joined, every open cell on a line, and every bridge gone over both ways.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @returns Solved: every pair joined, every open cell on a line, and every bridge gone over both ways.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { allJoined, decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(allJoined(layout,solvedLines));
+ * ```
+ */
 export function allJoined(layout: LinkLayout, lines: Lines): boolean {
   if (!layout.ends.every((_, pair) => joined(layout, lines, pair))) return false;
   if (!ownersOf(layout, lines).every((owner) => owner !== CELL_EMPTY)) return false;
@@ -78,6 +168,20 @@ export function allJoined(layout: LinkLayout, lines: Lines): boolean {
  * The pairs not joined yet, for Check: every pair whose line does not run from
  * one of its marbles to the other — a line stopped beside its partner looks
  * joined and is not. Nothing about where any line should go.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @returns The pairs not joined yet, for Check: every pair whose line does not run from one of its marbles to the other — a line stopped beside its partner looks joined and is not. Nothing about where any line should go.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines, unjoinedPairs } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(unjoinedPairs(layout,lines));
+ * ```
  */
 export function unjoinedPairs(layout: LinkLayout, lines: Lines): number[] {
   return layout.ends.map((_, pair) => pair).filter((pair) => !joined(layout, lines, pair));
@@ -87,6 +191,20 @@ export function unjoinedPairs(layout: LinkLayout, lines: Lines): number[] {
  * A level's answer drawn back as lines: each pair's cells, in order, from its
  * first marble to its second. How a solved level opens on its solved board.
  * Null for an answer that does not draw every pair as one unbroken line.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @returns A level's answer drawn back as lines: each pair's cells, in order, from its first marble to its second. How a solved level opens on its solved board. null for an answer that does not draw every pair as one unbroken line.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * console.log(linesOfAnswer(layout,answer));
+ * ```
  */
 export function linesOfAnswer(layout: LinkLayout, answer: string): Lines | null {
   const { size } = layout;
@@ -122,7 +240,23 @@ export function linesOfAnswer(layout: LinkLayout, answer: string): Lines | null 
   return out;
 }
 
-/** How many open cells have a line through them or a stone on them, and how many there are: a bridge counts twice, once each way over it. */
+/** How many open cells have a line through them or a stone on them, and how many there are: a bridge counts twice, once each way over it.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @returns How many open cells have a line through them or a stone on them, and how many there are: a bridge counts twice, once each way over it.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, filled, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(filled(layout,solvedLines));
+ * ```
+ */
 export function filled(layout: LinkLayout, lines: Lines): { done: number; of: number } {
   const open = layout.cells.filter((cell) => cell !== CELL_BLOCKED && cell !== CELL_BRIDGE).length;
   const bridges = layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
@@ -135,7 +269,23 @@ export function filled(layout: LinkLayout, lines: Lines): { done: number; of: nu
   return { done: covered.size + over, of: open + 2 * bridges.length };
 }
 
-/** The answer the lines make, in the answer's spelling (`encodeAnswer`). */
+/** The answer the lines make, in the answer's spelling (`encodeAnswer`).
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @returns The answer the lines make, in the answer's spelling (`encodeAnswer`).
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { answerOf, decodeLayout, linesOfAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(answerOf(layout,solvedLines));
+ * ```
+ */
 export function answerOf(layout: LinkLayout, lines: Lines): string {
   return encodeAnswer(ownersOf(layout, lines));
 }
@@ -149,7 +299,23 @@ function replaced(lines: Lines, pair: number, line: readonly number[]): Lines {
   return lines.map((each, at) => (at === pair ? line : each));
 }
 
-/** A press: the lines after it, and the pair now being drawn, or null where the press draws nothing. */
+/** A press: the lines after it, and the pair now being drawn, or null where the press draws nothing.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @param cell - The zero-based pointer target cell.
+ * @returns The lines and drawing pair; drawing is null when the press starts no line.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, noLines, pressAt } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(pressAt(layout,lines,layout.ends[0][0]));
+ * ```
+ */
 export function pressAt(layout: LinkLayout, lines: Lines, cell: number): { lines: Lines; drawing: number | null } {
   const stone = layout.cells[cell]!;
   if (stone === CELL_BRIDGE) return { lines, drawing: null };
@@ -166,7 +332,23 @@ function keptFrom(layout: LinkLayout, line: readonly number[], count: number): n
   return withoutPortalTail(layout, line.slice(0, count));
 }
 
-/** A line with the portal cells taken off its end, if it ends on any: a line is never left inside a portal. */
+/** A line with the portal cells taken off its end, if it ends on any: a line is never left inside a portal.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param line - The cell sequence of one native line.
+ * @returns A line with the portal cells taken off its end, if it ends on any: a line is never left inside a portal.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, linesOfAnswer, withoutPortalTail } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(withoutPortalTail(layout,solvedLines[0]));
+ * ```
+ */
 export function withoutPortalTail(layout: LinkLayout, line: readonly number[]): number[] {
   let kept = [...line];
   while (kept.length > 0 && layout.portals.has(kept[kept.length - 1]!)) kept = kept.slice(0, -1);
@@ -180,7 +362,26 @@ function cutBefore(layout: LinkLayout, lines: Lines, other: number, cell: number
   return replaced(lines, other, cut.length <= 1 ? [] : cut);
 }
 
-/** A drag of the pair being drawn into `cell`: one step, as the finger enters a cell. */
+/** A drag of the pair being drawn into `cell`: one step, as the finger enters a cell.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @param pair - The zero-based pair index.
+ * @param cell - The zero-based pointer target cell.
+ * @returns A drag of the pair being drawn into `cell`: one step, as the finger enters a cell.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, dragTo, linesOfAnswer, noLines, pressAt } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * console.log(dragTo(layout,pressAt(layout,lines,layout.ends[0][0]).lines,0,solvedLines[0][1]));
+ * ```
+ */
 export function dragTo(layout: LinkLayout, lines: Lines, pair: number, cell: number): Lines {
   const line = lines[pair]!;
   if (line.length === 0) return lines;
@@ -254,6 +455,22 @@ function intoPortal(layout: LinkLayout, lines: Lines, pair: number, cell: number
  * A drag that jumped several cells between two pointer events (a quick
  * flick): walked one cell at a time along the row, then the column, so a fast
  * finger draws what a slow one would. Stops at the first cell a step refuses.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @param pair - The zero-based pair index.
+ * @param cell - The zero-based pointer target cell.
+ * @returns A drag that jumped several cells between two pointer events (a quick flick): walked one cell at a time along the row, then the column, so a fast finger draws what a slow one would. Stops at the first cell a step refuses.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, dragThrough, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(dragThrough(layout,lines,0,layout.ends[0][0]));
+ * ```
  */
 export function dragThrough(layout: LinkLayout, lines: Lines, pair: number, cell: number): Lines {
   const size = layout.size;
@@ -289,16 +506,48 @@ function portalCells(layout: LinkLayout, line: readonly number[]): number {
  * toward that cell moved by the reach: it starts at none and is set again each
  * time the line goes through a portal or back over one, so that the finger is
  * over the line's end from then on, and moving it a cell moves the end a cell.
+ *
+ * @example
+ * ```ts
+ * import type { Reach } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: Reach = {dr:0,dc:1};
+ * console.log(value);
+ * ```
  */
 export type Reach = { dr: number; dc: number };
 
-/** No distance: the finger draws toward the cell it is over. */
+/** No distance: the finger draws toward the cell it is over.
+ *
+ * @example
+ * ```ts
+ * import { NO_REACH } from "@johnmorrisdotca/tsunagi";
+ * console.log(NO_REACH);
+ * ```
+ */
 export const NO_REACH: Reach = { dr: 0, dc: 0 };
 
 /**
  * A finger over `finger`, drawing the line of `pair`, with the reach it had:
  * the lines after it and the reach now. This is `dragThrough` for a board with
  * portals; on a board without them the reach stays none and it is the same.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @param pair - The zero-based pair index.
+ * @param finger - The current finger target cell.
+ * @param reach - The previous drag direction for continuous pointer movement.
+ * @returns A finger over `finger`, drawing the line of `pair`, with the reach it had: the lines after it and the reach now. This is `dragThrough` for a board with portals; on a board without them the reach stays none and it is the same.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, dragFinger, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(dragFinger(layout,lines,0,layout.ends[0][0]));
+ * ```
  */
 export function dragFinger(layout: LinkLayout, lines: Lines, pair: number, finger: number, reach: Reach = NO_REACH): { lines: Lines; reach: Reach } {
   const { size } = layout;
@@ -327,7 +576,22 @@ function hexToward(size: number, from: number, to: number): number {
   return hexNeighboursOf(size, from).reduce((best, next) => (apart(next, to) < apart(best, to) ? next : best));
 }
 
-/** Letting go: a line of only its stone is no line (a tap on a stone clears it), and a line ends before a bridge it stopped on. */
+/** Letting go: a line of only its stone is no line (a tap on a stone clears it), and a line ends before a bridge it stopped on.
+ *
+ * @param lines - The native cell lists for every pair.
+ * @param layout - The decoded native board and its rule settings.
+ * @returns Letting go: a line of only its stone is no line (a tap on a stone clears it), and a line ends before a bridge it stopped on.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, letGo, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(letGo(lines,layout));
+ * ```
+ */
 export function letGo(lines: Lines, layout?: LinkLayout): Lines {
   const onBridge = (line: readonly number[]) => layout !== undefined && line.length > 0 && layout.cells[line[line.length - 1]!] === CELL_BRIDGE;
   if (!lines.some((line) => line.length === 1 || onBridge(line))) return lines;
@@ -349,6 +613,22 @@ export function letGo(lines: Lines, layout?: LinkLayout): Lines {
 const FROM: Record<string, number> = { n: 0, e: 1, s: 2, w: 3, u: 4, v: 5 };
 const PROGRESS_CHARS = /^[.*neswuvp]*$/;
 
+/** Encode current lines as native resumable progress for this layout.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param lines - The native cell lists for every pair.
+ * @returns Encode current lines as native resumable progress for this layout.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, encodeLines, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(encodeLines(layout,lines));
+ * ```
+ */
 export function encodeLines(layout: LinkLayout, lines: Lines): string {
   const size = layout.size;
   const out = new Array<string>(size * size).fill(".");
@@ -374,7 +654,22 @@ export function encodeLines(layout: LinkLayout, lines: Lines): string {
   return out.join("");
 }
 
-/** Whether a progress code has the shape of one: a size's cells in the progress alphabet. */
+/** Whether a progress code has the shape of one: a size's cells in the progress alphabet.
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @param size - The number of cells on each side of the board.
+ * @returns Whether a progress code has the shape of one: a size's cells in the progress alphabet.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, encodeLines, linesCodeFits, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(linesCodeFits(encodeLines(layout,lines),4));
+ * ```
+ */
 export function linesCodeFits(code: string, size: number): boolean {
   return code.length === size * size && PROGRESS_CHARS.test(code);
 }
@@ -384,6 +679,20 @@ export function linesCodeFits(code: string, size: number): boolean {
  * or null for a code that does not describe lines on it: a start that is not
  * a stone, a step from nowhere, a line through another pair's stone, a cell
  * two lines claim.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param code - The native layout, answer or line-progress string.
+ * @returns Lines read back from a progress code against the layout they were drawn on, or null for a code that does not describe lines on it: a start that is not a stone, a step from nowhere, a line through another pair's stone, a cell two lines claim.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, decodeLines, encodeLines, noLines } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * console.log(decodeLines(layout,encodeLines(layout,lines)));
+ * ```
  */
 export function decodeLines(layout: LinkLayout, code: string): Lines | null {
   const size = layout.size;

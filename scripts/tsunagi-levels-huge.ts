@@ -19,6 +19,7 @@
  *
  * Nothing from 4×4 to 15×15 is touched: no level, no answer, no number.
  */
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
 import { PAIR_LETTERS } from "../src/code.ts";
@@ -150,7 +151,7 @@ for (const size of asked.length > 0 ? asked : SIZES) {
     const [layout, answer] = levels[slot]!;
     levels[slot] = [explosive(layout, size, role).layout, answer];
   }
-  writeFileSync(`src/levels/size${size}.data.ts`, fileFor(size, levels));
+  writeFileSync(`src/levels/size${size}.data.ts`, withLevelExamples(fileFor(size, levels), `@johnmorrisdotca/tsunagi/levels-${size}`));
   const scores = difficultyScores(levels.map(([layout, answer]) => measureLevel(layout, answer, size)!), size);
   marks[size] = scores.map((score) => String(Math.min(5, 1 + Math.floor(score / 20)))).join("");
   const layouts = levels.map(([layout]) => layout);

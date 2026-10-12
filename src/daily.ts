@@ -13,22 +13,59 @@
  */
 import { TSUNAGI_LEVEL_COUNTS } from "./levelCounts.ts";
 
-/** A calendar date, `YYYY-MM-DD`. */
+/** A calendar date, `YYYY-MM-DD`.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiDay } from "@johnmorrisdotca/tsunagi";
+ * import { tsunagiDay } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: TsunagiDay = tsunagiDay("2026-10-12");
+ * console.log(value);
+ * ```
+ */
 export type TsunagiDay = string;
 
 const DAY_MS = 86_400_000;
 
-/** Each day moves this many levels along a size's ladder, round to the start when it runs out. It is prime, and no size's count of levels is a multiple of it. Each size starts from a place of its own, so the sizes do not all stand at the same level on one day. */
+/** Each day moves this many levels along a size's ladder, round to the start when it runs out. It is prime, and no size's count of levels is a multiple of it. Each size starts from a place of its own, so the sizes do not all stand at the same level on one day.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_DAILY_STRIDE } from "@johnmorrisdotca/tsunagi";
+ * console.log(TSUNAGI_DAILY_STRIDE);
+ * ```
+ */
 export const TSUNAGI_DAILY_STRIDE = 97;
 
-/** Whether a text is a real date written `YYYY-MM-DD`: 2026-02-30 is not. */
+/** Whether a text is a real date written `YYYY-MM-DD`: 2026-02-30 is not.
+ *
+ * @param text - The calendar date text to validate.
+ * @returns Whether a text is a real date written `YYYY-MM-DD`: 2026-02-30 is not.
+ * @example
+ * ```ts
+ * import { isTsunagiDay } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(isTsunagiDay("2026-10-12"));
+ * ```
+ */
 export function isTsunagiDay(text: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
   const at = Date.parse(`${text}T00:00:00Z`);
   return !Number.isNaN(at) && new Date(at).toISOString().slice(0, 10) === text;
 }
 
-/** The day a moment falls on, in UTC, or the same day if it is already written as one. Throws on a date that is not one. */
+/** The day a moment falls on, in UTC, or the same day if it is already written as one. Throws on a date that is not one.
+ *
+ * @param date - A UTC date or native date string.
+ * @returns The day a moment falls on, in UTC, or the same day if it is already written as one. Throws on a date that is not one.
+ * @example
+ * ```ts
+ * import { tsunagiDay } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(tsunagiDay("2026-10-12"));
+ * ```
+ */
 export function tsunagiDay(date: string | Date): TsunagiDay {
   const day = typeof date === "string" ? date : Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   if (!isTsunagiDay(day)) throw new RangeError(`tsunagi: ${String(typeof date === "string" ? date : "an invalid Date")} is not a day`);
@@ -38,6 +75,16 @@ export function tsunagiDay(date: string | Date): TsunagiDay {
 /**
  * The level of the day at a size: a whole number from 1 to that size's count of levels, or null for a size there
  * are no levels of. It ignores which levels a player has opened: today's level is open to everybody.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param date - A UTC date or native date string.
+ * @returns The level of the day at a size: a whole number from 1 to that size's count of levels, or null for a size there are no levels of. It ignores which levels a player has opened: today's level is open to everybody.
+ * @example
+ * ```ts
+ * import { dailyTsunagiLevel } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(dailyTsunagiLevel(4,"2026-10-12"));
+ * ```
  */
 export function dailyTsunagiLevel(size: number, date: string | Date): number | null {
   const count = TSUNAGI_LEVEL_COUNTS[size];

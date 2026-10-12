@@ -7,9 +7,24 @@
  *
  * 2026-09-26: a hundred a size ordered by solver effort became 256 (192 at
  * 4×4) ordered by the measured difficulty.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_RENUMBERED_AT } from "@johnmorrisdotca/tsunagi/renumbered";
+ * console.log(TSUNAGI_RENUMBERED_AT);
+ * ```
  */
 export const TSUNAGI_RENUMBERED_AT = "2026-09-26";
 
+/** The new one-based number for each old level, by size, used to migrate stored records.
+ *
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_RENUMBERED } from "@johnmorrisdotca/tsunagi/renumbered";
+ * console.log(Object.keys(TSUNAGI_RENUMBERED));
+ * ```
+ */
 export const TSUNAGI_RENUMBERED: Readonly<Record<number, readonly number[]>> = {
   4: [2, 3, 4, 5, 23, 50, 51, 98, 99, 1, 19, 20, 13, 14, 15, 16, 21, 17, 75, 44, 45, 37, 26, 27, 28, 29, 30, 38, 94, 83, 76, 77, 58, 59, 60, 61, 62, 63, 78, 64, 65, 52, 66, 67, 84, 123, 124, 105, 106, 107, 125, 108, 126, 141, 154, 162, 100, 95, 47, 48, 134, 135, 127, 128, 109, 129, 119, 90, 85, 86, 91, 151, 152, 165, 184, 142, 143, 136, 144, 171, 181, 145, 149, 190, 170, 177, 178, 118, 120, 163, 155, 174, 168, 187, 159, 179, 188, 169, 185, 182],
   5: [5, 19, 105, 2, 3, 20, 8, 10, 30, 31, 32, 21, 64, 50, 47, 87, 109, 96, 116, 142, 24, 33, 11, 37, 44, 38, 34, 80, 94, 65, 128, 119, 88, 134, 143, 163, 43, 61, 51, 106, 181, 156, 219, 169, 185, 211, 45, 62, 110, 204, 170, 135, 175, 254, 52, 197, 220, 97, 164, 198, 226, 81, 144, 120, 165, 209, 82, 199, 145, 176, 213, 89, 158, 193, 256, 111, 221, 190, 83, 159, 98, 200, 146, 242, 186, 129, 112, 130, 182, 121, 255, 243, 214, 131, 113, 183, 229, 236, 171, 245],

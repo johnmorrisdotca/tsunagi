@@ -6,6 +6,12 @@
  * WRITTEN BY `node scripts/tsunagi-levels-portals.ts`, NEVER BY HAND, from the pools
  * `node scripts/tsunagi-reduce-pool.ts` makes. Every level is proved to have exactly one
  * answer by `portalLevels.test.ts`, and no two are the same board under a turn or a mirror.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_PORTAL_LEVELS } from "@johnmorrisdotca/tsunagi/levels-portals";
+ * console.log(Object.keys(TSUNAGI_PORTAL_LEVELS));
+ * ```
  */
 export const TSUNAGI_PORTAL_LEVELS: Readonly<Record<number, readonly (readonly [string, string])[]>> = {
   5: [

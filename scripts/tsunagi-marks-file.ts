@@ -1,3 +1,4 @@
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
 
 /**
@@ -7,7 +8,7 @@ import type { TwistRole } from "../src/ladder.types.ts";
  * kind of level keeps what the others made.
  */
 export function marksFile(marks: Record<number, string>, roles: Record<number, Record<number, TwistRole>>, portalMarks: Record<number, string>): string {
-  return [
+  return withLevelExamples([
     "/**",
     " * EVERY TSUNAGI LEVEL'S DIFFICULTY, 1 TO 5: one digit a level, level 1 first,",
     " * from its measured score (`difficulty.ts`) among every level of its size —",
@@ -32,5 +33,5 @@ export function marksFile(marks: Record<number, string>, roles: Record<number, R
     ...Object.entries(portalMarks).map(([size, digits]) => `  ${size}: "${digits}",`),
     "};",
     "",
-  ].join("\n");
+  ].join("\n"), "@johnmorrisdotca/tsunagi/marks");
 }

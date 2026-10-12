@@ -7,6 +7,12 @@
  * level is proved to have exactly one answer by `levels.test.ts`, no two
  * are the same board under a turn or a mirror, and `difficulty.test.ts` holds
  * the order to the measure.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
+ * console.log(TSUNAGI_5.length, TSUNAGI_5[0][0]);
+ * ```
  */
 export const TSUNAGI_5: readonly (readonly [string, string])[] = [
   ["AB..B.CDEF.....A..E.C..DF", "ABBBBACDEFACDEFACDEFCCDDF"],

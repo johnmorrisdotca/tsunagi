@@ -41,7 +41,18 @@ async function importPortalSize(size: number): Promise<readonly LevelRow[]> {
   return levels;
 }
 
-/** A size's levels in a set, loaded once and kept: the first set's by default, or the ones with portals. */
+/** A size's levels in a set, loaded once and kept: the first set's by default, or the ones with portals.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param set - The native level set or palette specified by the signature.
+ * @returns A size's levels in a set, loaded once and kept: the first set's by default, or the ones with portals.
+ * @example
+ * ```ts
+ * import { loadTsunagiLevels } from "@johnmorrisdotca/tsunagi/levels";
+ *
+ * console.log((await loadTsunagiLevels(4)).length);
+ * ```
+ */
 export async function loadTsunagiLevels(size: number, set: TsunagiSet = "classic"): Promise<readonly LevelRow[]> {
   const kept = set === "portals" ? loadedPortals : loaded;
   const already = kept.get(size);
@@ -51,19 +62,56 @@ export async function loadTsunagiLevels(size: number, set: TsunagiSet = "classic
   return levels;
 }
 
-/** Every size's levels of the first set, loaded. */
+/** Every size's levels of the first set, loaded.
+ *
+ * @returns Every size's levels of the first set, loaded.
+ * @example
+ * ```ts no-run
+ * import { loadEveryTsunagiLevel, tsunagiLevelsOf } from "@johnmorrisdotca/tsunagi/levels";
+ *
+ * await loadEveryTsunagiLevel();
+ * console.log(tsunagiLevelsOf(4).length);
+ * ```
+ */
 export async function loadEveryTsunagiLevel(): Promise<void> {
   await Promise.all(TSUNAGI_SIZES.map((size) => loadTsunagiLevels(size)));
 }
 
-/** A size already loaded in a set, or a refusal: nothing answers for a list it does not have. */
+/** A size already loaded in a set, or a refusal: nothing answers for a list it does not have.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param set - The native level set or palette specified by the signature.
+ * @returns A size already loaded in a set, or a refusal: nothing answers for a list it does not have.
+ * @example
+ * ```ts
+ * import { loadTsunagiLevels, tsunagiLevelsOf } from "@johnmorrisdotca/tsunagi/levels";
+ *
+ * await loadTsunagiLevels(4);
+ * console.log(tsunagiLevelsOf(4).length);
+ * ```
+ */
 export function tsunagiLevelsOf(size: number, set: TsunagiSet = "classic"): readonly LevelRow[] {
   const levels = (set === "portals" ? loadedPortals : loaded).get(size);
   if (levels === undefined) throw new Error(`The ${size}×${size} Tsunagi ${set === "portals" ? "portal " : ""}levels have not been loaded (loadTsunagiLevels).`);
   return levels;
 }
 
-/** The level a layout is, at a loaded size and set, or null for a layout no level has. */
+/** The level a layout is, at a loaded size and set, or null for a layout no level has.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param givens - The original native layout code.
+ * @param set - The native level set or palette specified by the signature.
+ * @returns The level a layout is, at a loaded size and set, or null for a layout no level has.
+ * @example
+ * ```ts
+ * import { loadTsunagiLevels, tsunagiLevelOf } from "@johnmorrisdotca/tsunagi/levels";
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ *
+ * await loadTsunagiLevels(4);
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(tsunagiLevelOf(4,givens));
+ * ```
+ */
 export function tsunagiLevelOf(size: number, givens: string, set: TsunagiSet = "classic"): number | null {
   const at = tsunagiLevelsOf(size, set).findIndex(([layout]) => layout === givens);
   return at === -1 ? null : at + 1;

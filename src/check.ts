@@ -19,9 +19,38 @@ import { bridgesOf, stepTable, type Step } from "./steps.ts";
  * Each portal's two cells belong to one line, which goes in at one and out of
  * the other exactly once (a step `steps.ts` gives with the portal in `through`).
  */
-/** What a check says: joined, or the first reason it is not. */
+/** What a check says: joined, or the first reason it is not.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import type { TsunagiCheck } from "@johnmorrisdotca/tsunagi";
+ * import { checkTsunagiAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const value: TsunagiCheck = checkTsunagiAnswer(4,givens,answer);
+ * console.log(value);
+ * ```
+ */
 export type TsunagiCheck = { ok: true } | { ok: false; reason: string };
 
+/** Validate that an answer fills this board with legal, separate lines connecting every pair.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param givens - The original native layout code.
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @returns Validate that an answer fills this board with legal, separate lines connecting every pair.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { checkTsunagiAnswer } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * console.log(checkTsunagiAnswer(4,givens,answer));
+ * ```
+ */
 export function checkTsunagiAnswer(size: number, givens: string, answer: string): TsunagiCheck {
   const layout = decodeLayout(givens, size);
   if (layout === null) return { ok: false, reason: "the givens are not a Tsunagi layout" };

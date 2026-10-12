@@ -25,13 +25,42 @@ import { allJoined, answerOf, dragFinger, filled, joined, letGo, linesOfAnswer, 
  *  - CHECK flags the pairs not yet joined; the flags go with the next change.
  */
 
-/** How a board's explosions are played: as made, softened (a boom for a blast, half as often) or not at all. */
+/** How a board's explosions are played: as made, softened (a boom for a blast, half as often) or not at all.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiExplosionChoice } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: TsunagiExplosionChoice = "soft";
+ * console.log(value);
+ * ```
+ */
 export type TsunagiExplosionChoice = "on" | "soft" | "off";
 
-/** The help a solve used: Cheat drew a line, or explosions were softened or turned off. */
+/** The help a solve used: Cheat drew a line, or explosions were softened or turned off.
+ *
+ * @example
+ * ```ts
+ * import type { TsunagiHelp } from "@johnmorrisdotca/tsunagi";
+ *
+ * const value: TsunagiHelp = "cheated";
+ * console.log(value);
+ * ```
+ */
 export type TsunagiHelp = "cheated" | "explosions-soft" | "explosions-off";
 
-/** What a game is told when it starts. */
+/** What a game is told when it starts.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import type { TsunagiGameOptions } from "@johnmorrisdotca/tsunagi";
+ *
+ * const answer = TSUNAGI_4[0][1];
+ * const value: TsunagiGameOptions = {answer,cheats:true};
+ * console.log(value);
+ * ```
+ */
 export type TsunagiGameOptions = {
   /** The board's one answer, as a code. With it, a solve must be that answer and Cheat is possible; without it, any full, joined board is a solve. */
   answer?: string;
@@ -43,6 +72,21 @@ export type TsunagiGameOptions = {
   lines?: Lines;
 };
 
+/** The complete immutable puzzle state, current stroke, undo history and assistance flags.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ * import type { TsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * const value: TsunagiGame = game;
+ * console.log(value);
+ * ```
+ */
 export type TsunagiGame = {
   /** The layout as it is played: its explosions as chosen. */
   layout: LinkLayout;
@@ -79,7 +123,22 @@ export type TsunagiGame = {
 
 const UNDO_MOST = 200;
 
-/** A game on a layout code, or null for a code that is no layout at that size. */
+/** A game on a layout code, or null for a code that is no layout at that size.
+ *
+ * @param givens - The original native layout code.
+ * @param size - The number of cells on each side of the board.
+ * @param options - Native drawing, geometry, game or mount settings.
+ * @returns A game on a layout code, or null for a code that is no layout at that size.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * console.log(newTsunagiGame(givens,4,{answer})?.solved);
+ * ```
+ */
 export function newTsunagiGame(givens: string, size: number, options: TsunagiGameOptions = {}): TsunagiGame | null {
   const layout = decodeLayout(givens, size);
   if (layout === null) return null;
@@ -112,12 +171,40 @@ function isSolved(layout: LinkLayout, lines: Lines, answer: string | null): bool
   return allJoined(layout, lines) && (answer === null || answerOf(layout, lines) === answer);
 }
 
-/** Whether the game is out of strokes before it is solved: it takes nothing more until `restartGame`. */
+/** Whether the game is out of strokes before it is solved: it takes nothing more until `restartGame`.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Whether the game is out of strokes before it is solved: it takes nothing more until `restartGame`.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame, outOfStrokes } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(outOfStrokes(game));
+ * ```
+ */
 export function outOfStrokes(game: TsunagiGame): boolean {
   return game.layout.strokes !== null && game.strokes >= game.layout.strokes && !game.solved;
 }
 
-/** Whether the game takes no more strokes: solved, or out of strokes. */
+/** Whether the game takes no more strokes: solved, or out of strokes.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Whether the game takes no more strokes: solved, or out of strokes.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { gameOver, newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(gameOver(game));
+ * ```
+ */
 export function gameOver(game: TsunagiGame): boolean {
   return game.solved || outOfStrokes(game);
 }
@@ -126,7 +213,23 @@ function shown(game: TsunagiGame, lines: Lines, more: Partial<TsunagiGame> = {})
   return { ...game, lines, flagged: null, checked: null, ...more };
 }
 
-/** A finger down on a cell: starts a line from a marble, or carries on from a line's cell. Nothing where there is nothing to draw. */
+/** A finger down on a cell: starts a line from a marble, or carries on from a line's cell. Nothing where there is nothing to draw.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @param cell - The zero-based pointer target cell.
+ * @returns A finger down on a cell: starts a line from a marble, or carries on from a line's cell. Nothing where there is nothing to draw.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, newTsunagiGame, pressGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(pressGame(game,layout.ends[0][0]).drawing);
+ * ```
+ */
 export function pressGame(game: TsunagiGame, cell: number): TsunagiGame {
   if (gameOver(game) || game.drawing !== null) return game;
   const pressed = pressAt(game.layout, game.lines, cell);
@@ -134,14 +237,46 @@ export function pressGame(game: TsunagiGame, cell: number): TsunagiGame {
   return shown(game, pressed.lines, { drawing: pressed.drawing, before: game.lines, reach: NO_REACH, blasted: null, exploded: null });
 }
 
-/** The finger carried into a cell: the line grows, shortens or cuts another back, as the rules say. */
+/** The finger carried into a cell: the line grows, shortens or cuts another back, as the rules say.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @param cell - The zero-based pointer target cell.
+ * @returns The finger carried into a cell: the line grows, shortens or cuts another back, as the rules say.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, dragGame, linesOfAnswer, newTsunagiGame, noLines, pressGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const layout = decodeLayout(givens,4)!;
+ * const lines = noLines(layout);
+ * const solvedLines = linesOfAnswer(layout,answer)!;
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(dragGame(pressGame(game,layout.ends[0][0]),solvedLines[0][1]).lines);
+ * ```
+ */
 export function dragGame(game: TsunagiGame, cell: number): TsunagiGame {
   if (game.drawing === null) return game;
   const dragged = dragFinger(game.layout, game.lines, game.drawing, cell, game.reach);
   return dragged.lines === game.lines && dragged.reach === game.reach ? game : shown(game, dragged.lines, { reach: dragged.reach });
 }
 
-/** The finger lifted: the stroke is counted if it changed the board, the board may be solved, and an explosion may go off. */
+/** The finger lifted: the stroke is counted if it changed the board, the board may be solved, and an explosion may go off.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns The finger lifted: the stroke is counted if it changed the board, the board may be solved, and an explosion may go off.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { liftGame, newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(liftGame(game));
+ * ```
+ */
 export function liftGame(game: TsunagiGame): TsunagiGame {
   if (game.drawing === null) return game;
   const lines = letGo(game.lines, game.layout);
@@ -155,20 +290,62 @@ export function liftGame(game: TsunagiGame): TsunagiGame {
   return { ...ended, strokes, lines: blown.lines, undo: [], blasted: blown.cells, exploded: blown.hit.length > 1 ? "blast" : "boom" };
 }
 
-/** Undo: the lines as they were before the last stroke. Nothing once the game is over. */
+/** Undo: the lines as they were before the last stroke. Nothing once the game is over.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Undo: the lines as they were before the last stroke. Nothing once the game is over.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame, undoGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(undoGame(game));
+ * ```
+ */
 export function undoGame(game: TsunagiGame): TsunagiGame {
   if (gameOver(game) || game.drawing !== null || game.undo.length === 0) return game;
   const lines = game.undo[game.undo.length - 1]!;
   return shown(game, lines, { undo: game.undo.slice(0, -1), blasted: null, exploded: null, solved: isSolved(game.layout, lines, game.answer) });
 }
 
-/** Restart: every line cleared and the strokes counted again (Undo can bring the lines back). A game that is solved or out of strokes restarts too. */
+/** Restart: every line cleared and the strokes counted again (Undo can bring the lines back). A game that is solved or out of strokes restarts too.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Restart: every line cleared and the strokes counted again (Undo can bring the lines back). A game that is solved or out of strokes restarts too.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame, restartGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(restartGame(game));
+ * ```
+ */
 export function restartGame(game: TsunagiGame): TsunagiGame {
   if (game.drawing !== null || game.lines.every((line) => line.length === 0)) return game;
   return shown(game, noLines(game.layout), { undo: [...game.undo.slice(-(UNDO_MOST - 1)), game.lines], strokes: 0, blasted: null, exploded: null, cheated: false, solved: false });
 }
 
-/** Check: the pairs not joined yet are flagged, and how many cells are still empty is said. */
+/** Check: the pairs not joined yet are flagged, and how many cells are still empty is said.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Check: the pairs not joined yet are flagged, and how many cells are still empty is said.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { checkGame, newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(checkGame(game));
+ * ```
+ */
 export function checkGame(game: TsunagiGame): TsunagiGame {
   if (gameOver(game) || game.drawing !== null) return game;
   const filledNow = filled(game.layout, game.lines);
@@ -178,6 +355,19 @@ export function checkGame(game: TsunagiGame): TsunagiGame {
 /**
  * Cheat: one unfinished line drawn as the answer has it, anything in its way cut back. It spends no stroke, and the
  * game is `helped` ever after. Nothing unless the game was made with `cheats` and an `answer`.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Cheat: one unfinished line drawn as the answer has it, anything in its way cut back. It spends no stroke, and the game is `helped` ever after. Nothing unless the game was made with `cheats` and an `answer`.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { cheatGame, newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(cheatGame(game));
+ * ```
  */
 export function cheatGame(game: TsunagiGame): TsunagiGame {
   if (!game.cheats || game.answer === null || gameOver(game) || game.drawing !== null) return game;
@@ -189,23 +379,71 @@ export function cheatGame(game: TsunagiGame): TsunagiGame {
   return shown(game, drawn.lines, { undo: [...game.undo.slice(-(UNDO_MOST - 1)), game.lines], cheated: true, solved, blasted: null, exploded: null });
 }
 
-/** The help a game has used so far, the one that costs more where it used two; null for none. */
+/** The help a game has used so far, the one that costs more where it used two; null for none.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns The help a game has used so far, the one that costs more where it used two; null for none.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { helpOf, newTsunagiGame } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(helpOf(game));
+ * ```
+ */
 export function helpOf(game: TsunagiGame): TsunagiHelp | null {
   return strongestTsunagiHelp([game.cheated ? "cheated" : null, game.eased]);
 }
 
-/** Of several helps, the one a solve is kept with: explosions off, then Cheat, then explosions softened. */
+/** Of several helps, the one a solve is kept with: explosions off, then Cheat, then explosions softened.
+ *
+ * @param helps - Assistance flags from the solves to combine.
+ * @returns The most significant assistance flag, or null when all solves were unassisted.
+ * @example
+ * ```ts
+ * import { strongestTsunagiHelp } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(strongestTsunagiHelp([null,"cheated","explosions-off"]));
+ * ```
+ */
 export function strongestTsunagiHelp(helps: readonly (TsunagiHelp | null)[]): TsunagiHelp | null {
   for (const help of ["explosions-off", "cheated", "explosions-soft"] as const) if (helps.includes(help)) return help;
   return null;
 }
 
-/** Whether a solve with this help (or none) opens what a solve opens: every help but explosions off, whose block's lesson was not played. */
+/** Whether a solve with this help (or none) opens what a solve opens: every help but explosions off, whose block's lesson was not played.
+ *
+ * @param help - The solve’s assistance flag, or null for no help.
+ * @returns Whether a solve with this help (or none) opens what a solve opens: every help but explosions off, whose block's lesson was not played.
+ * @example
+ * ```ts
+ * import { helpOpensNext } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(helpOpensNext("cheated"));
+ * ```
+ */
 export function helpOpensNext(help: TsunagiHelp | null): boolean {
   return help !== "explosions-off";
 }
 
-/** What a game stands at: for a status line under the board. */
+/** What a game stands at: for a status line under the board.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame, tsunagiProgress } from "@johnmorrisdotca/tsunagi";
+ * import type { TsunagiProgress } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * const value: TsunagiProgress = tsunagiProgress(game);
+ * console.log(value);
+ * ```
+ */
 export type TsunagiProgress = {
   pairs: number;
   joined: number;
@@ -223,6 +461,21 @@ export type TsunagiProgress = {
   helped: TsunagiHelp | null;
 };
 
+/** Read the native completion, strokes, explosions and help status of a game.
+ *
+ * @param game - The current immutable native puzzle state.
+ * @returns Read the native completion, strokes, explosions and help status of a game.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { newTsunagiGame, tsunagiProgress } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const game = newTsunagiGame(givens,4,{answer,cheats:true})!;
+ * console.log(tsunagiProgress(game));
+ * ```
+ */
 export function tsunagiProgress(game: TsunagiGame): TsunagiProgress {
   const cover = filled(game.layout, game.lines);
   const limit = game.layout.strokes;

@@ -36,7 +36,21 @@ import { countSolutionsOfLevel } from "./solve.ts";
  * runs it.
  */
 
-/** What is measured of one level. */
+/** What is measured of one level.
+ *
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { measureSolved } from "@johnmorrisdotca/tsunagi";
+ * import type { LevelMeasure } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const measure = measureSolved(givens,answer,4,{nodes:1,branches:0})!;
+ * const value: LevelMeasure = measure;
+ * console.log(value);
+ * ```
+ */
 export type LevelMeasure = {
   pairs: number;
   /** Turns over every line of the answer. */
@@ -53,7 +67,14 @@ export type LevelMeasure = {
   branches: number;
 };
 
-/** The weights of the four measures in the score. */
+/** The weights of the four measures in the score.
+ *
+ * @example
+ * ```ts
+ * import { DIFFICULTY_WEIGHTS } from "@johnmorrisdotca/tsunagi";
+ * console.log(DIFFICULTY_WEIGHTS);
+ * ```
+ */
 export const DIFFICULTY_WEIGHTS = { corners: 0.35, guessing: 0.3, notForced: 0.25, longest: 0.1 } as const;
 
 /**
@@ -61,6 +82,18 @@ export const DIFFICULTY_WEIGHTS = { corners: 0.35, guessing: 0.3, notForced: 0.2
  * line's two ends are grown while one of them has exactly one empty neighbour
  * to go to, until a pair's ends meet or no end has only one way on. What a
  * person does before they have to think.
+ *
+ * @param code - The native layout, answer or line-progress string.
+ * @param size - The number of cells on each side of the board.
+ * @returns The share of a layout's empty cells filled by forced moves alone: each line's two ends are grown while one of them has exactly one empty neighbour to go to, until a pair's ends meet or no end has only one way on. What a person does before they have to think.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { forcedShare } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * console.log(forcedShare(givens,4));
+ * ```
  */
 export function forcedShare(code: string, size: number): number {
   const decoded = decodeLayout(code, size);
@@ -105,7 +138,22 @@ export function forcedShare(code: string, size: number): number {
   return empties === 0 ? 1 : forced / empties;
 }
 
-/** Every measure of one level, from its layout and answer; null for a layout that does not read as one of this size. */
+/** Every measure of one level, from its layout and answer; null for a layout that does not read as one of this size.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @param size - The number of cells on each side of the board.
+ * @returns Every measure of one level, from its layout and answer; null for a layout that does not read as one of this size.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { measureLevel } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * console.log(measureLevel(givens,answer,4));
+ * ```
+ */
 export function measureLevel(layout: string, answer: string, size: number): LevelMeasure | null {
   const decoded = decodeLayout(layout, size);
   if (decoded === null) return null;
@@ -116,6 +164,21 @@ export function measureLevel(layout: string, answer: string, size: number): Leve
  * The same measures from a solve already made — how many positions and
  * branches the solver took — so a caller that has just proved a level (the
  * level tests) does not solve it a second time to measure it.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param answer - The native complete answer string or solved lines specified by the signature.
+ * @param size - The number of cells on each side of the board.
+ * @param solved - Solved level numbers, or the solver metrics specified by this signature.
+ * @returns The native level measures, or null for an invalid layout or answer.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { measureSolved } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * console.log(measureSolved(givens,answer,4,{nodes:1,branches:0}));
+ * ```
  */
 export function measureSolved(layout: string, answer: string, size: number, solved: { nodes: number; branches: number }): LevelMeasure | null {
   const decoded = decodeLayout(layout, size);
@@ -137,6 +200,20 @@ export function measureSolved(layout: string, answer: string, size: number, solv
  * percentiles among `measures` — one size's levels. A percentile is the share
  * of the other levels strictly below it, so ties share a place and the score
  * of a set of one is 0.
+ *
+ * @param measures - Native level measures to compare within this size.
+ * @param size - The number of cells on each side of the board.
+ * @returns Each level's score, 0 (easiest) to 100 (hardest), as the blend of its four percentiles among `measures` — one size's levels. A percentile is the share of the other levels strictly below it, so ties share a place and the score of a set of one is 0.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { difficultyScores, measureSolved } from "@johnmorrisdotca/tsunagi";
+ *
+ * const givens = TSUNAGI_4[0][0];
+ * const answer = TSUNAGI_4[0][1];
+ * const measure = measureSolved(givens,answer,4,{nodes:1,branches:0})!;
+ * console.log(difficultyScores([measure],4));
+ * ```
  */
 export function difficultyScores(measures: readonly LevelMeasure[], size: number): number[] {
   const cells = size * size;
@@ -159,6 +236,17 @@ export function difficultyScores(measures: readonly LevelMeasure[], size: number
  * The order to play a size's levels in: easiest first, by score, and among
  * equal scores by their order in `levels` so the ranking is the same every
  * time it is made. Returns indexes into `levels`.
+ *
+ * @param levels - Layout/answer rows in their current order.
+ * @param size - The number of cells on each side of the board.
+ * @returns The order to play a size's levels in: easiest first, by score, and among equal scores by their order in `levels` so the ranking is the same every time it is made. Returns indexes into `levels`.
+ * @example
+ * ```ts
+ * import { orderByDifficulty } from "@johnmorrisdotca/tsunagi";
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ *
+ * console.log(orderByDifficulty([TSUNAGI_4[0]],4));
+ * ```
  */
 export function orderByDifficulty(levels: readonly (readonly [string, string])[], size: number): number[] {
   const measures = levels.map(([layout, answer]) => {
