@@ -28,9 +28,9 @@ const page = `<!doctype html>
   <head>
     ${familyHead({
       id,
-      title: "Tsunagi · join the marbles, fill the board",
+      title: "Tsunagi 繋ぎ — Connect-the-pairs line puzzle",
       description: "Play Tsunagi, the line-joining logic puzzle: 2,368 levels from 4×4 to 30×30 and 256 more with portals, each with exactly one answer, with walls, bridges, waypoints, wrap and hexagon boards. Free and open source, in English and Japanese.",
-      ogTitle: "Tsunagi line puzzle",
+      ogTitle: "Tsunagi 繋ぎ — Connect-the-pairs line puzzle",
       ogDescription: "Join each pair of marbles with a line, and fill the board. 2,368 levels and 256 with portals, each with one answer.",
     })}
     <link rel="icon" href="${ICON}" />
@@ -39,7 +39,7 @@ const page = `<!doctype html>
   </head>
   <body>
     <main>
-      ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
+      ${familyHeader({ id, links: [{ href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] })}
       <div class="setup fam-row" data-help-en="Choose which levels: the classic ones, or the ones with portals, where a line goes into one ring and comes out of another." data-help-ja="どのレベルで遊ぶかを選びます。いつものレベルか、線が一方の輪に入ってもう一方から出てくる「ワープ」のレベルです。">
         <span class="fam-label" data-say="set"></span>
         <div class="fam-seg" role="group" data-say-label="set" id="set" data-testid="set"></div>
@@ -111,7 +111,7 @@ cpSync("demo/embed", "site/embed", { recursive: true });
 writeFileSync("site/family-embed-builder.js", `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`);
 const builderParts = {
   builderHead: familyHead({ id, title: "Tsunagi · build a line-puzzle embed", description: "Choose a fixed or daily line puzzle, preview it and copy the embed code." }),
-  builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }] }),
+  builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }, { href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] }),
   unreviewed: familyUnreviewed({ id }), footer: familyFooter({ id }), script: `<script>${FAMILY_SCRIPT}</script>`,
 };
 writeFileSync("site/builder.html", readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]));

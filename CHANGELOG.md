@@ -7,6 +7,8 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+- Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
+
 - Add a shared builder and validated, storage-free iframe for fixed and UTC daily classic or portal levels.
 - Add reflected display/grid properties, preserve live progress and methods, and make events composed and JSON-safe.
 - Add keyboard line drawing, a visible cursor and spoken coordinates, including hexagon neighbours and portal jumps.

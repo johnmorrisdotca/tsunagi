@@ -10,6 +10,7 @@ import { loadTsunagiLevels } from "./dist/levels.js";
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
 const WORDS = {
   en: {
+    pageDocs: "Docs",
     pageApi: "API reference",
     pitch: "Join each pair of marbles with a line. Lines never cross, and when every pair is joined, every cell is filled. Draw with a finger or the mouse, from a marble or from the end of a line.",
     name: "Tsunagi (繋ぎ) is Japanese for joining, a link.",
@@ -58,6 +59,7 @@ const WORDS = {
     foot: "Every level was made once and is proved on every build to have exactly one answer. Your progress stays on this device.",
   },
   ja: {
+    pageDocs: "ドキュメント",
     pageApi: "API（英語）",
     pitch: "同じ色の玉どうしを線でつなぎます。線は交差できません。すべての組をつなぐと、すべてのマスが埋まります。玉か線の端から、指やマウスでなぞって描きます。",
     name: "「繋ぎ」は、つなぐこと、つながりという意味です。",
@@ -149,7 +151,7 @@ let level = 1;
 let levels = [];
 let mount = null;
 
-const language = familyLanguage({ id: "tsunagi", words: WORDS, onChange: () => render() });
+const language = familyLanguage({ id: "tsunagi", words: WORDS, onChange: () => { docsLink(); render(); } });
 const say = (key, ...args) => {
   const word = WORDS[language.lang][key];
   return typeof word === "function" ? word(...args) : word;
@@ -342,3 +344,6 @@ document.getElementById("today").addEventListener("click", () => choose(size, da
 void choose(size, null).then(() => {
   host.dataset.ready = "true";
 });
+
+function docsLink() { document.querySelector('[data-say="pageDocs"]')?.setAttribute("href", language.lang === "ja" ? "docs/ja/index.html" : "docs/index.html"); }
+docsLink();

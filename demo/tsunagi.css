@@ -40,3 +40,6 @@
   #board { padding: 10px 10px 8px; }
   .settings .fam-label { min-width: 100%; }
 }
+
+/* Keep navigation width stable across languages. */
+header nav a[data-say="pageDocs"] { inline-size: 8rem; justify-content: center; flex: none; }

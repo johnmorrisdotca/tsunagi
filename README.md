@@ -1,4 +1,4 @@
-<h1 align="center">Tsunagi <sub>つなぎ</sub></h1>
+<h1 align="center">Tsunagi <sub>繋ぎ</sub> — Connect-the-pairs line puzzle</h1>
 
 <p align="center"><strong>A line-joining logic puzzle for JavaScript and TypeScript.</strong><br>
 Join each pair of marbles with a line, every line its own, until the board is full. Layouts and answers as short codes, the rules a line keeps, a solver that counts answers, a seeded generator, walls, bridges, waypoints, portals and hexagon boards, a difficulty measure, and 2,368 levels from 4×4 to 30×30, and 256 more with portals, each proved to have exactly one answer. The board drawn as SVG, in colours or numbers, dots or lines, and played by touch, mouse and keyboard in any page with one call or one tag. No dependencies.</p>
@@ -7,10 +7,13 @@ Join each pair of marbles with a line, every line its own, until the board is fu
   <a href="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/johnmorrisdotca/tsunagi/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://www.npmjs.com/package/@johnmorrisdotca/tsunagi"><img alt="npm" src="https://img.shields.io/npm/v/@johnmorrisdotca/tsunagi?color=2f5d4a"></a>
   <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-2f5d4a"></a>
+  <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
+  <a href="https://johnmorrisdotca.github.io/tsunagi/docs/api/main/index.html"><img alt="22.2 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-22.2%20kB-2f5d4a"></a>
+  <a href="https://www.npmjs.com/package/@johnmorrisdotca/tsunagi#provenance"><img alt="Published with npm provenance" src="https://img.shields.io/badge/npm-provenance-2f5d4a"></a>
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><strong>Play a level →</strong></a> · <a href="https://johnmorrisdotca.github.io/tsunagi/docs/">Documentation</a> · <a href="https://johnmorrisdotca.github.io/tsunagi/docs/guides/getting-started.html">Getting started</a> · <a href="https://johnmorrisdotca.github.io/tsunagi/api.html">API reference</a></p>
 
 <table align="center">
 <tr>
@@ -183,6 +186,17 @@ Every picture is a real board, drawn by the package, taken from [the demo](https
 ## Use it in your project
 
 Tsunagi is three things, each usable without the others: **the puzzle** (rules, solver, generator and levels, as plain functions over strings), **the drawing** (SVG text), and **the page** (a mounted board or a tag). The table under [Levels](#levels) says which entry holds which. The examples are at 6×6.
+
+### Install under another name
+
+```sh
+npm install puzzle@npm:@johnmorrisdotca/tsunagi
+```
+
+```ts no-check
+import { stoneLetters } from "puzzle";
+console.log(stoneLetters("A..A"));
+```
 
 ### Install
 
@@ -686,7 +700,7 @@ The levels are fixed, so the level of the day needs no seed and no server: it is
 
 ## API
 
-The [API reference](https://johnmorrisdotca.github.io/tsunagi/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+The [documentation](https://johnmorrisdotca.github.io/tsunagi/docs/) includes bilingual guides, local search, signatures, parameters, return values and checked examples, built from source by `pnpm docs:site`. The [API index](https://johnmorrisdotca.github.io/tsunagi/api.html) preserves export anchors.
 
 ### Entry points
 

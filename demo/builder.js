@@ -8,7 +8,7 @@ import "./dist/element-define.js";
 import { familyEmbedBuilder, FAMILY_EMBED_BUILDER_WORDS } from "./family-embed-builder.js";
 const words = {
   en: {
-    ...FAMILY_EMBED_BUILDER_WORDS.en,
+    ...FAMILY_EMBED_BUILDER_WORDS.en, pageDocs: "Docs", pageApi: "API reference",
     pitch: "Choose a line puzzle or a UTC daily level, preview it, and copy the code for your page.",
     name: "Tsunagi means joining in Japanese.",
     nameLink: "About the name",
@@ -21,7 +21,7 @@ const words = {
     badLevel: "Choose a level that exists at this grid size."
   },
   ja: {
-    ...FAMILY_EMBED_BUILDER_WORDS.ja,
+    ...FAMILY_EMBED_BUILDER_WORDS.ja, pageDocs: "ドキュメント", pageApi: "API（英語）",
     pitch: "繋のパズル、またはUTCの日替わり問題を選び、表示を確認して、ページに埋め込むコードをコピーできます。",
     name: "「繋」は英語の joining に当たる日本語です。",
     nameLink: "名前について",
@@ -63,7 +63,7 @@ for (const name of ["onChange", "onStroke", "onExplosion", "onSolve"]) leftOut[`
 const heights = {};
 const key = (settings) => JSON.stringify(settings);
 let mounted;
-const page = globalThis.familyLanguage({ id: "tsunagi", words, onChange: () => mounted?.draw() });
+const page = globalThis.familyLanguage({ id: "tsunagi", words, onChange: () => { docsLink(); mounted?.draw(); } });
 const countOf = (settings) => (settings.set === "portals" ? TSUNAGI_PORTAL_COUNTS : TSUNAGI_LEVEL_COUNTS)[Number(settings.grid ?? 7)];
 function problem(settings) { try { const day = embedDay(settings.daily); const count = countOf(settings); if (count === undefined) return "badLevel"; return day !== null || (Number.isInteger(Number(settings.level ?? 1)) && Number(settings.level ?? 1) >= 1 && Number(settings.level ?? 1) <= count) ? null : "badLevel"; } catch { return "badDay"; } }
 const builder = familyEmbedBuilder({ id: "tsunagi", packageName: "@johnmorrisdotca/tsunagi", major: VERSION.split(".")[0], site: "https://johnmorrisdotca.github.io/tsunagi/", title: "Tsunagi · line puzzle", titleJa: "繋のパズルの埋め込み", options, leftOut, groups: { board: { en: "The puzzle", ja: "パズルの設定" } }, makers: { board: { names: "board", element: "board", tag: "tsunagi-board", embed: "embed/", required: ["grid", "level"], description: "makerBoardSays", formats: ["element", "iframe", "module", "react", "vue", "svelte", "angular", "html", "url"], width: 640, height: (settings) => heights[key(settings)] ?? ({ small: 680, medium: 840, large: 1000 }[settings.size] ?? 840) } }, code: ({ maker, format, settings }) => {
@@ -88,3 +88,6 @@ const compatible = () => {
 };
 globalThis.document.getElementById("bld-groups").addEventListener("click", (event) => { if (event.target.closest("#opt-set button")) globalThis.queueMicrotask(compatible); });
 globalThis.document.getElementById("bld-groups").addEventListener("change", (event) => { if (event.target.id === "opt-grid") globalThis.queueMicrotask(compatible); });
+
+function docsLink() { document.querySelector('[data-say="pageDocs"]')?.setAttribute("href", page.lang === "ja" ? "docs/ja/index.html" : "docs/index.html"); }
+docsLink();

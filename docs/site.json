@@ -1,0 +1,114 @@
+{
+  "job": "Connect-the-pairs line puzzle",
+  "pitch": {
+    "en": "Join each pair with a separate line and fill the board, through fixed levels or seeded puzzles.",
+    "ja": "同じ印の2つを別々の線で結び、盤を埋めます。収録された問題やシード付きの問題で遊べます。"
+  },
+  "name": {
+    "en": "Tsunagi means joining in Japanese.",
+    "ja": "「つなぎ」は、物をつなぐことを表す言葉です。"
+  },
+  "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='%23f3efe4'%3E繋%3C/text%3E%3C/svg%3E",
+  "entries": {
+    ".": {
+      "en": "Rules, solvers and generation",
+      "ja": "ルール・解法・生成"
+    },
+    "./draw": {
+      "en": "SVG board",
+      "ja": "SVGの盤"
+    },
+    "./play": {
+      "en": "Playable board",
+      "ja": "遊べる盤"
+    },
+    "./element": {
+      "en": "Board element",
+      "ja": "盤の要素"
+    },
+    "./element/define": {
+      "en": "Register the board",
+      "ja": "盤の登録"
+    },
+    "./levels": {
+      "en": "Load level collections",
+      "ja": "問題集の読み込み"
+    },
+    "./layouts": {
+      "en": "Boards without answers",
+      "ja": "解答なしの盤"
+    },
+    "./levels-portals": {
+      "en": "Portal levels",
+      "ja": "ポータルの問題"
+    },
+    "./marks": {
+      "en": "Difficulty and lesson marks",
+      "ja": "難しさと学習の目印"
+    },
+    "./renumbered": {
+      "en": "Level-number migration",
+      "ja": "問題番号の移行"
+    },
+    "./levels-4": {
+      "en": "4 × 4 levels",
+      "ja": "4 × 4の問題"
+    },
+    "./levels-5": {
+      "en": "5 × 5 levels",
+      "ja": "5 × 5の問題"
+    },
+    "./levels-6": {
+      "en": "6 × 6 levels",
+      "ja": "6 × 6の問題"
+    },
+    "./levels-7": {
+      "en": "7 × 7 levels",
+      "ja": "7 × 7の問題"
+    },
+    "./levels-8": {
+      "en": "8 × 8 levels",
+      "ja": "8 × 8の問題"
+    },
+    "./levels-9": {
+      "en": "9 × 9 levels",
+      "ja": "9 × 9の問題"
+    },
+    "./levels-10": {
+      "en": "10 × 10 levels",
+      "ja": "10 × 10の問題"
+    },
+    "./levels-11": {
+      "en": "11 × 11 levels",
+      "ja": "11 × 11の問題"
+    },
+    "./levels-12": {
+      "en": "12 × 12 levels",
+      "ja": "12 × 12の問題"
+    },
+    "./levels-13": {
+      "en": "13 × 13 levels",
+      "ja": "13 × 13の問題"
+    },
+    "./levels-14": {
+      "en": "14 × 14 levels",
+      "ja": "14 × 14の問題"
+    },
+    "./levels-15": {
+      "en": "15 × 15 levels",
+      "ja": "15 × 15の問題"
+    },
+    "./levels-20": {
+      "en": "20 × 20 levels",
+      "ja": "20 × 20の問題"
+    },
+    "./levels-25": {
+      "en": "25 × 25 levels",
+      "ja": "25 × 25の問題"
+    },
+    "./levels-30": {
+      "en": "30 × 30 levels",
+      "ja": "30 × 30の問題"
+    }
+  }
+}

@@ -6,3 +6,4 @@ playwright-report/
 *.tgz
 scripts/.tsunagi-pool/
 .readme-examples/
+.docs-examples/
