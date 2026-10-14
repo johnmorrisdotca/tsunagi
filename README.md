@@ -263,25 +263,7 @@ defineProps({ size: Number, level: Number });
 <tsunagi-board bind:this={board} size={size} level={level}></tsunagi-board>
 ```
 
-```ts no-check
-// Angular: a standalone component with CUSTOM_ELEMENTS_SCHEMA
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
-import "@johnmorrisdotca/tsunagi/element/define";
-
-@Component({
-  selector: "app-level",
-  standalone: true,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `<tsunagi-board size="6" level="3" (tsunagi-solve)="solved($event)"></tsunagi-board>`,
-})
-export class Level {
-  solved(event: Event) { console.log((event as CustomEvent).detail.answer); }
-}
-```
-
-In Next.js or any server-rendering framework, import the define entry from a client component, so the tag is defined in the browser. Or skip the tag and call `mountTsunagi(element, options)` from `@johnmorrisdotca/tsunagi/play` in an effect: the handle it returns has `destroy()`.
-
-`pnpm test:frameworks` builds these recipes from the packed tarball for each of the five and plays a level to its end in Chromium and WebKit; it needs the network and a few minutes, so it runs before a release and in CI, not with `pnpm check`.
+Angular (a standalone component with `CUSTOM_ELEMENTS_SCHEMA`), Next.js and other server-rendering frameworks (import the define entry from a client component, or call `mountTsunagi` in an effect) are in [docs/FRAMEWORKS.md](docs/FRAMEWORKS.md); `pnpm test:frameworks` builds all of these recipes from the packed tarball, for each of the five, in Chromium and WebKit.
 
 ### What a developer gets
 
@@ -844,12 +826,7 @@ Left out on purpose: levels made from a seed when the page opens, because a fixe
 
 ## Making levels
 
-Levels are found by seeded generators, proved to have exactly one answer, ordered by measured difficulty and written by scripts in `scripts/`, so the same run writes the same files and a level already published keeps its number. The commands, the two ways big boards are made (clues taken away, and a solver that learns from its dead ends), the numbers measured on one core of a desk on 2026-10-05, and what each size takes are in [docs/MAKING-LEVELS.md](docs/MAKING-LEVELS.md).
-
-```sh
-node scripts/tsunagi-levels.ts 7              # 7×7 again: its twists placed, its marks measured, every board kept at its number
-node scripts/tsunagi-levels.ts --grow 10      # 10×10 grown to whole blocks of sixteen and reordered, easiest first
-```
+Levels are found by seeded generators, proved to have exactly one answer, ordered by measured difficulty and written by scripts in `scripts/`, so the same run writes the same files and a level already published keeps its number. The commands, the two ways big boards are made (clues taken away, and a solver that learns from its dead ends), the numbers measured on one core of a desk on 2026-10-05, and what each size takes are in [docs/MAKING-LEVELS.md](docs/MAKING-LEVELS.md), which opens with the two commands that run it.
 
 ## Architecture
 
@@ -880,7 +857,7 @@ Using Tsunagi in something? Open an *Add my project* issue and we will add you.
 ### The family
 
 <!-- family:start (made by scripts/family-readme.mjs from scripts/family-template.mjs; change those, not this) -->
-Tsunagi is one of twenty-four packages, each made for the same site, each at
+Tsunagi is one of twenty-six packages, each made for the same site, each at
 [github.com/johnmorrisdotca](https://github.com/johnmorrisdotca). The code of every one is MIT.
 
 - [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ): dice, with notation, exact odds, real sounds and the dice of many games. [Demo](https://johnmorrisdotca.github.io/korokoro/).
@@ -907,8 +884,10 @@ Tsunagi is one of twenty-four packages, each made for the same site, each at
 - [Gunjin](https://github.com/johnmorrisdotca/gunjin) (軍人): five hidden-rank strategy games with pass-the-device play. [Demo](https://johnmorrisdotca.github.io/gunjin/).
 - [Karakuri](https://github.com/johnmorrisdotca/karakuri) (からくり): eight hyper-casual puzzle games, some of them physics: draw a shield, pull pins, cut ropes, slide blocks, pour tubes. [Demo](https://johnmorrisdotca.github.io/karakuri/).
 - [Houseki](https://github.com/johnmorrisdotca/houseki) (宝石): gem and stone matching puzzles: falling triplets, stone collapse, colour chains and gem swap. [Demo](https://johnmorrisdotca.github.io/houseki/).
+- [Kyogijo Stadiums](https://github.com/johnmorrisdotca/kyogijo-stadiums) (競技場): sports fields, rinks, courts and ballparks drawn to scale as SVG, with each team and the score on them. [Demo](https://johnmorrisdotca.github.io/kyogijo-stadiums/).
+- [Taisen](https://github.com/johnmorrisdotca/taisen-brackets) (対戦): a sport-agnostic tournament bracket, drawn as SVG, from a list of ties. [Demo](https://johnmorrisdotca.github.io/taisen-brackets/). Not on npm yet.
 
-**This package is Tsunagi.** The demos of all twenty-four share one header and footer, so each links the rest.
+**This package is Tsunagi.** The demos of all twenty-six share one header and footer, so each links the rest.
 <!-- family:end -->
 
 ## Development
