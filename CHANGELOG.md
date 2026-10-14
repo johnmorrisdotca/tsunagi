@@ -7,6 +7,8 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
+
 - Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
 
 - Add a shared builder and validated, storage-free iframe for fixed and UTC daily classic or portal levels.
