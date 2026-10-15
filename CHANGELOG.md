@@ -7,24 +7,23 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
-- Synchronize documentation tooling for repository layouts, generated type references, Node entry points and repository-specific README links.
+## [1.7.0] - 2026-10-14
 
-- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
-
-- Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
-
-- Add a shared builder and validated, storage-free iframe for fixed and UTC daily classic or portal levels.
-- Add reflected display/grid properties, preserve live progress and methods, and make events composed and JSON-safe.
-- Add keyboard line drawing, a visible cursor and spoken coordinates, including hexagon neighbours and portal jumps.
+The board is a custom element with the family's standard embed attributes and a shared builder, it can be drawn with the keyboard, and the package has an English and Japanese documentation site with a checked example for every export. The levels, codes, solvers and saved progress are unchanged.
 
 ### Added
 
+- Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
+- Add a shared builder and validated, storage-free iframe for fixed and UTC daily classic or portal levels.
+- Add reflected display/grid properties, preserve live progress and methods, and make events composed and JSON-safe.
+- Add keyboard line drawing, a visible cursor and spoken coordinates, including hexagon neighbours and portal jumps.
 - Share a package-independent embed builder for option controls, preview adapters, code tabs and shareable links.
 
 ### Changed
 
+- Synchronize documentation tooling for repository layouts, generated type references, Node entry points and repository-specific README links.
+- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
 - Group the package family by kind, alphabetize each group, and include the geography packages and REST in Pieces in the shared footer and README.
-
 - Update the shared family description for addresses in all seven supported countries, including France and Germany.
 
 ## [1.6.3] - 2026-10-06
@@ -286,7 +285,8 @@ its own package.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.3...v1.7.0
 [1.6.1]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.4.0...v1.5.0

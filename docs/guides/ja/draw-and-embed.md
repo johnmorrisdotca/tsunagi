@@ -2,7 +2,7 @@
 title: 盤の表示と埋め込み
 section: how-to
 order: 4
-description: 盤の表示と埋め込みの使い方と注意点。
+description: 盤をSVGで描き、遊べる盤を置き、埋め込みの仕様を守ります。
 ---
 
 ## 配置せずSVGを作る

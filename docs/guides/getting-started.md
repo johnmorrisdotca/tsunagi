@@ -2,7 +2,7 @@
 title: Getting started
 section: tutorial
 order: 1
-description: Learn getting started.
+description: Install Tsunagi and check a bundled level's answer.
 ---
 
 Join each pair with its own line and fill every playable cell. Tsunagi has fixed levels, native board codes, pure rules, bounded solvers and separate SVG/playable-board entries.

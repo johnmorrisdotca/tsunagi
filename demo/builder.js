@@ -23,14 +23,14 @@ const words = {
   ja: {
     ...FAMILY_EMBED_BUILDER_WORDS.ja, pageDocs: "ドキュメント", pageApi: "API（英語）",
     pitch: "繋のパズル、またはUTCの日替わり問題を選び、表示を確認して、ページに埋め込むコードをコピーできます。",
-    name: "「繋」は英語の joining に当たる日本語です。",
+    name: "「繋」は英語のjoiningに当たる日本語です。",
     nameLink: "名前について",
     foot: "設定はリンクに入ります。ゲームや個人情報は保存しません。",
     toGallery: "パズルの一覧",
     makerBoard: "盤",
     makerBoardSays: "同じ玉をつないで、盤を埋めます。",
     copyLink: "このパズルへのリンクをコピー",
-    badDay: "実在する日付をYYYY-MM-DD形式で入力するか、today または off を指定してください。UTCの日付を使います。",
+    badDay: "実在する日付をYYYY-MM-DD形式で入力するか、todayまたはoffを指定してください。UTCの日付を使います。",
     badLevel: "この盤の大きさにある問題を選んでください。"
   },
 };

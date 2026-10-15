@@ -2,7 +2,7 @@
 title: Daily levels, blocks and assistance
 section: how-to
 order: 6
-description: Learn daily levels, blocks and assistance.
+description: Pick a daily level by UTC date, follow the 16-level blocks, and record assistance correctly.
 ---
 
 ## Choose the same UTC day

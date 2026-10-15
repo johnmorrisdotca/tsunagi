@@ -2,7 +2,7 @@
 title: Upgrading and migrating records
 section: upgrading
 order: 10
-description: Learn upgrading and migrating records.
+description: Keep 1.x codes valid and apply a renumbering to old records once.
 ---
 
 ## Preserve the 1.x codes
@@ -15,4 +15,4 @@ The renumbered entry records the historical old-to-new one-based level numbers b
 
 ## Keep integration behavior
 
-This rollout changes documentation and native navigation without changing emitted SDK behavior or any level row. Check representative plain/twist/progress records and both language paths. [CHANGELOG.md](../../CHANGELOG.md), [native embeds](../embeds.md) and [level loading](load-levels.md) retain compatibility details.
+Check representative plain/twist/progress records and both language paths. [CHANGELOG.md](../../CHANGELOG.md), [native embeds](../embeds.md) and [level loading](load-levels.md) retain compatibility details.

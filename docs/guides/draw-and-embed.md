@@ -2,7 +2,7 @@
 title: Draw and embed a native board
 section: how-to
 order: 4
-description: Learn draw and embed a native board.
+description: Draw a board as SVG, mount a playable board, and keep the embed contract.
 ---
 
 ## Draw SVG without mounting

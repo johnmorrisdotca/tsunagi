@@ -2,7 +2,7 @@
 title: Codes, steps and native twists
 section: explanation
 order: 7
-description: Learn codes, steps and native twists.
+description: Read and write board codes, keep twist rules in their own suffixes, and tell an answer from progress.
 ---
 
 ## Decode instead of guessing

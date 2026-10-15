@@ -2,7 +2,7 @@
 title: Solve and generate with a budget
 section: how-to
 order: 5
-description: Learn solve and generate with a budget.
+description: Count solutions within a budget, tell a proof from a give-up, and generate candidates with limits.
 ---
 
 ## Distinguish proof from exhaustion
@@ -28,4 +28,4 @@ Generators return null when the requested attempt cannot produce and prove its c
 
 ## Preserve fixed levels
 
-A new candidate is not a published fixed level. Use the existing generation workflow to change collections and preserve their proofs, order and migrations. This documentation rollout refreshes generated comments only, leaving all boards and answers unchanged.
+A new candidate is not a published fixed level. Use the existing generation workflow to change collections and preserve their proofs, order and migrations.

@@ -3,95 +3,95 @@
   "entries": {
     ".": {
       "minified": 75047,
-      "gzip": 22198
+      "gzip": 22379
     },
     "./draw": {
       "minified": 37943,
-      "gzip": 13531
+      "gzip": 13712
     },
     "./play": {
       "minified": 84274,
-      "gzip": 24479
+      "gzip": 24711
     },
     "./element": {
       "minified": 784132,
-      "gzip": 248583
+      "gzip": 251469
     },
     "./element/define": {
       "minified": 784137,
-      "gzip": 248590
+      "gzip": 251472
     },
     "./levels": {
       "minified": 689774,
-      "gzip": 220907
+      "gzip": 223682
     },
     "./levels-4": {
       "minified": 7815,
-      "gzip": 2169
+      "gzip": 2142
     },
     "./levels-5": {
       "minified": 15030,
-      "gzip": 4335
+      "gzip": 4286
     },
     "./levels-6": {
       "minified": 20682,
-      "gzip": 6070
+      "gzip": 6012
     },
     "./levels-7": {
       "minified": 27344,
-      "gzip": 8371
+      "gzip": 8308
     },
     "./levels-8": {
       "minified": 35020,
-      "gzip": 11133
+      "gzip": 11020
     },
     "./levels-9": {
       "minified": 43792,
-      "gzip": 14298
+      "gzip": 14178
     },
     "./levels-10": {
       "minified": 26695,
-      "gzip": 8709
+      "gzip": 8640
     },
     "./levels-11": {
       "minified": 16039,
-      "gzip": 5176
+      "gzip": 5143
     },
     "./levels-12": {
       "minified": 37979,
-      "gzip": 13387
+      "gzip": 13302
     },
     "./levels-13": {
       "minified": 44389,
-      "gzip": 13290
+      "gzip": 13267
     },
     "./levels-14": {
       "minified": 51273,
-      "gzip": 14455
+      "gzip": 14404
     },
     "./levels-15": {
       "minified": 58707,
-      "gzip": 15276
+      "gzip": 15206
     },
     "./levels-20": {
       "minified": 51814,
-      "gzip": 18532
+      "gzip": 18978
     },
     "./levels-25": {
       "minified": 80616,
-      "gzip": 30687
+      "gzip": 31919
     },
     "./levels-30": {
       "minified": 115813,
-      "gzip": 38322
+      "gzip": 40022
     },
     "./layouts": {
       "minified": 343109,
-      "gzip": 83168
+      "gzip": 82598
     },
     "./levels-portals": {
       "minified": 52831,
-      "gzip": 16354
+      "gzip": 16313
     },
     "./marks": {
       "minified": 19277,
@@ -99,7 +99,7 @@
     },
     "./renumbered": {
       "minified": 2237,
-      "gzip": 1083
+      "gzip": 1047
     }
   }
 }

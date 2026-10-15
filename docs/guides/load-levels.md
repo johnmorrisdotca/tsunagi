@@ -2,7 +2,7 @@
 title: Load levels and identify boards
 section: how-to
 order: 2
-description: Learn load levels and identify boards.
+description: Load levels by size, check a board on the server without its answer, and keep numbers and codes stable.
 ---
 
 ## Import one size or load lazily

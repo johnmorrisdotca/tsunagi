@@ -2,12 +2,12 @@
 title: Level data and proof workflow
 section: explanation
 order: 8
-description: Learn level data and proof workflow.
+description: See how level data, generation and proofs are kept apart, and why the generator is the source of truth.
 ---
 
 ## Keep data separate from rules
 
-The root supplies codes, solvers, generation, gameplay and metadata. Level rows are imported size by size; layouts-only, marks and renumbering entries serve different jobs without requiring every answer. Fixed levels retain their board codes and numbers across this documentation update.
+The root supplies codes, solvers, generation, gameplay and metadata. Level rows are imported size by size; layouts-only, marks and renumbering entries serve different jobs without requiring every answer.
 
 ## Keep the writer authoritative
 

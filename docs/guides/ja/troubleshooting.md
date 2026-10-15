@@ -2,7 +2,7 @@
 title: 問題の確認とFAQ
 section: troubleshooting
 order: 9
-description: 問題の確認とFAQの使い方と注意点。
+description: 盤や進行がnullになる、結果なしは証明ではない、問題集が見つからない、盤が操作できないといった場合の原因を確認します。
 ---
 
 ## 盤や進行がnull

@@ -2,7 +2,7 @@
 title: Troubleshooting and FAQ
 section: troubleshooting
 order: 9
-description: Learn troubleshooting and faq.
+description: Find out why a board or progress is null, why no result is not a proof, and why a level set is missing or a board will not play.
 ---
 
 ## Layout or progress returned null

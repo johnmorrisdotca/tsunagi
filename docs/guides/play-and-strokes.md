@@ -2,7 +2,7 @@
 title: Play strokes and retain progress
 section: how-to
 order: 3
-description: Learn play strokes and retain progress.
+description: Play with press, drag and lift, count strokes and explosions, and restore progress on the same board.
 ---
 
 ## Use native press, drag and lift

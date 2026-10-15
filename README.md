@@ -8,7 +8,7 @@ Join each pair of marbles with a line, every line its own, until the board is fu
   <a href="https://www.npmjs.com/package/@johnmorrisdotca/tsunagi"><img alt="npm" src="https://img.shields.io/npm/v/@johnmorrisdotca/tsunagi?color=2f5d4a"></a>
   <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-2f5d4a"></a>
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
-  <a href="https://johnmorrisdotca.github.io/tsunagi/docs/api/main/index.html"><img alt="22.2 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-22.2%20kB-2f5d4a"></a>
+  <a href="https://johnmorrisdotca.github.io/tsunagi/docs/api/main/index.html"><img alt="22.4 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-22.4%20kB-2f5d4a"></a>
   <a href="https://www.npmjs.com/package/@johnmorrisdotca/tsunagi#provenance"><img alt="Published with npm provenance" src="https://img.shields.io/badge/npm-provenance-2f5d4a"></a>
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
 </p>
@@ -279,25 +279,7 @@ defineProps({ size: Number, level: Number });
 <tsunagi-board bind:this={board} size={size} level={level}></tsunagi-board>
 ```
 
-```ts no-check
-// Angular: a standalone component with CUSTOM_ELEMENTS_SCHEMA
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
-import "@johnmorrisdotca/tsunagi/element/define";
-
-@Component({
-  selector: "app-level",
-  standalone: true,
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  template: `<tsunagi-board size="6" level="3" (tsunagi-solve)="solved($event)"></tsunagi-board>`,
-})
-export class Level {
-  solved(event: Event) { console.log((event as CustomEvent).detail.answer); }
-}
-```
-
-In Next.js or any server-rendering framework, import the define entry from a client component, so the tag is defined in the browser. Or skip the tag and call `mountTsunagi(element, options)` from `@johnmorrisdotca/tsunagi/play` in an effect: the handle it returns has `destroy()`.
-
-`pnpm test:frameworks` builds these recipes from the packed tarball for each of the five and plays a level to its end in Chromium and WebKit; it needs the network and a few minutes, so it runs before a release and in CI, not with `pnpm check`.
+Angular (a standalone component with `CUSTOM_ELEMENTS_SCHEMA`), Next.js and other server-rendering frameworks (import the define entry from a client component, or call `mountTsunagi` in an effect) are in [docs/FRAMEWORKS.md](docs/FRAMEWORKS.md); `pnpm test:frameworks` builds all of these recipes from the packed tarball, for each of the five, in Chromium and WebKit.
 
 ### What a developer gets
 
@@ -788,7 +770,7 @@ All of these are held by tests, and the ones with a name are exported.
 | The zoom pad | from 10×10, up to 3 times | `TSUNAGI_ZOOM_FROM`, `TSUNAGI_MOST_ZOOM` |
 | A day | `YYYY-MM-DD`, counted in UTC | `isTsunagiDay` |
 
-A generator never runs on a server unless you ask it to. The check never searches: it is linear in the size of the board.
+A generator runs only when asked. The check never searches: it is linear in the board's size.
 
 ## Accessibility
 
@@ -814,16 +796,11 @@ Not here yet, and each welcome as an [issue](https://github.com/johnmorrisdotca/
 - More keyboard tutorials for the portal and hexagon boards.
 - A command line: check an answer, count a board's answers, and print a level as text.
 
-Left out on purpose: levels made from a seed when the page opens, because a fixed level is what lets times be compared; and any account, ranking or storage. A page keeps its own games: the events hand them over.
+Left out on purpose: levels made from a seed when the page opens (a fixed level is what lets times be compared), and any account, ranking or storage. A page keeps its own games: the events hand them over.
 
 ## Making levels
 
-Levels are found by seeded generators, proved to have exactly one answer, ordered by measured difficulty and written by scripts in `scripts/`, so the same run writes the same files and a level already published keeps its number. The commands, the two ways big boards are made (clues taken away, and a solver that learns from its dead ends), the numbers measured on one core of a desk on 2026-10-05, and what each size takes are in [docs/MAKING-LEVELS.md](docs/MAKING-LEVELS.md).
-
-```sh
-node scripts/tsunagi-levels.ts 7              # 7×7 again: its twists placed, its marks measured, every board kept at its number
-node scripts/tsunagi-levels.ts --grow 10      # 10×10 grown to whole blocks of sixteen and reordered, easiest first
-```
+Levels are found by seeded generators, proved to have exactly one answer, ordered by measured difficulty and written by scripts in `scripts/`, so the same run writes the same files and a level already published keeps its number. The commands, the two ways big boards are made (clues taken away, and a solver that learns from its dead ends), the numbers measured on one core of a desk on 2026-10-05, and what each size takes are in [docs/MAKING-LEVELS.md](docs/MAKING-LEVELS.md), which opens with the two commands that run it.
 
 ## Architecture
 
@@ -854,7 +831,7 @@ Using Tsunagi in something? Open an *Add my project* issue and we will add you.
 ### The family
 
 <!-- family:start (made by scripts/family-readme.mjs from scripts/family-template.mjs; change those, not this) -->
-Tsunagi is one of twenty-eight packages, each made for the same site, each at
+Tsunagi is one of thirty-two packages, each made for the same site, each at
 [github.com/johnmorrisdotca](https://github.com/johnmorrisdotca) or [github.com/spxis](https://github.com/spxis). The code of every one is MIT.
 
 **Games — board**
@@ -902,12 +879,19 @@ Tsunagi is one of twenty-eight packages, each made for the same site, each at
 - [Hata](https://github.com/johnmorrisdotca/hata) (旗): country and regional flags as SVG, at their true proportions and keyed by ISO code. [Demo](https://johnmorrisdotca.github.io/hata/).
 - [Kuni](https://github.com/johnmorrisdotca/kuni) (国): countries and their regions, with ISO codes and names in English and Japanese. [Demo](https://johnmorrisdotca.github.io/kuni/).
 
+**Sports**
+
+- [Dougu Sports](https://github.com/johnmorrisdotca/dougu-sports) (道具): sports emblems as SVG: trophies, medals, crests, and the ball and gear of every sport, with optional 3D turning. [Demo](https://johnmorrisdotca.github.io/dougu-sports/).
+- [Kyogijo Stadiums](https://github.com/johnmorrisdotca/kyogijo-stadiums) (競技場): sports fields, rinks, courts and ballparks drawn to scale as SVG, with each team and the score on them. [Demo](https://johnmorrisdotca.github.io/kyogijo-stadiums/).
+- [Senshu Jerseys](https://github.com/johnmorrisdotca/senshu-jerseys) (選手): sports jerseys, sweaters, kits, caps, helmets and retired-number banners as SVG, front and back, with optional 2.5D turning. [Demo](https://johnmorrisdotca.github.io/senshu-jerseys/).
+- [Taisen Brackets](https://github.com/johnmorrisdotca/taisen-brackets) (対戦): a sport-agnostic tournament bracket, drawn as SVG, from a list of ties. [Demo](https://johnmorrisdotca.github.io/taisen-brackets/).
+
 **Developer tools**
 
 - [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシーズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
 
 
-**This package is Tsunagi.** The demos of all twenty-eight share one header and footer, so each links the rest.
+**This package is Tsunagi.** The demos of all thirty-two share one header and footer, so each links the rest.
 <!-- family:end -->
 
 ## Development

@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
-  "version": "1.6.3",
+  "version": "1.7.0",
   "description": "Tsunagi \u7e4b\u304e \u2014 Connect-the-pairs line puzzle: seeded layouts, 2,368 hand-checked levels with unique answers, solver, walls, bridges, portals, hexagons and an SVG board. TypeScript, zero dependencies.",
   "keywords": [
     "arukone",
