@@ -1,15 +1,14 @@
 import type { TsunagiBoardLook, TsunagiBoardName } from "./boards.ts";
-import { CELL_BLOCKED, CELL_BRIDGE } from "./code.ts";
+import { create, createTsunagiChrome, type TsunagiChrome } from "./chrome.ts";
+import { CELL_BRIDGE } from "./code.ts";
 import type { TsunagiColour, TsunagiColourSetName, TsunagiFill, TsunagiMarks } from "./colours.ts";
 import { drawTsunagi, drawTsunagiPair } from "./draw.ts";
 import {
   cheatGame,
   checkGame,
-  dragGame,
   helpOf,
   liftGame,
   newTsunagiGame,
-  pressGame,
   restartGame,
   type TsunagiExplosionChoice,
   type TsunagiGame,
@@ -18,14 +17,14 @@ import {
   tsunagiProgress,
   undoGame,
 } from "./game.ts";
-import { cellAtPoint, type TsunagiGeometry, tsunagiGeometry } from "./geometry.ts";
-import { challengesOf, tsunagiMarks, tsunagiRole } from "./ladder.ts";
-import type { Challenge } from "./ladder.types.ts";
+import { type TsunagiGeometry, tsunagiGeometry } from "./geometry.ts";
+import { attachTsunagiKeyboard, type TsunagiKeyboard } from "./keyboard.ts";
 import type { TsunagiSet } from "./levelCounts.ts";
-import { answerOf, encodeLines, type Lines, NO_REACH } from "./lines.ts";
+import { answerOf, encodeLines, type Lines } from "./lines.ts";
 import { TSUNAGI_PLAY_STYLE } from "./playStyle.ts";
+import { attachTsunagiPointer, type TsunagiPointer } from "./pointer.ts";
 import { type TsunagiLanguage, tsunagiLanguageOf, tsunagiSay } from "./strings.ts";
-import { edgeNudge, keptView, TSUNAGI_FITTED, TSUNAGI_ZOOM_FROM, type TsunagiView, zoomedAbout } from "./viewport.ts";
+import { keptView, TSUNAGI_FITTED, TSUNAGI_ZOOM_FROM, type TsunagiView, zoomedAbout } from "./viewport.ts";
 
 /**
  * A PLAYABLE TSUNAGI BOARD IN ANY PAGE: `mountTsunagi(host, options)` draws a
@@ -191,21 +190,6 @@ export type TsunagiMount = {
 /** How long Check's flashing lasts and how long an explosion's burst shows, in milliseconds; the words stay until the board changes. */
 const FLASH_MS = 2400;
 const BLAST_MS = 1200;
-/** How long a tapped portal shows its link to the other ring. */
-const LINK_MS = 1800;
-
-const CHALLENGE_KEYS: readonly Challenge[] = [
-  "bridges",
-  "walls",
-  "waypoints",
-  "wrap",
-  "portals",
-  "explosions",
-  "strokes",
-  "hexagon",
-  "sparse",
-];
-
 /** Put the style in the page once: in the document's head, or in the shadow root the host is in.
  *
  * @param host - The DOM host for the native board or its scoped styles.
@@ -229,18 +213,6 @@ export function ensureTsunagiPlayStyle(host: Element): void {
   style.setAttribute("data-tsunagi-play", "");
   style.textContent = TSUNAGI_PLAY_STYLE;
   target.append(style);
-}
-
-function create<K extends keyof HTMLElementTagNameMap>(
-  document: Document,
-  tag: K,
-  className: string,
-  text?: string,
-): HTMLElementTagNameMap[K] {
-  const element = document.createElement(tag);
-  element.className = className;
-  if (text !== undefined) element.textContent = text;
-  return element;
 }
 
 /** Draw a level into `host` and play it. Returns the handle that drives it, or null for a layout code that is no layout at that size.
@@ -294,76 +266,19 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   const box = create(document, "div", "tsp-box");
   const inner = create(document, "div", "tsp-inner");
   box.append(inner);
-  const pad = create(document, "div", "tsp-pad");
-  pad.setAttribute("role", "group");
-  const chips = create(document, "div", "tsp-chips");
-  const says = create(document, "p", "tsp-says");
-  says.setAttribute("aria-live", "polite");
-  const controls = create(document, "div", "tsp-controls");
-  const progress = create(document, "p", "tsp-progress");
-  progress.setAttribute("aria-live", "polite");
-  const messages = create(document, "div", "tsp-messages");
-  messages.setAttribute("aria-live", "polite");
-  const hint = create(document, "p", "tsp-hint");
-  host.append(box, pad, chips, says);
-  if (withControls) host.append(controls, progress, messages, hint);
-
-  const button = (
-    name: string,
-    onPress: () => void,
-    parent: HTMLElement,
-    className = "tsp-button",
-  ): HTMLButtonElement => {
-    const one = create(document, "button", className);
-    one.type = "button";
-    one.dataset.action = name;
-    one.addEventListener("click", onPress);
-    parent.append(one);
-    return one;
-  };
-  const undoButton = button("undo", () => api.undo(), controls);
-  const restartButton = button("restart", () => api.restart(), controls);
-  const checkButton = button("check", () => api.check(), controls);
-  const cheatButton = button("cheat", () => api.cheat(), controls);
-  const padButtons: Record<string, HTMLButtonElement> = {};
-  const padMoves: Record<string, (view: TsunagiView, width: number) => TsunagiView> = {
-    out: (view, width) => zoomedAbout(view, 1 / 1.5, width / 2, width / 2, width),
-    in: (view, width) => zoomedAbout(view, 1.5, width / 2, width / 2, width),
-    left: (view, width) => ({ ...view, x: view.x + Math.round(width / 4) }),
-    up: (view, width) => ({ ...view, y: view.y + Math.round(width / 4) }),
-    down: (view, width) => ({ ...view, y: view.y - Math.round(width / 4) }),
-    right: (view, width) => ({ ...view, x: view.x - Math.round(width / 4) }),
-  };
-  for (const [name, glyph] of [
-    ["out", "−"],
-    ["in", "+"],
-    ["left", "←"],
-    ["up", "↑"],
-    ["down", "↓"],
-    ["right", "→"],
-  ] as const) {
-    const one = button(name, () => changeView(padMoves[name]!), pad);
-    one.textContent = glyph;
-    padButtons[name] = one;
-  }
-  const fitButton = button("fit", () => api.fit(), pad);
 
   // What is on show.
   let shownFlags: readonly number[] | null = null;
   let shownBlast: readonly number[] | null = null;
   let flagTimer = 0;
   let blastTimer = 0;
-  let linkTimer = 0;
   let view: TsunagiView = TSUNAGI_FITTED;
   let boxWidth = 0;
   let geometry: TsunagiGeometry = tsunagiGeometry(game.layout, { coordinates: look.coordinates });
   let solvedTold = false;
-  let openChip: string | null = null;
   let drawnKey = "";
   let drawnLines: Lines | null = null;
   let drawnStill = "";
-  let pointer: { id: number; cell: number | null; x: number; y: number } | null = null;
-  let frame = 0;
 
   const zooming = (): boolean => options.zoom === "on" || (options.zoom !== "off" && size >= TSUNAGI_ZOOM_FROM);
   const detail = (extra: Partial<TsunagiEventDetail> = {}): TsunagiEventDetail => ({
@@ -382,146 +297,10 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   };
   const say = (key: string, values: Record<string, string | number> = {}): string => tsunagiSay(language, key, values);
 
-  function applyView(): void {
-    const on = zooming();
-    pad.hidden = !on;
-    if (!on) view = TSUNAGI_FITTED;
-    inner.style.width = on && boxWidth > 0 ? `${boxWidth * view.zoom}px` : "100%";
-    inner.style.transform = on && view.zoom !== 1 ? `translate(${view.x}px, ${view.y}px)` : "";
-    box.dataset.zoom = view.zoom.toFixed(2);
-    fitButton.disabled = view.zoom === 1;
-    padButtons.out!.disabled = view.zoom === 1;
-    padButtons.in!.disabled = view.zoom >= 3;
-  }
-  function changeView(next: (view: TsunagiView, width: number) => TsunagiView): void {
-    view = keptView(next(view, boxWidth), boxWidth);
-    applyView();
-  }
-
-  function renderChips(): void {
-    chips.replaceChildren();
-    chips.hidden = !withChips;
-    says.hidden = !withChips;
-    if (!withChips) return;
-    const keys: { key: string; label: string; strong: boolean; says: string }[] = [];
-    const marks = level === undefined ? null : tsunagiMarks(size, level, set);
-    if (marks !== null) keys.push({ key: "difficulty", label: "", strong: false, says: say("difficultySays") });
-    const role = level === undefined ? null : tsunagiRole(size, level, set);
-    if (role?.role === "teaches" && role.newOnes.length > 0)
-      keys.push({
-        key: "teaches",
-        label: say("teaches", { what: role.newOnes.map((each) => say(each)).join(language === "ja" ? "、" : " and ") }),
-        strong: true,
-        says: say("teachesSays"),
-      });
-    if (role?.role === "tests") keys.push({ key: "tests", label: say("tests"), strong: true, says: say("testsSays") });
-    for (const challenge of challengesOf(givens))
-      if (CHALLENGE_KEYS.includes(challenge))
-        keys.push({ key: challenge, label: say(challenge), strong: false, says: say(`${challenge}Says`) });
-    for (const chip of keys) {
-      const one = create(document, "button", "tsp-chip");
-      one.type = "button";
-      one.dataset.chip = chip.key;
-      one.dataset.strong = String(chip.strong);
-      one.setAttribute("aria-expanded", String(openChip === chip.key));
-      if (chip.key === "difficulty") {
-        one.append(say("difficulty"), " ");
-        const dots = create(document, "span", "tsp-dots");
-        dots.dataset.marks = String(marks);
-        dots.setAttribute("aria-label", say("difficultyOf", { n: marks ?? 0 }));
-        dots.append("●".repeat(marks ?? 0));
-        const off = create(document, "span", "tsp-off", "●".repeat(5 - (marks ?? 0)));
-        dots.append(off);
-        one.append(dots);
-      } else one.textContent = chip.label;
-      one.title = chip.says;
-      one.addEventListener("click", () => {
-        openChip = openChip === chip.key ? null : chip.key;
-        renderChips();
-      });
-      chips.append(one);
-    }
-    says.textContent = openChip === null ? "" : (keys.find((chip) => chip.key === openChip)?.says ?? "");
-  }
-
-  function words(): void {
-    const info = tsunagiProgress(game);
-    undoButton.textContent = say("undo");
-    restartButton.textContent = say("restart");
-    checkButton.textContent = say("check");
-    cheatButton.textContent = say("cheat");
-    cheatButton.title = say("cheatTitle");
-    cheatButton.hidden = !(game.cheats && game.answer !== null);
-    const over = game.solved || info.outOfStrokes;
-    undoButton.disabled = over || game.undo.length === 0;
-    restartButton.disabled = game.lines.every((line) => line.length === 0);
-    checkButton.disabled = over;
-    cheatButton.disabled = over;
-    padButtons.out!.setAttribute("aria-label", say("zoomOut"));
-    padButtons.in!.setAttribute("aria-label", say("zoomIn"));
-    for (const name of ["left", "up", "down", "right"]) padButtons[name]!.setAttribute("aria-label", say(name));
-    fitButton.textContent = say("fit");
-    pad.setAttribute("aria-label", say("zoomLabel"));
-    host.dataset.solved = String(game.solved);
-    host.dataset.strokes = String(info.strokes);
-    host.dataset.joined = String(info.joined);
-    host.dataset.filled = String(info.filled);
-    if (!withControls) return;
-    hint.textContent = say("hint");
-    progress.textContent = game.solved
-      ? say("solved")
-      : info.joined === info.pairs && info.filled < info.cells
-        ? say("fullButEmpty", { n: info.cells - info.filled })
-        : say("progress", {
-            joined: info.joined,
-            pairs: info.pairs,
-            percent: Math.round((100 * info.filled) / info.cells),
-          });
-    const lines: { text: string; warn?: boolean; name: string }[] = [];
-    if (info.strokeLimit !== null)
-      lines.push({
-        name: "strokes",
-        text: info.outOfStrokes
-          ? say("outOfStrokes")
-          : say("strokesLeft", { n: info.strokesLeft ?? 0, left: info.strokesLeft ?? 0, limit: info.strokeLimit }),
-        warn: info.outOfStrokes,
-      });
-    if (info.boomIn !== null && !game.solved) {
-      const burst = game.exploded === null || shownBlast === null ? "" : `${say(game.exploded)} `;
-      lines.push({
-        name: "boom",
-        text: `${burst}${info.boomIn === 1 ? say("boomNext") : say("boomIn", { n: info.boomIn })}`,
-        warn: info.boomIn === 1,
-      });
-    }
-    if (game.eased !== null || game.cheated)
-      lines.push({
-        name: "help",
-        text: say(
-          game.eased === "explosions-off"
-            ? "helpExplosionsOff"
-            : game.eased === "explosions-soft"
-              ? "helpExplosionsSoft"
-              : "helpCheated",
-        ),
-      });
-    if (game.checked !== null)
-      lines.push({
-        name: "check",
-        text:
-          game.checked.unjoined > 0
-            ? say("checkMissing", { n: game.checked.unjoined })
-            : say("checkEmpty", { n: game.checked.empty }),
-      });
-    messages.replaceChildren(
-      ...lines.map((line) => {
-        const one = create(document, "p", "tsp-message", line.text);
-        one.dataset.message = line.name;
-        if (line.warn === true) one.dataset.warn = "true";
-        return one;
-      }),
-    );
-  }
+  // The buttons call the handle, which is built below; nothing is drawn until both exist.
+  let chrome!: TsunagiChrome;
+  let keys!: TsunagiKeyboard;
+  let pointing!: TsunagiPointer;
 
   /**
    * Only the pairs whose line changed are redrawn, in the drawing already there: on a board of dozens of
@@ -549,63 +328,6 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       if (parts.line !== "") drawn.insertAdjacentHTML("beforeend", parts.line);
     }
     return true;
-  }
-
-  let keyboardCell = game.layout.ends[0]?.[0] ?? 0;
-  const keyboardStatus = create(document, "p", "tsp-key-status");
-  keyboardStatus.setAttribute("aria-live", "polite");
-  host.append(keyboardStatus);
-  box.tabIndex = 0;
-  box.setAttribute("role", "application");
-  function paintKeyboard(): void {
-    if (keyboardCell >= game.layout.cells.length || game.layout.cells[keyboardCell] === CELL_BLOCKED)
-      keyboardCell = game.layout.ends[0]?.[0] ?? 0;
-    box.dataset.keyboardCell = String(keyboardCell);
-    box.setAttribute("aria-label", say("keyboardHelp"));
-    keyboardStatus.textContent = say("keyboardCell", {
-      row: Math.floor(keyboardCell / size) + 1,
-      col: (keyboardCell % size) + 1,
-    });
-    const svg = inner.querySelector("svg");
-    if (!svg) return;
-    svg.querySelector(".tsp-key-cursor")?.remove();
-    const point = geometry.centre(keyboardCell);
-    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("class", "tsp-key-cursor");
-    circle.setAttribute("aria-hidden", "true");
-    circle.setAttribute("cx", String(point.x));
-    circle.setAttribute("cy", String(point.y));
-    circle.setAttribute("r", "44");
-    svg.append(circle);
-  }
-  function showKeyboardCell(): void {
-    if (view.zoom <= 1) return;
-    const svg = inner.querySelector("svg");
-    const matrix = svg?.getScreenCTM();
-    if (!svg || !matrix) return;
-    const centre = geometry.centre(keyboardCell);
-    const point = svg.createSVGPoint();
-    point.x = centre.x;
-    point.y = centre.y;
-    const at = point.matrixTransform(matrix);
-    const rect = box.getBoundingClientRect();
-    const margin = 28;
-    const dx =
-      at.x < rect.left + margin
-        ? rect.left + margin - at.x
-        : at.x > rect.right - margin
-          ? rect.right - margin - at.x
-          : 0;
-    const dy =
-      at.y < rect.top + margin
-        ? rect.top + margin - at.y
-        : at.y > rect.bottom - margin
-          ? rect.bottom - margin - at.y
-          : 0;
-    if (dx || dy) {
-      view = keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width);
-      applyView();
-    }
   }
 
   function render(force = false): void {
@@ -645,8 +367,8 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       drawnStill = still;
     }
     box.dataset.over = String(over);
-    words();
-    paintKeyboard();
+    chrome.words();
+    keys.paint();
   }
 
   /** Bring the game's flags and bursts onto the board for a moment. */
@@ -667,18 +389,6 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       }, BLAST_MS);
   }
 
-  function pointAt(clientX: number, clientY: number): number | null {
-    const svg = inner.querySelector("svg");
-    if (svg === null) return null;
-    const rect = svg.getBoundingClientRect();
-    if (rect.width === 0) return null;
-    return cellAtPoint(
-      geometry,
-      ((clientX - rect.left) / rect.width) * geometry.side,
-      ((clientY - rect.top) / rect.height) * geometry.side,
-    );
-  }
-
   function after(before: TsunagiGame): void {
     if (game === before) return;
     const changed = game.lines !== before.lines;
@@ -687,47 +397,6 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     if (changed) tell("tsunagi-change", detail(), callbacks.onChange);
   }
 
-  /** A tap or press on a portal shows its link to the other ring for a moment: a pointer that hovers sees it by itself, a finger has no hover. */
-  function showLink(cell: number): void {
-    if (!game.layout.portals.has(cell)) return;
-    const group = inner.querySelector(`.tsu-portal-end[data-cell="${cell}"]`)?.parentElement;
-    if (group === null || group === undefined) return;
-    group.setAttribute("data-linked", "true");
-    window.clearTimeout(linkTimer);
-    linkTimer = window.setTimeout(() => group.removeAttribute("data-linked"), LINK_MS);
-  }
-
-  function press(event: PointerEvent): void {
-    if (pointer !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
-    const cell = pointAt(event.clientX, event.clientY);
-    if (cell === null) return;
-    showLink(cell);
-    const before = game;
-    const next = pressGame(before, cell);
-    if (next === before) return;
-    event.preventDefault();
-    box.setPointerCapture?.(event.pointerId);
-    pointer = { id: event.pointerId, cell, x: event.clientX, y: event.clientY };
-    game = next;
-    after(before);
-    if (view.zoom > 1 && frame === 0) frame = window.requestAnimationFrame(nudge);
-  }
-  function drag(clientX: number, clientY: number): void {
-    if (pointer === null) return;
-    pointer.x = clientX;
-    pointer.y = clientY;
-    const cell = pointAt(clientX, clientY);
-    if (cell === null || cell === pointer.cell) return;
-    pointer.cell = cell;
-    const before = game;
-    game = dragGame(before, cell);
-    after(before);
-  }
-  function lift(event: PointerEvent): void {
-    if (pointer === null || pointer.id !== event.pointerId) return;
-    pointer = null;
-    finishStroke();
-  }
   function finishStroke(): void {
     const before = game;
     game = liftGame(before);
@@ -746,98 +415,15 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       tell("tsunagi-solve", detail(), callbacks.onSolve);
     }
   }
-  /** While a line is dragged near an edge of a zoomed board, the view moves toward it, a little each frame, and the line carries on under the finger. */
-  function nudge(): void {
-    frame = 0;
-    if (pointer === null || view.zoom <= 1) return;
-    const rect = box.getBoundingClientRect();
-    const { dx, dy } = edgeNudge(pointer.x, pointer.y, rect);
-    if (dx !== 0 || dy !== 0) {
-      view = keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width);
-      applyView();
-      drag(pointer.x, pointer.y);
-    }
-    frame = window.requestAnimationFrame(nudge);
-  }
-
-  const onDown = (event: PointerEvent): void => press(event);
-  const onMove = (event: PointerEvent): void => {
-    if (pointer !== null && pointer.id === event.pointerId) drag(event.clientX, event.clientY);
-  };
   const onWheel = (event: WheelEvent): void => {
     if (!zooming()) return;
     event.preventDefault();
     const rect = box.getBoundingClientRect();
     const factor = Math.exp(-event.deltaY * (event.ctrlKey ? 0.01 : 0.002));
     view = zoomedAbout(view, factor, event.clientX - rect.left, event.clientY - rect.top, rect.width);
-    applyView();
+    chrome.applyView();
   };
-  const onKey = (event: KeyboardEvent): void => {
-    if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z") {
-      event.preventDefault();
-      api.undo();
-      return;
-    }
-    if (event.target !== box || pointer !== null || event.ctrlKey || event.metaKey || event.altKey) return;
-    const key = event.key.toLowerCase();
-    if (key === "enter" || key === " ") {
-      event.preventDefault();
-      if (game.drawing !== null) finishStroke();
-      else {
-        const before = game;
-        game = pressGame(game, keyboardCell);
-        after(before);
-        paintKeyboard();
-      }
-      return;
-    }
-    if (key === "escape" && game.drawing !== null) {
-      event.preventDefault();
-      const before = game;
-      game = { ...game, lines: game.before ?? game.lines, drawing: null, before: null };
-      after(before);
-      paintKeyboard();
-      return;
-    }
-    const move = (
-      {
-        arrowup: [-1, 0],
-        arrowright: [0, 1],
-        arrowdown: [1, 0],
-        arrowleft: [0, -1],
-        ...(game.layout.hex ? { q: [1, -1], e: [-1, 1] } : {}),
-      } as Record<string, number[]>
-    )[key];
-    const dRow = move?.[0];
-    const dCol = move?.[1];
-    if (dRow === undefined || dCol === undefined) return;
-    event.preventDefault();
-    let row = Math.floor(keyboardCell / size) + dRow;
-    let col = (keyboardCell % size) + dCol;
-    if (game.layout.wrap) {
-      row = (row + size) % size;
-      col = (col + size) % size;
-    }
-    if (row < 0 || col < 0 || row >= size || col >= size) return;
-    const next = row * size + col;
-    if (game.layout.cells[next] === CELL_BLOCKED) return;
-    if (game.drawing !== null) {
-      const before = game;
-      game = dragGame(game, next);
-      if (game === before) return;
-      keyboardCell = game.lines[game.drawing!]?.at(-1) ?? next;
-      game = { ...game, reach: NO_REACH };
-      after(before);
-    } else keyboardCell = next;
-    paintKeyboard();
-    showKeyboardCell();
-  };
-  box.addEventListener("pointerdown", onDown);
-  box.addEventListener("pointermove", onMove);
-  box.addEventListener("pointerup", lift);
-  box.addEventListener("pointercancel", lift);
   box.addEventListener("wheel", onWheel, { passive: false });
-  host.addEventListener("keydown", onKey);
   const resize =
     typeof ResizeObserver === "undefined"
       ? null
@@ -846,9 +432,8 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
           if (width === boxWidth) return;
           boxWidth = width;
           view = keptView(view, boxWidth);
-          applyView();
+          chrome.applyView();
         });
-  resize?.observe(box);
   const watching =
     typeof MutationObserver === "undefined"
       ? null
@@ -857,36 +442,23 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
           const next = tsunagiLanguageOf(host.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang);
           if (next === language) return;
           language = next;
-          renderChips();
+          chrome.renderChips();
           render(true);
         });
-  watching?.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
-
-  /** Room for every line of words this level can ever show, so nothing under the board moves as they come and go. */
-  function reserve(next: TsunagiGame): void {
-    // What Check says and what an explosion says can run to two lines on a phone; the stroke count is one.
-    const lines =
-      2 +
-      (next.layout.strokes !== null ? 1 : 0) +
-      (next.layout.explosions !== null ? 2 : 0) +
-      (next.cheats || next.eased !== null ? 2 : 0);
-    messages.style.minHeight = `${(lines * 1.4 + 0.1).toFixed(1)}em`;
-  }
-
   function begin(next: TsunagiGame): void {
     window.clearTimeout(flagTimer);
     window.clearTimeout(blastTimer);
     game = next;
-    keyboardCell = next.layout.ends[0]?.[0] ?? 0;
+    keys.reset(next.layout.ends[0]?.[0] ?? 0);
     shownFlags = null;
     shownBlast = null;
     solvedTold = next.solved;
-    openChip = null;
+    chrome.closeChip();
     view = TSUNAGI_FITTED;
     geometry = tsunagiGeometry(next.layout, { coordinates: look.coordinates });
-    reserve(next);
-    renderChips();
-    applyView();
+    chrome.reserve(next);
+    chrome.renderChips();
+    chrome.applyView();
     render(true);
   }
 
@@ -926,7 +498,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
         if (made !== null) begin(made);
         return;
       }
-      renderChips();
+      chrome.renderChips();
       render(true);
     },
     undo: () => {
@@ -956,19 +528,14 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     },
     fit: () => {
       view = TSUNAGI_FITTED;
-      applyView();
+      chrome.applyView();
     },
     destroy: () => {
       window.clearTimeout(flagTimer);
       window.clearTimeout(blastTimer);
-      window.clearTimeout(linkTimer);
-      window.cancelAnimationFrame(frame);
-      box.removeEventListener("pointerdown", onDown);
-      box.removeEventListener("pointermove", onMove);
-      box.removeEventListener("pointerup", lift);
-      box.removeEventListener("pointercancel", lift);
+      pointing.stop();
+      keys.stop();
       box.removeEventListener("wheel", onWheel);
-      host.removeEventListener("keydown", onKey);
       resize?.disconnect();
       watching?.disconnect();
       host.replaceChildren();
@@ -980,8 +547,76 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     },
   };
 
+  chrome = createTsunagiChrome({
+    host,
+    document,
+    box,
+    inner,
+    withControls,
+    withChips,
+    game: () => game,
+    view: () => view,
+    setView: (next) => {
+      view = next;
+    },
+    boxWidth: () => boxWidth,
+    zooming,
+    say,
+    language: () => language,
+    size: () => size,
+    level: () => level,
+    set: () => set,
+    givens: () => givens,
+    shownBlast: () => shownBlast,
+    undo: () => api.undo(),
+    restart: () => api.restart(),
+    check: () => api.check(),
+    cheat: () => api.cheat(),
+    fit: () => api.fit(),
+  });
+  pointing = attachTsunagiPointer({
+    box,
+    inner,
+    game: () => game,
+    setGame: (next) => {
+      game = next;
+    },
+    geometry: () => geometry,
+    view: () => view,
+    setView: (next) => {
+      view = next;
+    },
+    applyView: () => chrome.applyView(),
+    after,
+    finishStroke,
+  });
+  keys = attachTsunagiKeyboard({
+    host,
+    box,
+    inner,
+    document,
+    game: () => game,
+    setGame: (next) => {
+      game = next;
+    },
+    size: () => size,
+    say,
+    geometry: () => geometry,
+    view: () => view,
+    setView: (next) => {
+      view = next;
+    },
+    applyView: () => chrome.applyView(),
+    drawing: () => pointing.drawing(),
+    finishStroke,
+    undo: () => api.undo(),
+    after,
+  });
+
+  resize?.observe(box);
+  watching?.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
   begin(game);
   boxWidth = box.getBoundingClientRect().width;
-  applyView();
+  chrome.applyView();
   return api;
 }

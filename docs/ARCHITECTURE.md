@@ -10,10 +10,12 @@ levels is an entry of its own, so a page loads only the size it shows.
 ```text
 src/
 ├── index.ts          the main entry: everything but the levels, the drawing and the page
+├── keyboard.ts       drawing a line from the keyboard, and keeping that cell on screen
 ├── code.ts           layouts and answers as short codes, and the board each stands for
 ├── steps.ts          where a line may go next on a board: walls, bridges, portals, wrap, hexagons
 ├── lines.ts          the lines a player has drawn, and what a press and a drag do to them
 ├── check.ts          whether an answer joins every pair as the rules allow
+├── chrome.ts         the chips, the buttons and the words under a mounted board
 ├── solve.ts          the solver, which counts a board's answers up to a limit (4×4 to 12×12)
 ├── solveSat.ts       the same count by SAT, for 13×13 and above and for portals: the board written as clauses
 ├── sat.ts            a small SAT solver: clause learning, restarts, clauses added between solves
@@ -42,6 +44,7 @@ src/
 ├── style.ts          the drawing's style: its colours as custom properties, a flash and a burst
 ├── strings.ts        the words, in English and Japanese, for a screen reader and for the board's buttons
 ├── play-entry.ts     the "/play" entry: a level played in any element
+├── pointer.ts        a press and a drag on the board, including a zoomed board's edge
 ├── mount.ts          mountTsunagi: draws a level into an element and plays it by touch and mouse
 ├── viewport.ts       the arithmetic of zooming and moving a big board through its box
 ├── playStyle.ts      the style of a playable board: its box, buttons, words and zoom pad
