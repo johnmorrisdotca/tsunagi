@@ -36,13 +36,27 @@ export function attemptsFor(size: number): number {
 }
 
 const SEED = 20261005;
-export const KINDS = ["plain", "wrap", "blocked", "portals1", "portals2", "portals3", "portals4", "portalsWrap2", "portalsWrap3"] as const;
+export const KINDS = [
+  "plain",
+  "wrap",
+  "blocked",
+  "portals1",
+  "portals2",
+  "portals3",
+  "portals4",
+  "portalsWrap2",
+  "portalsWrap3",
+] as const;
 export type PoolKind = (typeof KINDS)[number];
 
 /** What a kind asks of the generator. */
 export function optionsOf(kind: PoolKind): ReduceOptions {
   const portals = /^portals(?:Wrap)?(\d)$/.exec(kind);
-  return { wrap: kind === "wrap" || kind.startsWith("portalsWrap"), portals: portals === null ? 0 : Number(portals[1]), ...(kind === "blocked" ? { blockedCount: 6 } : {}) };
+  return {
+    wrap: kind === "wrap" || kind.startsWith("portalsWrap"),
+    portals: portals === null ? 0 : Number(portals[1]),
+    ...(kind === "blocked" ? { blockedCount: 6 } : {}),
+  };
 }
 
 export type ReducedPoolBoard = PoolBoard & { kind: PoolKind; portals: number; wrap: boolean };
@@ -51,15 +65,30 @@ export type ReducedPoolBoard = PoolBoard & { kind: PoolKind; portals: number; wr
 export function runJob(size: number, kind: PoolKind, job: number): ReducedPoolBoard[] {
   const random = seededRandom(SEED + size * 1_000_003 + (KINDS.indexOf(kind) + 1) * 7_919_999 + job);
   // POOL_BUDGET sets one for every job of a run: the 30×30 boards that wrap need far more than the table's.
-  const budget = process.env.POOL_BUDGET === undefined ? BUDGETS[job % BUDGETS.length]! : Number(process.env.POOL_BUDGET);
+  const budget =
+    process.env.POOL_BUDGET === undefined ? BUDGETS[job % BUDGETS.length]! : Number(process.env.POOL_BUDGET);
   const out: ReducedPoolBoard[] = [];
   const seen = new Set<string>();
   for (let attempt = 0; attempt < attemptsFor(size); attempt += 1) {
-    const made = reducedCandidate(size, random, { ...optionsOf(kind), budget, greed: GREEDS[Math.floor(job / BUDGETS.length) % GREEDS.length] });
+    const made = reducedCandidate(size, random, {
+      ...optionsOf(kind),
+      budget,
+      greed: GREEDS[Math.floor(job / BUDGETS.length) % GREEDS.length],
+    });
     if (made === null || seen.has(made.key)) continue;
     seen.add(made.key);
-    const lengths = [...new Set([...made.answer].filter((char) => char !== "#" && char !== "+" && char !== "."))].map((letter) => [...made.answer].filter((char) => char === letter).length);
-    out.push({ ...made, forced: forcedShare(made.layout, size), longest: Math.max(...lengths), job, kind, portals: made.portals, wrap: made.wrap });
+    const lengths = [...new Set([...made.answer].filter((char) => char !== "#" && char !== "+" && char !== "."))].map(
+      (letter) => [...made.answer].filter((char) => char === letter).length,
+    );
+    out.push({
+      ...made,
+      forced: forcedShare(made.layout, size),
+      longest: Math.max(...lengths),
+      job,
+      kind,
+      portals: made.portals,
+      wrap: made.wrap,
+    });
   }
   return out;
 }
@@ -77,20 +106,26 @@ if (!isMainThread) {
   const file = `scripts/.tsunagi-pool/size${size}.${kind}.jsonl`;
   const doneFile = `scripts/.tsunagi-pool/size${size}.${kind}.done`;
   const done = new Set<number>();
-  if (existsSync(doneFile)) for (const each of readFileSync(doneFile, "utf8").split("\n")) if (each !== "") done.add(Number(each));
+  if (existsSync(doneFile))
+    for (const each of readFileSync(doneFile, "utf8").split("\n")) if (each !== "") done.add(Number(each));
   const todo = Array.from({ length: count }, (_, at) => first + at).filter((job) => !done.has(job));
   const workers = Math.max(1, Math.min(todo.length, Number(process.env.POOL_WORKERS ?? cpus().length - 2)));
   const started = Date.now();
   let finished = 0;
   let boards = 0;
   for (let w = 0; w < workers; w += 1) {
-    const worker = new Worker(fileURLToPath(import.meta.url), { workerData: { size, kind, jobs: todo.filter((_, at) => at % workers === w) } });
+    const worker = new Worker(fileURLToPath(import.meta.url), {
+      workerData: { size, kind, jobs: todo.filter((_, at) => at % workers === w) },
+    });
     worker.on("message", ({ job, boards: found }: { job: number; boards: ReducedPoolBoard[] }) => {
       for (const board of found) appendFileSync(file, JSON.stringify(board) + "\n");
       appendFileSync(doneFile, `${job}\n`);
       finished += 1;
       boards += found.length;
-      if (finished % 5 === 0 || finished === todo.length) console.log(`${size}×${size} ${kind}: ${finished}/${todo.length} jobs, ${boards} boards, ${Math.round((Date.now() - started) / 1000)} s`);
+      if (finished % 5 === 0 || finished === todo.length)
+        console.log(
+          `${size}×${size} ${kind}: ${finished}/${todo.length} jobs, ${boards} boards, ${Math.round((Date.now() - started) / 1000)} s`,
+        );
     });
   }
 }

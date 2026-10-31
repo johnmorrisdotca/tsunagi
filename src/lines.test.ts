@@ -3,7 +3,21 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { checkTsunagiAnswer } from "./check.ts";
 import { decodeLayout } from "./code.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
-import { allJoined, answerOf, decodeLines, dragThrough, dragTo, encodeLines, joined, letGo, linesOfAnswer, noLines, pressAt, unjoinedPairs, type Lines } from "./lines.ts";
+import {
+  allJoined,
+  answerOf,
+  decodeLines,
+  dragThrough,
+  dragTo,
+  encodeLines,
+  joined,
+  letGo,
+  linesOfAnswer,
+  noLines,
+  pressAt,
+  unjoinedPairs,
+  type Lines,
+} from "./lines.ts";
 
 /**
  * How a finger draws a Tsunagi line: the rules the grid hands every press and
@@ -25,7 +39,12 @@ function answerLine(n: number, pair: number): number[] {
   for (;;) {
     const at = line[line.length - 1]!;
     const next = [at - 4, at + 1, at + 4, at - 1].find(
-      (cell) => cell >= 0 && cell < 16 && answer[cell] === letter && !line.includes(cell) && (Math.abs(cell - at) === 4 || Math.floor(cell / 4) === Math.floor(at / 4)),
+      (cell) =>
+        cell >= 0 &&
+        cell < 16 &&
+        answer[cell] === letter &&
+        !line.includes(cell) &&
+        (Math.abs(cell - at) === 4 || Math.floor(cell / 4) === Math.floor(at / 4)),
     );
     if (next === undefined) return line;
     line.push(next);
@@ -52,7 +71,6 @@ describe("drawing a tsunagi line", () => {
     expect(answerOf(layout, lines)).toBe(answer);
     expect(checkTsunagiAnswer(4, level(1).givens, answerOf(layout, lines))).toEqual({ ok: true });
   });
-
 });
 
 /*
@@ -169,15 +187,18 @@ describe("Check names the pairs not joined, and nothing else", () => {
 });
 
 describe("a solved level is drawn back from its answer", () => {
-  it.each(TSUNAGI_SIZES.map((size) => [size]))("draws every %i×%i level's answer as lines that make exactly that answer", (size) => {
-    for (const [givens, answer] of tsunagiLevelsOf(size)) {
-      const layout = decodeLayout(givens, size)!;
-      const lines = linesOfAnswer(layout, answer);
-      expect(lines, givens).not.toBeNull();
-      expect(allJoined(layout, lines!)).toBe(true);
-      expect(answerOf(layout, lines!)).toBe(answer);
-    }
-  });
+  it.each(TSUNAGI_SIZES.map((size) => [size]))(
+    "draws every %i×%i level's answer as lines that make exactly that answer",
+    (size) => {
+      for (const [givens, answer] of tsunagiLevelsOf(size)) {
+        const layout = decodeLayout(givens, size)!;
+        const lines = linesOfAnswer(layout, answer);
+        expect(lines, givens).not.toBeNull();
+        expect(allJoined(layout, lines!)).toBe(true);
+        expect(answerOf(layout, lines!)).toBe(answer);
+      }
+    },
+  );
 
   it("refuses an answer that is not a board of unbroken lines", () => {
     const { layout, answer } = level(1);

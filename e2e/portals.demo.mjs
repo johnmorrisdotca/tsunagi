@@ -33,7 +33,11 @@ async function solveThroughPortals(page, svg, level) {
     await page.mouse.down();
     for (let index = 1; index < line.length; index += 1) {
       const [before, cell] = [line[index - 1], line[index]];
-      if (layout.portals.has(before) || (layout.portals.has(line[index - 2] ?? -1) && layout.portals.get(line[index - 2]) === before)) continue;
+      if (
+        layout.portals.has(before) ||
+        (layout.portals.has(line[index - 2] ?? -1) && layout.portals.get(line[index - 2]) === before)
+      )
+        continue;
       const [dr, dc] = [Math.floor(cell / size) - Math.floor(before / size), (cell % size) - (before % size)];
       if (row + dr < 0 || row + dr >= size || col + dc < 0 || col + dc >= size) {
         await page.mouse.up();
@@ -51,12 +55,23 @@ async function solveThroughPortals(page, svg, level) {
   }
 }
 
-test("the set row chooses the levels with portals, which have their own sizes and their own thirty-two levels", async ({ page }) => {
+test("the set row chooses the levels with portals, which have their own sizes and their own thirty-two levels", async ({
+  page,
+}) => {
   await open(page, "?size=7&level=1");
   await expect(page.locator(`${at("set")} button[aria-pressed="true"]`)).toHaveText("Classic");
   await page.locator(`${at("set")} button[data-value="portals"]`).click();
   await expect(page.locator(at("level"))).toContainText("/ 32");
-  await expect(page.locator(`${at("sizes")} button`)).toHaveText(["5×5", "6×6", "7×7", "8×8", "9×9", "10×10", "12×12", "15×15"]);
+  await expect(page.locator(`${at("sizes")} button`)).toHaveText([
+    "5×5",
+    "6×6",
+    "7×7",
+    "8×8",
+    "9×9",
+    "10×10",
+    "12×12",
+    "15×15",
+  ]);
   await expect(page.locator(`${at("board")} .tsu-portal`).first()).toBeVisible();
   await noSidewaysScroll(page);
   // And back: the first set again, at the same size.
@@ -65,7 +80,9 @@ test("the set row chooses the levels with portals, which have their own sizes an
   await expect(page.locator(`${at("board")} .tsu-portal`)).toHaveCount(0);
 });
 
-test("a level with portals is drawn with two rings alike for each, and every ring's partner is linked on hover", async ({ page }, info) => {
+test("a level with portals is drawn with two rings alike for each, and every ring's partner is linked on hover", async ({
+  page,
+}, info) => {
   const level = portalLevel(6, 1);
   await open(page, "?set=portals&size=6&level=1");
   const rings = page.locator(`${at("board")} .tsu-portal`);
@@ -86,8 +103,13 @@ test("a level with portals is drawn with two rings alike for each, and every rin
   }
 });
 
-for (const [size, level] of [[6, 1], [7, 17]]) {
-  test(`${size}×${size} portal level ${level} is solved by a finger that goes into one ring while the line comes out of the other`, async ({ page }) => {
+for (const [size, level] of [
+  [6, 1],
+  [7, 17],
+]) {
+  test(`${size}×${size} portal level ${level} is solved by a finger that goes into one ring while the line comes out of the other`, async ({
+    page,
+  }) => {
     const wanted = portalLevel(size, level);
     await open(page, `?set=portals&size=${size}&level=${level}`);
     await solveThroughPortals(page, board(page), wanted);
@@ -97,12 +119,16 @@ for (const [size, level] of [[6, 1], [7, 17]]) {
   });
 }
 
-test("a line goes into a ring and out of its partner in the one drag, and is taken back over the portal as it went in", async ({ page }) => {
+test("a line goes into a ring and out of its partner in the one drag, and is taken back over the portal as it went in", async ({
+  page,
+}) => {
   const level = portalLevel(6, 1);
   const { layout } = level;
   await open(page, "?set=portals&size=6&level=1");
   const line = level.lines.find((each) => each.some((cell) => layout.portals.has(cell)));
-  const enter = line.findIndex((cell, index) => layout.portals.has(cell) && layout.portals.get(cell) === line[index + 1]);
+  const enter = line.findIndex(
+    (cell, index) => layout.portals.has(cell) && layout.portals.get(cell) === line[index + 1],
+  );
   expect(enter).toBeGreaterThan(0);
   const svg = board(page);
   // Down on the line's first marble and along it, cell by cell, to the cell beside the first ring and into the ring.
@@ -112,12 +138,19 @@ test("a line goes into a ring and out of its partner in the one drag, and is tak
   await page.mouse.move(point.x, point.y);
   await page.mouse.down();
   for (let index = 1; index <= enter; index += 1) {
-    [row, col] = [row + Math.floor(line[index] / size) - Math.floor(line[index - 1] / size), col + (line[index] % size) - (line[index - 1] % size)];
-    if (row < 0 || row >= size || col < 0 || col >= size) test.skip(true, "this finger would leave the board: the unit tests hold the rule");
+    [row, col] = [
+      row + Math.floor(line[index] / size) - Math.floor(line[index - 1] / size),
+      col + (line[index] % size) - (line[index - 1] % size),
+    ];
+    if (row < 0 || row >= size || col < 0 || col >= size)
+      test.skip(true, "this finger would leave the board: the unit tests hold the rule");
     point = await cellPoint(svg, layout, row * size + col);
     await page.mouse.move(point.x, point.y, { steps: 4 });
   }
   // Into the ring: the line has gone through, both rings are cells of it, and it has come out beyond the other.
-  await expect(page.locator(`${at("board")} .tsu-line[data-pair="${layout.cells[line[0]]}"]`)).toHaveAttribute("data-cells", String(enter + 3));
+  await expect(page.locator(`${at("board")} .tsu-line[data-pair="${layout.cells[line[0]]}"]`)).toHaveAttribute(
+    "data-cells",
+    String(enter + 3),
+  );
   await page.mouse.up();
 });

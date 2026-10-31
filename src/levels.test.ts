@@ -1,6 +1,13 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { firstUnsolvedTsunagiLevel, loadEveryTsunagiLevel, nextTsunagiLevel, openTsunagiLevels, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES } from "./levels.ts";
+import {
+  firstUnsolvedTsunagiLevel,
+  loadEveryTsunagiLevel,
+  nextTsunagiLevel,
+  openTsunagiLevels,
+  TSUNAGI_LEVEL_COUNTS,
+  TSUNAGI_SIZES,
+} from "./levels.ts";
 
 /**
  * HOW TSUNAGI'S LEVELS OPEN AND WHICH COMES NEXT. Every level itself — proved
@@ -37,7 +44,23 @@ describe("the levels open a block of sixteen at a time", () => {
 
   it("has whole blocks at every size: 256 a size, 192 at 4×4, 128 at 10×10 and 12×12 to 15×15, and 64 at 11×11, 20×20, 25×25 and 30×30", () => {
     for (const size of TSUNAGI_SIZES) expect(TSUNAGI_LEVEL_COUNTS[size]! % 16, `${size}×${size}`).toBe(0);
-    expect(TSUNAGI_LEVEL_COUNTS).toEqual({ 4: 192, 5: 256, 6: 256, 7: 256, 8: 256, 9: 256, 10: 128, 11: 64, 12: 128, 13: 128, 14: 128, 15: 128, 20: 64, 25: 64, 30: 64 });
+    expect(TSUNAGI_LEVEL_COUNTS).toEqual({
+      4: 192,
+      5: 256,
+      6: 256,
+      7: 256,
+      8: 256,
+      9: 256,
+      10: 128,
+      11: 64,
+      12: 128,
+      13: 128,
+      14: 128,
+      15: 128,
+      20: 64,
+      25: 64,
+      30: 64,
+    });
   });
 });
 

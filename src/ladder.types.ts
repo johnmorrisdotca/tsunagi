@@ -8,7 +8,16 @@
  * console.log(value);
  * ```
  */
-export type Challenge = "bridges" | "walls" | "waypoints" | "wrap" | "portals" | "explosions" | "strokes" | "hexagon" | "sparse";
+export type Challenge =
+  | "bridges"
+  | "walls"
+  | "waypoints"
+  | "wrap"
+  | "portals"
+  | "explosions"
+  | "strokes"
+  | "hexagon"
+  | "sparse";
 
 /** Where a level sits in its block's lesson: its 15th teaches the block's twist, its 16th tests it. `newOnes` are what no earlier level of the size had.
  *

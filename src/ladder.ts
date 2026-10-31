@@ -1,4 +1,13 @@
-import { CAPITAL_PAIRS, inHex, layoutCells, stoneLetters, LINK_BLOCKED, LINK_BRIDGE, LINK_WALLS, tailWord } from "./code.ts";
+import {
+  CAPITAL_PAIRS,
+  inHex,
+  layoutCells,
+  stoneLetters,
+  LINK_BLOCKED,
+  LINK_BRIDGE,
+  LINK_WALLS,
+  tailWord,
+} from "./code.ts";
 import { TSUNAGI_BLOCK } from "./levelBlocks.ts";
 import type { Challenge, TwistRole } from "./ladder.types.ts";
 import type { TsunagiSet } from "./levelCounts.ts";
@@ -23,7 +32,17 @@ export type { Challenge, TwistRole };
  * ```
  */
 
-export const CHALLENGES: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "portals", "explosions", "strokes", "hexagon", "sparse"];
+export const CHALLENGES: readonly Challenge[] = [
+  "bridges",
+  "walls",
+  "waypoints",
+  "wrap",
+  "portals",
+  "explosions",
+  "strokes",
+  "hexagon",
+  "sparse",
+];
 
 /** The challenges on a board, in the order the ladder teaches them.
  *
@@ -99,7 +118,11 @@ export function twistRole(layouts: readonly string[], level: number): TwistRole 
   const challenges = challengesOf(layout);
   if (challenges.length === 0) return null;
   const before = new Set(layouts.slice(0, level - 1).flatMap(challengesOf));
-  return { role: slot === TSUNAGI_BLOCK - 1 ? "teaches" : "tests", challenges, newOnes: challenges.filter((each) => !before.has(each)) };
+  return {
+    role: slot === TSUNAGI_BLOCK - 1 ? "teaches" : "tests",
+    challenges,
+    newOnes: challenges.filter((each) => !before.has(each)),
+  };
 }
 
 /** A level's measured difficulty, 1 (easiest) to 5, or null for a level the marks do not have.

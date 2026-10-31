@@ -2,8 +2,28 @@
 // `mountTsunagi` (the drawing, the drag, Undo, Check, Cheat, the zoom), with every option the package has on a
 // settings panel, a preview of the level's block, kept on this device between visits, and spoken in the language
 // the header's chooser picks. The page itself only chooses a level, keeps what was solved and hands the settings on.
-import { blockOf, blockRange, dailyTsunagiLevel, decodeLayout, decodeLines, helpOpensNext, levelCountOf, linesOfAnswer, openTsunagiLevels, TSUNAGI_PORTAL_SIZES, TSUNAGI_SIZES } from "./dist/index.js";
-import { TSUNAGI_BOARDS, TSUNAGI_BOARD_NAMES, TSUNAGI_COLOUR_SET_NAMES, TSUNAGI_COLOUR_SETS, colourOfPair, drawTsunagi, hsl } from "./dist/draw-entry.js";
+import {
+  blockOf,
+  blockRange,
+  dailyTsunagiLevel,
+  decodeLayout,
+  decodeLines,
+  helpOpensNext,
+  levelCountOf,
+  linesOfAnswer,
+  openTsunagiLevels,
+  TSUNAGI_PORTAL_SIZES,
+  TSUNAGI_SIZES,
+} from "./dist/index.js";
+import {
+  TSUNAGI_BOARDS,
+  TSUNAGI_BOARD_NAMES,
+  TSUNAGI_COLOUR_SET_NAMES,
+  TSUNAGI_COLOUR_SETS,
+  colourOfPair,
+  drawTsunagi,
+  hsl,
+} from "./dist/draw-entry.js";
 import { mountTsunagi } from "./dist/play-entry.js";
 import { loadTsunagiLevels } from "./dist/levels.js";
 
@@ -12,7 +32,8 @@ const WORDS = {
   en: {
     pageDocs: "Docs",
     pageApi: "API reference",
-    pitch: "Join each pair of marbles with a line. Lines never cross, and when every pair is joined, every cell is filled. Draw with a finger or the mouse, from a marble or from the end of a line.",
+    pitch:
+      "Join each pair of marbles with a line. Lines never cross, and when every pair is joined, every cell is filled. Draw with a finger or the mouse, from a marble or from the end of a line.",
     name: "Tsunagi (繋ぎ) is Japanese for joining, a link.",
     nameLink: "About the name",
     size: "Size",
@@ -46,22 +67,27 @@ const WORDS = {
     cheating: "Cheating",
     cheatsOff: "Not allowed",
     cheatsOn: "Allowed",
-    helpCosts: "A level solved with Cheat, or with explosions softened or off, counts as helped. With explosions off it does not open the next block.",
+    helpCosts:
+      "A level solved with Cheat, or with explosions softened or off, counts as helped. With explosions off it does not open the next block.",
     solvedHere: "Solved",
     blockTitle: (block) => `Levels ${block}: the block you are in`,
-    blockText: "Every level of a block of sixteen, as drawn: a level you have solved shows its answer, and one not open yet is dimmed.",
+    blockText:
+      "Every level of a block of sixteen, as drawn: a level you have solved shows its answer, and one not open yet is dimmed.",
     levelLabel: (level, state) => `Level ${level}, ${state}`,
     states: { open: "open", solved: "solved", locked: "not open yet", here: "playing now" },
     moreTitle: "Using it",
-    moreText: "The board above is the package itself: the rules, the drawing and every level. Each line below is all it takes.",
+    moreText:
+      "The board above is the package itself: the rules, the drawing and every level. Each line below is all it takes.",
     tagTitle: "As a tag",
-    tagText: "The same board in one element, with no framework: numbers, lines only, and the level's challenges under it.",
+    tagText:
+      "The same board in one element, with no framework: numbers, lines only, and the level's challenges under it.",
     foot: "Every level was made once and is proved on every build to have exactly one answer. Your progress stays on this device.",
   },
   ja: {
     pageDocs: "ドキュメント",
     pageApi: "API（英語）",
-    pitch: "同じ色の玉どうしを線でつなぎます。線は交差できません。すべての組をつなぐと、すべてのマスが埋まります。玉か線の端から、指やマウスでなぞって描きます。",
+    pitch:
+      "同じ色の玉どうしを線でつなぎます。線は交差できません。すべての組をつなぐと、すべてのマスが埋まります。玉か線の端から、指やマウスでなぞって描きます。",
     name: "「繋ぎ」は、つなぐこと、つながりという意味です。",
     nameLink: "名前について（英語）",
     size: "大きさ",
@@ -72,7 +98,8 @@ const WORDS = {
     previous: "前のレベル",
     next: "次のレベル",
     today: "今日",
-    open: (open, count) => `${count}レベル中${open}レベルが開いています。16レベルのまとまりをすべて解くと、次が開きます。`,
+    open: (open, count) =>
+      `${count}レベル中${open}レベルが開いています。16レベルのまとまりをすべて解くと、次が開きます。`,
     look: "見た目",
     assists: "補助",
     marks: "見分け方",
@@ -95,14 +122,17 @@ const WORDS = {
     cheating: "ヒント",
     cheatsOff: "使わない",
     cheatsOn: "使える",
-    helpCosts: "ヒントを使ったり、爆発を弱めたりなしにして解くと、助けを借りたものとして数えます。爆発なしでは、次のまとまりは開きません。",
+    helpCosts:
+      "ヒントを使ったり、爆発を弱めたりなしにして解くと、助けを借りたものとして数えます。爆発なしでは、次のまとまりは開きません。",
     solvedHere: "解けた",
     blockTitle: (block) => `レベル一覧：${block}番目のまとまり`,
-    blockText: "16レベルのまとまりをそのまま描いています。解いたレベルは答えが見え、まだ開いていないレベルは薄くなります。",
+    blockText:
+      "16レベルのまとまりをそのまま描いています。解いたレベルは答えが見え、まだ開いていないレベルは薄くなります。",
     levelLabel: (level, state) => `レベル${level}、${state}`,
     states: { open: "開いている", solved: "解けた", locked: "まだ開いていない", here: "いま遊んでいる" },
     moreTitle: "使い方",
-    moreText: "上の盤面は、このパッケージそのもの（ルール、描き方、すべてのレベル）で動いています。下の各行がそれぞれ必要なコードのすべてです。",
+    moreText:
+      "上の盤面は、このパッケージそのもの（ルール、描き方、すべてのレベル）で動いています。下の各行がそれぞれ必要なコードのすべてです。",
     tagTitle: "タグとして",
     tagText: "同じ盤面を、フレームワークなしの一つの要素で。数字、線だけ、盤の下にレベルの仕掛けも出ています。",
     foot: "どのレベルも一度だけ作られ、ビルドのたびに答えがちょうど一つであることが確かめられています。進み具合はこの端末に残ります。",
@@ -126,7 +156,8 @@ const write = (value) => {
     /* Not remembered on this device; the board still plays. */
   }
 };
-const pick = (asked, allowed, kept, fallback) => (allowed.includes(asked) ? asked : allowed.includes(kept) ? kept : fallback);
+const pick = (asked, allowed, kept, fallback) =>
+  allowed.includes(asked) ? asked : allowed.includes(kept) ? kept : fallback;
 
 const kept = read();
 const look = {
@@ -143,7 +174,11 @@ const help = {
 // The levels with portals have sizes of their own; the first set's are the default.
 let set = pick(params.get("set"), ["classic", "portals"], kept.set, "classic");
 const sizesOf = () => (set === "portals" ? TSUNAGI_PORTAL_SIZES : TSUNAGI_SIZES);
-let size = sizesOf().includes(Number(params.get("size"))) ? Number(params.get("size")) : sizesOf().includes(kept.size) ? kept.size : 5;
+let size = sizesOf().includes(Number(params.get("size")))
+  ? Number(params.get("size"))
+  : sizesOf().includes(kept.size)
+    ? kept.size
+    : 5;
 let solved = kept.solved ?? {};
 let helped = kept.helped ?? {};
 let progress = kept.progress ?? {};
@@ -151,7 +186,14 @@ let level = 1;
 let levels = [];
 let mount = null;
 
-const language = familyLanguage({ id: "tsunagi", words: WORDS, onChange: () => { docsLink(); render(); } });
+const language = familyLanguage({
+  id: "tsunagi",
+  words: WORDS,
+  onChange: () => {
+    docsLink();
+    render();
+  },
+});
 const say = (key, ...args) => {
   const word = WORDS[language.lang][key];
   return typeof word === "function" ? word(...args) : word;
@@ -202,14 +244,59 @@ function marbleDots(set) {
 }
 
 function settings() {
-  const row = (id, items, chosen, choose, labelOf, extra) => seg(document.getElementById(id), items, chosen, choose, labelOf, extra);
-  row("marks", ["colours", "numbers"], look.marks, (value) => change({ marks: value }), (value) => say(value));
-  row("fill", ["marbles", "lines"], look.fill, (value) => change({ fill: value }), (value) => say(value));
-  row("colour-set", TSUNAGI_COLOUR_SET_NAMES, look.colours, (value) => change({ colours: value }), (value) => say("colourSets")[value], (button, value) => button.append(marbleDots(value)));
-  row("board-look", TSUNAGI_BOARD_NAMES, look.board, (value) => change({ board: value }), (value) => say("boards")[value], (button, value) => button.append(patch(value)));
-  row("coordinates", [true, false], look.coordinates, (value) => change({ coordinates: value }), (value) => say(value ? "on" : "off"));
-  row("explosions", ["on", "soft", "off"], help.explosions, (value) => changeHelp({ explosions: value }), (value) => say(`explosions${value[0].toUpperCase()}${value.slice(1)}`));
-  row("cheats", [false, true], help.cheats, (value) => changeHelp({ cheats: value }), (value) => say(value ? "cheatsOn" : "cheatsOff"));
+  const row = (id, items, chosen, choose, labelOf, extra) =>
+    seg(document.getElementById(id), items, chosen, choose, labelOf, extra);
+  row(
+    "marks",
+    ["colours", "numbers"],
+    look.marks,
+    (value) => change({ marks: value }),
+    (value) => say(value),
+  );
+  row(
+    "fill",
+    ["marbles", "lines"],
+    look.fill,
+    (value) => change({ fill: value }),
+    (value) => say(value),
+  );
+  row(
+    "colour-set",
+    TSUNAGI_COLOUR_SET_NAMES,
+    look.colours,
+    (value) => change({ colours: value }),
+    (value) => say("colourSets")[value],
+    (button, value) => button.append(marbleDots(value)),
+  );
+  row(
+    "board-look",
+    TSUNAGI_BOARD_NAMES,
+    look.board,
+    (value) => change({ board: value }),
+    (value) => say("boards")[value],
+    (button, value) => button.append(patch(value)),
+  );
+  row(
+    "coordinates",
+    [true, false],
+    look.coordinates,
+    (value) => change({ coordinates: value }),
+    (value) => say(value ? "on" : "off"),
+  );
+  row(
+    "explosions",
+    ["on", "soft", "off"],
+    help.explosions,
+    (value) => changeHelp({ explosions: value }),
+    (value) => say(`explosions${value[0].toUpperCase()}${value.slice(1)}`),
+  );
+  row(
+    "cheats",
+    [false, true],
+    help.cheats,
+    (value) => changeHelp({ cheats: value }),
+    (value) => say(value ? "cheatsOn" : "cheatsOff"),
+  );
 }
 
 function change(next) {
@@ -253,7 +340,13 @@ function block() {
     button.dataset.solved = String(solvedSet().has(each));
     button.disabled = state === "locked";
     button.setAttribute("aria-label", say("levelLabel", each, say("states")[state]));
-    button.innerHTML = drawTsunagi(layout, { ...look, lines: lines ?? undefined, coordinates: false, language: language.lang, label: "" });
+    button.innerHTML = drawTsunagi(layout, {
+      ...look,
+      lines: lines ?? undefined,
+      coordinates: false,
+      language: language.lang,
+      label: "",
+    });
     button.firstElementChild.setAttribute("aria-hidden", "true");
     button.firstElementChild.removeAttribute("role");
     const number = document.createElement("span");
@@ -267,8 +360,20 @@ function block() {
 
 function render() {
   language.say();
-  seg(document.getElementById("set"), ["classic", "portals"], set, (each) => chooseSet(each), (each) => say(each));
-  seg(sizes, sizesOf(), size, (each) => choose(each, null), (each) => `${each}×${each}`);
+  seg(
+    document.getElementById("set"),
+    ["classic", "portals"],
+    set,
+    (each) => chooseSet(each),
+    (each) => say(each),
+  );
+  seg(
+    sizes,
+    sizesOf(),
+    size,
+    (each) => choose(each, null),
+    (each) => `${each}×${each}`,
+  );
   const count = levelCountOf(size, set);
   const open = openTsunagiLevels(size, solvedSet(), set);
   document.getElementById("today").disabled = set === "portals";
@@ -302,8 +407,12 @@ function put() {
         keep();
       },
       onSolve: (detail) => {
-        helped[slot()] = detail.helped === null ? (helped[slot()] ?? []).filter((each) => each !== level) : [...new Set([...(helped[slot()] ?? []), level])];
-        if (helpOpensNext(detail.helped)) solved = { ...solved, [slot()]: [...new Set([...(solved[slot()] ?? []), level])] };
+        helped[slot()] =
+          detail.helped === null
+            ? (helped[slot()] ?? []).filter((each) => each !== level)
+            : [...new Set([...(helped[slot()] ?? []), level])];
+        if (helpOpensNext(detail.helped))
+          solved = { ...solved, [slot()]: [...new Set([...(solved[slot()] ?? []), level])] };
         keep();
         render();
       },
@@ -339,11 +448,17 @@ async function choose(nextSize, nextLevel, any = false) {
 document.getElementById("previous").addEventListener("click", () => choose(size, level - 1));
 document.getElementById("next").addEventListener("click", () => choose(size, level + 1));
 // Today's level at this size: the same board for everybody, open or not, as a level named in the address is.
-document.getElementById("today").addEventListener("click", () => choose(size, dailyTsunagiLevel(size, new Date()), true));
+document
+  .getElementById("today")
+  .addEventListener("click", () => choose(size, dailyTsunagiLevel(size, new Date()), true));
 
 void choose(size, null).then(() => {
   host.dataset.ready = "true";
 });
 
-function docsLink() { document.querySelector('[data-say="pageDocs"]')?.setAttribute("href", language.lang === "ja" ? "docs/ja/index.html" : "docs/index.html"); }
+function docsLink() {
+  document
+    .querySelector('[data-say="pageDocs"]')
+    ?.setAttribute("href", language.lang === "ja" ? "docs/ja/index.html" : "docs/index.html");
+}
 docsLink();

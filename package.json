@@ -1,7 +1,7 @@
 {
   "name": "@johnmorrisdotca/tsunagi",
   "version": "1.7.0",
-  "description": "Tsunagi \u7e4b\u304e \u2014 Connect-the-pairs line puzzle: seeded layouts, 2,368 hand-checked levels with unique answers, solver, walls, bridges, portals, hexagons and an SVG board. TypeScript, zero dependencies.",
+  "description": "Tsunagi 繋ぎ — Connect-the-pairs line puzzle: seeded layouts, 2,368 hand-checked levels with unique answers, solver, walls, bridges, portals, hexagons and an SVG board. TypeScript, zero dependencies.",
   "keywords": [
     "arukone",
     "big-boards",
@@ -184,7 +184,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint .",
+    "lint": "biome check .",
     "typecheck": "tsc -p tsconfig.check.json",
     "test": "vitest run",
     "test:package": "pnpm build && node scripts/check-package.mjs",
@@ -199,18 +199,17 @@
     "test:frameworks": "pnpm build && node scripts/check-frameworks.mjs",
     "docs:site": "pnpm build && node scripts/docs-site.mjs build",
     "docs:check": "pnpm build && node scripts/docs-site.mjs check",
-    "size": "node scripts/docs-site.mjs size"
+    "size": "node scripts/docs-site.mjs size",
+    "format": "biome check --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.0.0",
+    "@biomejs/biome": "2.6.4",
     "@playwright/test": "^1.63.0",
-    "eslint": "^9.0.0",
-    "typescript": "^5.9.0",
-    "typescript-eslint": "^8.0.0",
-    "vitest": "^5.0.0",
-    "pagefind": "^1.5.2",
+    "esbuild": "^0.28.0",
     "marked": "^18.0.0",
-    "esbuild": "^0.28.0"
+    "pagefind": "^1.5.2",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.0"
   },
   "packageManager": "pnpm@10.11.0"
 }

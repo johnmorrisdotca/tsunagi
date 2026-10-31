@@ -1,4 +1,24 @@
-import { CELL_BLOCKED, CELL_BRIDGE, CELL_EMPTY, compareEdges, decodeLayout, edgeKey, encodeAnswer, encodeLayout, encodePortals, hexNeighbourTable, layoutCells, layoutNeighbours, layoutStep, type LinkLayout, LINK_HEX, LINK_WALLS, neighbourTable, stoneLetters, tailWord } from "./code.ts";
+import {
+  CELL_BLOCKED,
+  CELL_BRIDGE,
+  CELL_EMPTY,
+  compareEdges,
+  decodeLayout,
+  edgeKey,
+  encodeAnswer,
+  encodeLayout,
+  encodePortals,
+  hexNeighbourTable,
+  layoutCells,
+  layoutNeighbours,
+  layoutStep,
+  type LinkLayout,
+  LINK_HEX,
+  LINK_WALLS,
+  neighbourTable,
+  stoneLetters,
+  tailWord,
+} from "./code.ts";
 import { countSolutions } from "./solve.ts";
 import { stepTable } from "./steps.ts";
 import type { Random } from "./random.ts";
@@ -74,7 +94,16 @@ const BLOCKED_MARK = 32_000;
  * console.log(value);
  * ```
  */
-export type LinkExtras = { blocked?: ReadonlySet<number>; bridges?: ReadonlySet<number>; walls?: ReadonlySet<string>; waypoints?: ReadonlySet<number>; wrap?: boolean; hex?: boolean; sparse?: boolean; portals?: readonly (readonly [number, number])[] };
+export type LinkExtras = {
+  blocked?: ReadonlySet<number>;
+  bridges?: ReadonlySet<number>;
+  walls?: ReadonlySet<string>;
+  waypoints?: ReadonlySet<number>;
+  wrap?: boolean;
+  hex?: boolean;
+  sparse?: boolean;
+  portals?: readonly (readonly [number, number])[];
+};
 
 /** How a filling is laid, where it need not be the way it always was: how often a line takes its tightest way on, and whether it may start beside the tightest cell as well as on it.
  *
@@ -105,11 +134,36 @@ export type FillingStyle = { greed?: number; looseStart?: boolean };
  * console.log(randomFilling(4,seededRandom(42),8));
  * ```
  */
-export function randomFilling(size: number, random: Random, longest: number, blocked: ReadonlySet<number> = new Set(), wrap = false, hex = false, style: FillingStyle = {}): number[][] | null {
+export function randomFilling(
+  size: number,
+  random: Random,
+  longest: number,
+  blocked: ReadonlySet<number> = new Set(),
+  wrap = false,
+  hex = false,
+  style: FillingStyle = {},
+): number[][] | null {
   const total = size * size;
   // On a board that wraps, the lines may run off one edge and on at the other.
   // On a board that wraps, the lines may run off one edge and on at the other; on a hexagon, a cell has six neighbours.
-  const around = hex ? hexNeighbourTable(size) : wrap ? layoutNeighbours({ size, cells: [], ends: [], walls: new Set(), waypoints: new Map(), wrap: true, portalPairs: [], portals: new Map(), hex: false, sparse: false, strokes: null, explosions: null }) : neighbourTable(size);
+  const around = hex
+    ? hexNeighbourTable(size)
+    : wrap
+      ? layoutNeighbours({
+          size,
+          cells: [],
+          ends: [],
+          walls: new Set(),
+          waypoints: new Map(),
+          wrap: true,
+          portalPairs: [],
+          portals: new Map(),
+          hex: false,
+          sparse: false,
+          strokes: null,
+          explosions: null,
+        })
+      : neighbourTable(size);
   const owner = new Int16Array(total).fill(-1);
   // A blocked cell belongs to no line, ever: marked as one nothing can be.
   for (const cell of blocked) owner[cell] = BLOCKED_MARK;
@@ -117,7 +171,8 @@ export function randomFilling(size: number, random: Random, longest: number, blo
   let retreats = size >= RETREAT_FROM ? RETREATS : 0;
   const emptyAround = (at: number) => around[at]!.filter((next) => owner[next] === -1).length;
   // Whether `cell` can follow `tip` on line `id` without the line touching itself.
-  const fits = (id: number, tip: number, cell: number) => owner[cell] === -1 && around[cell]!.every((next) => next === tip || owner[next] !== id);
+  const fits = (id: number, tip: number, cell: number) =>
+    owner[cell] === -1 && around[cell]!.every((next) => next === tip || owner[next] !== id);
 
   for (;;) {
     const empty: number[] = [];
@@ -125,7 +180,10 @@ export function randomFilling(size: number, random: Random, longest: number, blo
     if (empty.length === 0) break;
     // Start where the grid is tightest, so no cell is left stranded.
     const tightest = Math.min(...empty.map(emptyAround));
-    const starts = style.looseStart === true ? empty.filter((at) => emptyAround(at) <= tightest + 1) : empty.filter((at) => emptyAround(at) === tightest);
+    const starts =
+      style.looseStart === true
+        ? empty.filter((at) => emptyAround(at) <= tightest + 1)
+        : empty.filter((at) => emptyAround(at) === tightest);
     const start = starts[Math.floor(random() * starts.length)]!;
     const id = paths.length;
     const path = [start];
@@ -211,9 +269,15 @@ function absorb(run: number[], paths: number[][], owner: Int16Array, around: num
  * console.log(layoutOf(4,solvedLines.map(line=>[...line])));
  * ```
  */
-export function layoutOf(size: number, paths: readonly number[][], extras: LinkExtras = {}): { layout: string; answer: string } {
+export function layoutOf(
+  size: number,
+  paths: readonly number[][],
+  extras: LinkExtras = {},
+): { layout: string; answer: string } {
   const total = size * size;
-  const byFirst = [...paths].map((path) => (path[0]! < path[path.length - 1]! ? path : [...path].reverse())).sort((a, b) => a[0]! - b[0]!);
+  const byFirst = [...paths]
+    .map((path) => (path[0]! < path[path.length - 1]! ? path : [...path].reverse()))
+    .sort((a, b) => a[0]! - b[0]!);
   const cells = new Array<number>(total).fill(CELL_EMPTY);
   const owners = new Array<number>(total).fill(CELL_EMPTY);
   byFirst.forEach((path, pair) => {
@@ -226,7 +290,16 @@ export function layoutOf(size: number, paths: readonly number[][], extras: LinkE
   // A waypoint is kept for the pair whose line runs through it in the answer.
   const waypoints = new Map([...(extras.waypoints ?? [])].map((cell) => [cell, owners[cell]!] as const));
   // Relabel in reading order of first stone, which `byFirst`'s order already is.
-  return { layout: encodeLayout(cells, extras.walls ?? [], { waypoints, wrap: extras.wrap, hex: extras.hex, sparse: extras.sparse, portals: extras.portals }), answer: encodeAnswer(owners) };
+  return {
+    layout: encodeLayout(cells, extras.walls ?? [], {
+      waypoints,
+      wrap: extras.wrap,
+      hex: extras.hex,
+      sparse: extras.sparse,
+      portals: extras.portals,
+    }),
+    answer: encodeAnswer(owners),
+  };
 }
 
 /** Where cell `at` goes when a board is given `turn` quarter turns and then mirrored across the vertical when `mirror`. */
@@ -264,10 +337,12 @@ export function transformed(code: string, size: number, turn: number, mirror: bo
     const word = tailWord(segment);
     // Portals turn with the board, each pair written again with its smaller cell first, the pairs in order.
     if (word?.word === "portals") {
-      return encodePortals(word.list!.split(",").map((pair) => {
-        const [a, b] = pair.split("-").map(Number) as [number, number];
-        return [movedTo(size, a, turn, mirror), movedTo(size, b, turn, mirror)] as const;
-      }));
+      return encodePortals(
+        word.list!.split(",").map((pair) => {
+          const [a, b] = pair.split("-").map(Number) as [number, number];
+          return [movedTo(size, a, turn, mirror), movedTo(size, b, turn, mirror)] as const;
+        }),
+      );
     }
     return word !== null
       ? segment
@@ -366,7 +441,9 @@ export function turnsIn(answer: string, layout: LinkLayout): number {
   for (let at = 0; at < layoutCells(answer).length; at += 1) {
     if (layout.cells[at] !== CELL_EMPTY) continue;
     // The ways this cell's line goes on from it, as steps: over a bridge or into a portal, the way onto it; across a joined edge, the step it is.
-    const ways = steps[at]!.filter((step) => answer[step.to] === answer[at]).map((step) => layoutStep(layout, at, step.over !== -1 ? step.over : step.through.length > 0 ? step.through[0]! : step.to));
+    const ways = steps[at]!.filter((step) => answer[step.to] === answer[at]).map((step) =>
+      layoutStep(layout, at, step.over !== -1 ? step.over : step.through.length > 0 ? step.through[0]! : step.to),
+    );
     // Straight on is two opposite steps, on a square or a hexagon alike.
     if (ways.length === 2 && ways[0]! + ways[1]! !== 0) turns += 1;
   }
@@ -421,7 +498,8 @@ function splitAt(paths: readonly number[][], cell: number): number[][] | null {
   const index = path.indexOf(cell);
   for (const cut of [index + 1, index]) {
     const [first, second] = [path.slice(0, cut), path.slice(cut)];
-    if (first.length >= SHORTEST_LINE && second.length >= SHORTEST_LINE) return [...paths.slice(0, at), first, second, ...paths.slice(at + 1)];
+    if (first.length >= SHORTEST_LINE && second.length >= SHORTEST_LINE)
+      return [...paths.slice(0, at), first, second, ...paths.slice(at + 1)];
   }
   return null;
 }
@@ -449,7 +527,13 @@ function splitAt(paths: readonly number[][], cell: number): number[][] | null {
  * console.log(repairedCandidate(4,seededRandom(42),8,20000,3));
  * ```
  */
-export function repairedCandidate(size: number, random: Random, longest: number, budget: number, most: number): LinkCandidate | null {
+export function repairedCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  most: number,
+): LinkCandidate | null {
   let paths = randomFilling(size, random, longest);
   if (paths === null) return null;
   for (let round = 0; round < REPAIR_ROUNDS; round += 1) {
@@ -461,13 +545,22 @@ export function repairedCandidate(size: number, random: Random, longest: number,
     if (solved.gaveUp) return null;
     if (solved.count === 1) {
       if (encodeAnswer(solved.solution!) !== answer) return null;
-      return { layout, answer, pairs: decoded.ends.length, nodes: solved.nodes, branches: solved.branches, turns: turnsIn(answer, decoded), key: symmetryKey(layout, size) };
+      return {
+        layout,
+        answer,
+        pairs: decoded.ends.length,
+        nodes: solved.nodes,
+        branches: solved.branches,
+        turns: turnsIn(answer, decoded),
+        key: symmetryKey(layout, size),
+      };
     }
     const other = solved.solutions.map(encodeAnswer).find((each) => each !== answer);
     if (other === undefined) return null;
     const differ = [...other].flatMap((char, at) => (char !== answer[at] ? [at] : []));
     let mended: number[][] | null = null;
-    for (let left = differ.length; left > 0 && mended === null; left -= 1) mended = splitAt(paths, differ.splice(Math.floor(random() * left), 1)[0]!);
+    for (let left = differ.length; left > 0 && mended === null; left -= 1)
+      mended = splitAt(paths, differ.splice(Math.floor(random() * left), 1)[0]!);
     if (mended === null) return null;
     paths = mended;
   }

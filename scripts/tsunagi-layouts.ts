@@ -18,30 +18,38 @@ import { loadTsunagiLevels } from "../src/levels.ts";
 const classic: Record<number, string[]> = {};
 for (const size of TSUNAGI_SIZES) classic[size] = (await loadTsunagiLevels(size)).map(([layout]) => layout);
 const portals: Record<number, string[]> = {};
-for (const size of TSUNAGI_PORTAL_SIZES) portals[size] = (await loadTsunagiLevels(size, "portals")).map(([layout]) => layout);
+for (const size of TSUNAGI_PORTAL_SIZES)
+  portals[size] = (await loadTsunagiLevels(size, "portals")).map(([layout]) => layout);
 
 const table = (all: Record<number, string[]>) =>
-  Object.entries(all).flatMap(([size, layouts]) => [`  ${size}: [`, ...layouts.map((layout) => `    "${layout}",`), "  ],"]);
+  Object.entries(all).flatMap(([size, layouts]) => [
+    `  ${size}: [`,
+    ...layouts.map((layout) => `    "${layout}",`),
+    "  ],",
+  ]);
 
 writeFileSync(
   "src/levels/layouts.data.ts",
-  withLevelExamples([
-    "/**",
-    " * EVERY LEVEL'S BOARD WITHOUT ITS ANSWER, by size and in level order: what a server needs to know",
-    " * a level when it checks a solve or lists who solved which level. `@johnmorrisdotca/tsunagi/layouts`.",
-    " *",
-    " * WRITTEN BY `node scripts/tsunagi-layouts.ts`, NEVER BY HAND, from the level files; `layouts.test.ts`",
-    " * fails when it is not what they say.",
-    " */",
-    "export const TSUNAGI_LAYOUTS: Readonly<Record<number, readonly string[]>> = {",
-    ...table(classic),
-    "};",
-    "",
-    "/** The levels with portals, by size. */",
-    "export const TSUNAGI_PORTAL_LAYOUTS: Readonly<Record<number, readonly string[]>> = {",
-    ...table(portals),
-    "};",
-    "",
-  ].join("\n"), "@johnmorrisdotca/tsunagi/layouts"),
+  withLevelExamples(
+    [
+      "/**",
+      " * EVERY LEVEL'S BOARD WITHOUT ITS ANSWER, by size and in level order: what a server needs to know",
+      " * a level when it checks a solve or lists who solved which level. `@johnmorrisdotca/tsunagi/layouts`.",
+      " *",
+      " * WRITTEN BY `node scripts/tsunagi-layouts.ts`, NEVER BY HAND, from the level files; `layouts.test.ts`",
+      " * fails when it is not what they say.",
+      " */",
+      "export const TSUNAGI_LAYOUTS: Readonly<Record<number, readonly string[]>> = {",
+      ...table(classic),
+      "};",
+      "",
+      "/** The levels with portals, by size. */",
+      "export const TSUNAGI_PORTAL_LAYOUTS: Readonly<Record<number, readonly string[]>> = {",
+      ...table(portals),
+      "};",
+      "",
+    ].join("\n"),
+    "@johnmorrisdotca/tsunagi/layouts",
+  ),
 );
 console.log(`${Object.values(classic).flat().length} layouts, ${Object.values(portals).flat().length} with portals`);

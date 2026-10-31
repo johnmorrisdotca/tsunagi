@@ -2,7 +2,17 @@
 // cleared, undone, checked and solved. What the page shows is held to what the package says of the same level.
 import { expect, test } from "@playwright/test";
 
-import { at, board, cellPoint, dragCells, findLevel, levelOf, noSidewaysScroll, open, solveByDragging } from "./demo.mjs";
+import {
+  at,
+  board,
+  cellPoint,
+  dragCells,
+  findLevel,
+  levelOf,
+  noSidewaysScroll,
+  open,
+  solveByDragging,
+} from "./demo.mjs";
 import { checkTsunagiAnswer, dailyTsunagiLevel } from "../dist/index.js";
 
 test("a first visit draws the level the address names, with a marble at each end of every pair", async ({ page }) => {
@@ -20,7 +30,10 @@ test("a line is drawn by dragging from a marble to its partner, and Undo takes i
   const level = levelOf(5, 1);
   const svg = board(page);
   await dragCells(page, svg, level.layout, level.lines[0]);
-  await expect(page.locator(`${at("board")} .tsu-line[data-pair="0"]`)).toHaveAttribute("data-cells", String(level.lines[0].length));
+  await expect(page.locator(`${at("board")} .tsu-line[data-pair="0"]`)).toHaveAttribute(
+    "data-cells",
+    String(level.lines[0].length),
+  );
   await expect(page.locator(at("board"))).toHaveAttribute("data-joined", "1");
   await expect(page.locator(`${at("board")} .tsp-progress`)).toContainText(`1 of ${level.layout.ends.length} joined`);
   await page.locator(`${at("board")} [data-action="undo"]`).click();
@@ -49,15 +62,22 @@ test("a marble tapped clears its line, and a line dragged into another cuts the 
   await expect(page.locator(`${at("board")} .tsu-line`)).toHaveCount(0);
   // Pair 1's line, drawn through a cell of pair 0's line: pair 0's is cut back to before it.
   await dragCells(page, svg, level.layout, level.lines[0]);
-  const other = level.lines.findIndex((line, pair) => pair > 0 && line.some((cell) => level.lines[0].slice(1, -1).includes(cell)));
+  const other = level.lines.findIndex(
+    (line, pair) => pair > 0 && line.some((cell) => level.lines[0].slice(1, -1).includes(cell)),
+  );
   if (other > 0) {
     await dragCells(page, svg, level.layout, level.lines[other]);
     const cut = await page.locator(`${at("board")} .tsu-line[data-pair="0"]`).count();
-    if (cut > 0) expect(Number(await page.locator(`${at("board")} .tsu-line[data-pair="0"]`).getAttribute("data-cells"))).toBeLessThan(level.lines[0].length);
+    if (cut > 0)
+      expect(
+        Number(await page.locator(`${at("board")} .tsu-line[data-pair="0"]`).getAttribute("data-cells")),
+      ).toBeLessThan(level.lines[0].length);
   }
 });
 
-test("every pair dragged along its answer solves the level, and the page says so, keeps it, and opens it solved again", async ({ page }) => {
+test("every pair dragged along its answer solves the level, and the page says so, keeps it, and opens it solved again", async ({
+  page,
+}) => {
   await open(page, "?size=5&level=1");
   const level = levelOf(5, 1);
   await solveByDragging(page, board(page), level);
@@ -82,7 +102,10 @@ test("a half-drawn level is kept, and comes back as it was left", async ({ page 
   await dragCells(page, board(page), level.layout, level.lines[0]);
   await page.goto("http://tsunagi.test/?size=5&level=2");
   await page.waitForSelector(`${at("board")}[data-ready="true"] svg.tsunagi`);
-  await expect(page.locator(`${at("board")} .tsu-line[data-pair="0"]`)).toHaveAttribute("data-cells", String(level.lines[0].length));
+  await expect(page.locator(`${at("board")} .tsu-line[data-pair="0"]`)).toHaveAttribute(
+    "data-cells",
+    String(level.lines[0].length),
+  );
 });
 
 test("Check flashes the marbles of the pairs not joined yet, and says how many", async ({ page }) => {
@@ -107,20 +130,33 @@ test("a finger drags a line by touch, and the page does not scroll under it", as
   const touch = (x, y) => [{ x, y, id: 1 }];
   const before = await page.evaluate(() => window.scrollY);
   await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: touch(points[0].x, points[0].y) });
-  for (const point of points.slice(1)) await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: touch(point.x, point.y) });
+  for (const point of points.slice(1))
+    await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: touch(point.x, point.y) });
   await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-  await expect(page.locator(`${at("board")} .tsu-line[data-pair="0"]`)).toHaveAttribute("data-cells", String(level.lines[0].length));
+  await expect(page.locator(`${at("board")} .tsu-line[data-pair="0"]`)).toHaveAttribute(
+    "data-cells",
+    String(level.lines[0].length),
+  );
   expect(await page.evaluate(() => window.scrollY)).toBe(before);
 });
 
 test("a level with bridges, walls and explosions is solved by dragging", async ({ page }) => {
-  const level = findLevel((challenges) => challenges.includes("bridges") && challenges.includes("walls") && !challenges.includes("strokes") && !challenges.includes("explosions"), { sizes: [7, 8, 6] });
+  const level = findLevel(
+    (challenges) =>
+      challenges.includes("bridges") &&
+      challenges.includes("walls") &&
+      !challenges.includes("strokes") &&
+      !challenges.includes("explosions"),
+    { sizes: [7, 8, 6] },
+  );
   await open(page, `?size=${level.size}&level=${level.level}`);
   await solveByDragging(page, board(page), level);
   await expect(page.locator(at("board"))).toHaveAttribute("data-solved", "true");
 });
 
-test("Today opens the level of the day at the size chosen, the same one the package names, and opens it even when it is not open yet", async ({ page }) => {
+test("Today opens the level of the day at the size chosen, the same one the package names, and opens it even when it is not open yet", async ({
+  page,
+}) => {
   await open(page, "?size=7&level=1");
   await page.locator(at("today")).click();
   const expected = dailyTsunagiLevel(7, new Date());

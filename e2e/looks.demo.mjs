@@ -13,14 +13,18 @@ const boxOf = async (page) => {
   return { ...box, y: box.y + scroll };
 };
 
-test("Numbers puts each pair's number on its marbles, Colours takes it off, and the choice comes back after a reload", async ({ page }) => {
+test("Numbers puts each pair's number on its marbles, Colours takes it off, and the choice comes back after a reload", async ({
+  page,
+}) => {
   await open(page, "?size=5&level=1");
   const pairs = levelOf(5, 1).layout.ends.length;
   await expect(page.locator(`${at("board")} .tsu-num`)).toHaveCount(0);
   await press(page, "marks", "numbers");
   await expect(page.locator(`${at("board")} .tsu-num`)).toHaveCount(pairs * 2);
   await expect(page.locator(`${at("board")} .tsu-marble[data-pair="0"] .tsu-num`).first()).toHaveText("1");
-  await expect(page.locator(`${at("board")} .tsu-marble[data-pair="${pairs - 1}"] .tsu-num`).first()).toHaveText(String(pairs));
+  await expect(page.locator(`${at("board")} .tsu-marble[data-pair="${pairs - 1}"] .tsu-num`).first()).toHaveText(
+    String(pairs),
+  );
   await expect(board(page)).toHaveAttribute("data-marks", "numbers");
   await page.goto("http://tsunagi.test/?size=5&level=1");
   await page.waitForSelector(`${at("board")}[data-ready="true"] svg.tsunagi`);
@@ -34,7 +38,10 @@ test("numbers draw the lines in a soft tint and still solve the level", async ({
   const level = levelOf(5, 1);
   await solveByDragging(page, board(page), level);
   await expect(page.locator(at("board"))).toHaveAttribute("data-solved", "true");
-  const stroke = await page.locator(`${at("board")} .tsu-line polyline`).first().getAttribute("stroke");
+  const stroke = await page
+    .locator(`${at("board")} .tsu-line polyline`)
+    .first()
+    .getAttribute("stroke");
   expect(stroke).toMatch(/^hsl\(\d+, 30%, 62%\)$/);
 });
 
@@ -54,7 +61,13 @@ test("Dots put a small marble in every cell a line runs through, and Lines draws
 
 test("a colour set repaints the marbles, and every set has its own colours", async ({ page }) => {
   await open(page, "?size=5&level=1");
-  const colour = () => page.locator(`${at("board")} radialGradient`).first().locator("stop").nth(1).getAttribute("stop-color");
+  const colour = () =>
+    page
+      .locator(`${at("board")} radialGradient`)
+      .first()
+      .locator("stop")
+      .nth(1)
+      .getAttribute("stop-color");
   const seen = new Set([await colour()]);
   for (const set of ["bright", "colour-blind", "soft"]) {
     await press(page, "colour-set", set);
@@ -93,7 +106,9 @@ test("Coordinates put a letter over each column and a number beside each row", a
   const at1 = geometry.centre(level.lines[0][1]);
   await page.mouse.move(box.x + (at0.x / geometry.side) * box.width, box.y + (at0.y / geometry.side) * box.height);
   await page.mouse.down();
-  await page.mouse.move(box.x + (at1.x / geometry.side) * box.width, box.y + (at1.y / geometry.side) * box.height, { steps: 4 });
+  await page.mouse.move(box.x + (at1.x / geometry.side) * box.width, box.y + (at1.y / geometry.side) * box.height, {
+    steps: 4,
+  });
   await page.mouse.up();
   await expect(page.locator(`${at("board")} .tsu-line`)).toHaveCount(1);
 });
@@ -113,12 +128,18 @@ test("nothing moves when an option is chosen: the board's box and the page's hei
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
 });
 
-test("the pieces drawn to be played cannot be selected, dragged or double-tapped into a selection", async ({ page }) => {
+test("the pieces drawn to be played cannot be selected, dragged or double-tapped into a selection", async ({
+  page,
+}) => {
   await open(page, "?size=5&level=1");
   const level = levelOf(5, 1);
-  expect(await page.locator(`${at("board")} .tsp-box`).evaluate((element) => getComputedStyle(element).userSelect)).toBe("none");
+  expect(
+    await page.locator(`${at("board")} .tsp-box`).evaluate((element) => getComputedStyle(element).userSelect),
+  ).toBe("none");
   expect(await board(page).evaluate((element) => getComputedStyle(element).userSelect)).toBe("none");
-  expect(await page.locator(`${at("board")} .tsp-box`).evaluate((element) => getComputedStyle(element).touchAction)).toBe("none");
+  expect(
+    await page.locator(`${at("board")} .tsp-box`).evaluate((element) => getComputedStyle(element).touchAction),
+  ).toBe("none");
   const marble = page.locator(`${at("board")} .tsu-marble[data-cell="${level.layout.ends[0][0]}"]`);
   await marble.dblclick();
   await marble.click({ clickCount: 3 });
@@ -169,8 +190,14 @@ test("the tag on the page plays the same board in numbers and lines, with the le
   await expect(page.locator(`${at("board")} .tsu-line`)).toHaveCount(0);
 });
 
-test("a level with a bridge hides the line going down under the deck and draws the line going across over it", async ({ page }) => {
-  const level = findLevel((challenges) => challenges.includes("bridges") && !challenges.includes("walls") && !challenges.includes("explosions"), { sizes: [7, 8, 6, 5] });
+test("a level with a bridge hides the line going down under the deck and draws the line going across over it", async ({
+  page,
+}) => {
+  const level = findLevel(
+    (challenges) =>
+      challenges.includes("bridges") && !challenges.includes("walls") && !challenges.includes("explosions"),
+    { sizes: [7, 8, 6, 5] },
+  );
   await open(page, `?size=${level.size}&level=${level.level}`);
   await solveByDragging(page, board(page), level);
   await expect(page.locator(at("board"))).toHaveAttribute("data-solved", "true");
@@ -178,20 +205,38 @@ test("a level with a bridge hides the line going down under the deck and draws t
   await expect(page.locator(`${at("board")} .tsu-bridge`)).toHaveCount(bridges);
   await expect(page.locator(`${at("board")} .tsu-over-bridge`)).toHaveCount(bridges);
   // The lines are drawn under a mask that cuts every deck out, and the line across is drawn outside it, above the deck.
-  expect(await page.locator(`${at("board")} .tsu-line`).first().evaluate((element) => element.parentElement.getAttribute("mask"))).toMatch(/^url\(#/);
-  expect(await page.locator(`${at("board")} .tsu-over-bridge`).first().evaluate((element) => element.closest("[mask]"))).toBeNull();
+  expect(
+    await page
+      .locator(`${at("board")} .tsu-line`)
+      .first()
+      .evaluate((element) => element.parentElement.getAttribute("mask")),
+  ).toMatch(/^url\(#/);
+  expect(
+    await page
+      .locator(`${at("board")} .tsu-over-bridge`)
+      .first()
+      .evaluate((element) => element.closest("[mask]")),
+  ).toBeNull();
   const order = await page.evaluate(() => {
     const all = [...document.querySelectorAll('[data-testid="board"] svg.tsunagi > *')];
-    return [all.findIndex((element) => element.classList.contains("tsu-lines")), all.findIndex((element) => element.classList.contains("tsu-bridge"))];
+    return [
+      all.findIndex((element) => element.classList.contains("tsu-lines")),
+      all.findIndex((element) => element.classList.contains("tsu-bridge")),
+    ];
   });
   expect(order[1]).toBeGreaterThan(order[0]);
   // At the deck's middle the pixel is the over line's colour: what is on top there is the line going across, not the one going down.
-  const over = await page.locator(`${at("board")} .tsu-over-bridge`).first().evaluate((element) => ({ stroke: element.getAttribute("stroke"), pair: element.dataset.pair }));
+  const over = await page
+    .locator(`${at("board")} .tsu-over-bridge`)
+    .first()
+    .evaluate((element) => ({ stroke: element.getAttribute("stroke"), pair: element.dataset.pair }));
   const bridge = page.locator(`${at("board")} .tsu-bridge`).first();
   const hit = await bridge.evaluate((element) => {
     const rect = element.querySelector(".tsu-deck").getBoundingClientRect();
     const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    return top === null ? null : { cls: top.getAttribute("class"), pair: top.dataset.pair ?? top.parentElement?.dataset.pair };
+    return top === null
+      ? null
+      : { cls: top.getAttribute("class"), pair: top.dataset.pair ?? top.parentElement?.dataset.pair };
   });
   expect(hit?.cls).toBe("tsu-over-bridge");
   expect(hit?.pair).toBe(over.pair);

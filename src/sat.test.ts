@@ -7,7 +7,9 @@ import { seededRandom } from "./random.ts";
 function bruteForce(n: number, clauses: readonly (readonly number[])[]): number {
   let count = 0;
   for (let bits = 0; bits < 2 ** n; bits += 1) {
-    const holds = clauses.every((clause) => clause.some((lit) => (((bits >> (Math.abs(lit) - 1)) & 1) === 1) === lit > 0));
+    const holds = clauses.every((clause) =>
+      clause.some((lit) => (((bits >> (Math.abs(lit) - 1)) & 1) === 1) === lit > 0),
+    );
     if (holds) count += 1;
   }
   return count;
@@ -46,7 +48,8 @@ describe("the SAT solver", () => {
     const sat = new Sat();
     const hole = Array.from({ length: 5 }, () => Array.from({ length: 4 }, () => sat.newVar()));
     for (const pigeon of hole) sat.addClause(pigeon);
-    for (let h = 0; h < 4; h += 1) for (let p = 0; p < 5; p += 1) for (let q = p + 1; q < 5; q += 1) sat.addClause([-hole[p]![h]!, -hole[q]![h]!]);
+    for (let h = 0; h < 4; h += 1)
+      for (let p = 0; p < 5; p += 1) for (let q = p + 1; q < 5; q += 1) sat.addClause([-hole[p]![h]!, -hole[q]![h]!]);
     expect(sat.solve()).toBe("unsat");
     expect(sat.conflicts).toBeGreaterThan(0);
   });
@@ -55,7 +58,7 @@ describe("the SAT solver", () => {
     const random = seededRandom(7);
     for (let round = 0; round < 60; round += 1) {
       const n = 4 + Math.floor(random() * 6);
-      const clauses = Array.from({ length: 2 + Math.floor(random() * 3 * n), }, () => {
+      const clauses = Array.from({ length: 2 + Math.floor(random() * 3 * n) }, () => {
         const width = 1 + Math.floor(random() * 3);
         return Array.from({ length: width }, () => (random() < 0.5 ? -1 : 1) * (1 + Math.floor(random() * n)));
       });
@@ -63,12 +66,13 @@ describe("the SAT solver", () => {
     }
   });
 
-  it("gives up with \"unknown\" past the dead ends it is allowed, and the same clauses give the same count every time", () => {
+  it('gives up with "unknown" past the dead ends it is allowed, and the same clauses give the same count every time', () => {
     const build = () => {
       const sat = new Sat();
       const hole = Array.from({ length: 8 }, () => Array.from({ length: 7 }, () => sat.newVar()));
       for (const pigeon of hole) sat.addClause(pigeon);
-      for (let h = 0; h < 7; h += 1) for (let p = 0; p < 8; p += 1) for (let q = p + 1; q < 8; q += 1) sat.addClause([-hole[p]![h]!, -hole[q]![h]!]);
+      for (let h = 0; h < 7; h += 1)
+        for (let p = 0; p < 8; p += 1) for (let q = p + 1; q < 8; q += 1) sat.addClause([-hole[p]![h]!, -hole[q]![h]!]);
       return sat;
     };
     const limited = build();

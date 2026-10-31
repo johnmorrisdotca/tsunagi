@@ -4,7 +4,19 @@ import { checkTsunagiAnswer } from "./check.ts";
 import { CELL_BRIDGE, decodeLayout, encodeLayout, stepBetween, wrappedStep } from "./code.ts";
 import { isTwist } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
-import { allJoined, answerOf, decodeLines, dragTo, encodeLines, letGo, linesOfAnswer, noLines, overBridge, pressAt, type Lines } from "./lines.ts";
+import {
+  allJoined,
+  answerOf,
+  decodeLines,
+  dragTo,
+  encodeLines,
+  letGo,
+  linesOfAnswer,
+  noLines,
+  overBridge,
+  pressAt,
+  type Lines,
+} from "./lines.ts";
 import { countSolutions } from "./solve.ts";
 import { relettered, transformed } from "./generate.ts";
 
@@ -18,7 +30,11 @@ beforeAll(loadEveryTsunagiLevel);
 
 /** Every twist level: its size, number, layout and answer. */
 function twistLevels() {
-  return TSUNAGI_SIZES.flatMap((size) => tsunagiLevelsOf(size).flatMap(([layout, answer], at) => (isTwist(layout) ? [{ size, level: at + 1, layout, answer }] : [])));
+  return TSUNAGI_SIZES.flatMap((size) =>
+    tsunagiLevelsOf(size).flatMap(([layout, answer], at) =>
+      isTwist(layout) ? [{ size, level: at + 1, layout, answer }] : [],
+    ),
+  );
 }
 
 /** A line drawn as a finger draws it: a press on its first cell, a step into each after, let go. Through a portal the finger goes into the first ring and the line comes out of the other and on, so the cells after a portal's are the line's own. */
@@ -34,7 +50,8 @@ function draw(layout: ReturnType<typeof decodeLayout> & object, lines: Lines, ce
 
 describe("every twist level", () => {
   it("has twists to test at every size", () => {
-    for (const size of TSUNAGI_SIZES) expect(twistLevels().filter((each) => each.size === size).length, `${size}×${size}`).toBeGreaterThan(0);
+    for (const size of TSUNAGI_SIZES)
+      expect(twistLevels().filter((each) => each.size === size).length, `${size}×${size}`).toBeGreaterThan(0);
   });
 
   it("reads back from its answer, drawn by dragging, kept as progress and checked as a solve", () => {
@@ -158,7 +175,10 @@ describe("the rules of a waypoint", () => {
     const [cell, pair] = [...layout.waypoints][0]!;
     const other = pair === 0 ? "B" : "A";
     const doctored = answer.slice(0, cell) + other + answer.slice(cell + 1);
-    expect(checkTsunagiAnswer(size, code, doctored)).toEqual({ ok: false, reason: "a waypoint is passed by another line" });
+    expect(checkTsunagiAnswer(size, code, doctored)).toEqual({
+      ok: false,
+      reason: "a waypoint is passed by another line",
+    });
   });
 });
 

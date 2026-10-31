@@ -2,7 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { checkTsunagiAnswer } from "./check.ts";
 import { cheatLine } from "./cheat.ts";
-import { CELL_BLOCKED, CELL_EMPTY, decodeLayout, encodeAnswer, encodeLayout, portalExit, type LinkLayout } from "./code.ts";
+import {
+  CELL_BLOCKED,
+  CELL_EMPTY,
+  decodeLayout,
+  encodeAnswer,
+  encodeLayout,
+  portalExit,
+  type LinkLayout,
+} from "./code.ts";
 import { forcedShare } from "./difficulty.ts";
 import { drawTsunagi } from "./draw.ts";
 import { explosionAfter } from "./explosions.ts";
@@ -10,7 +18,19 @@ import { CELL, lineRuns, PORTAL_STUB, tsunagiGeometry } from "./geometry.ts";
 import { dragGame, liftGame, newTsunagiGame, pressGame } from "./game.ts";
 import { relettered, symmetryKey, transformed } from "./generate.ts";
 import { challengesOf } from "./ladder.ts";
-import { allJoined, answerOf, decodeLines, dragFinger, encodeLines, joined, linesOfAnswer, NO_REACH, noLines, pressAt, type Lines } from "./lines.ts";
+import {
+  allJoined,
+  answerOf,
+  decodeLines,
+  dragFinger,
+  encodeLines,
+  joined,
+  linesOfAnswer,
+  NO_REACH,
+  noLines,
+  pressAt,
+  type Lines,
+} from "./lines.ts";
 import { seededRandom } from "./random.ts";
 import { reducedCandidate, withPortals } from "./reduce.ts";
 import { countSolutions, countSolutionsOfLevel } from "./solve.ts";
@@ -46,7 +66,10 @@ describe("portals in a layout's code", () => {
   it("are read after the cells, each as its two cells, the smaller first", () => {
     const layout = decodeLayout(SIX, 6)!;
     expect(layout.portalPairs).toEqual([[14, 28]]);
-    expect([...layout.portals]).toEqual([[14, 28], [28, 14]]);
+    expect([...layout.portals]).toEqual([
+      [14, 28],
+      [28, 14],
+    ]);
     expect(layout.cells[14]).toBe(CELL_EMPTY);
     expect(layout.cells[28]).toBe(CELL_EMPTY);
   });
@@ -78,7 +101,8 @@ describe("portals in a layout's code", () => {
   });
 
   it("are refused when they are not a board's portals", () => {
-    const refused = (portals: string, stones: Record<string, [number, number]> = { A: [12, 35] }) => decodeLayout(codeOf(6, stones, portals), 6);
+    const refused = (portals: string, stones: Record<string, [number, number]> = { A: [12, 35] }) =>
+      decodeLayout(codeOf(6, stones, portals), 6);
     // Out of order, the larger cell first, one cell twice, a cell off the board, a list that is not one.
     expect(refused("14-28,2-9")).toBeNull();
     expect(refused("28-14")).toBeNull();
@@ -127,7 +151,9 @@ describe("portals in a layout's code", () => {
     const edge = decodeLayout(codeOf(6, { A: [0, 35] }, "10-29"), 6)!;
     // 10 is at the right of row 2... 29 is at the right of row 5: nothing beyond it going right.
     expect(portalExit(edge, 9, 10)).toBe(-1);
-    expect(portalExit(decodeLayout(codeOf(6, { A: [0, 35] }, "10-29").replace("|portals", "|wrap|portals"), 6)!, 9, 10)).toBe(24);
+    expect(
+      portalExit(decodeLayout(codeOf(6, { A: [0, 35] }, "10-29").replace("|portals", "|wrap|portals"), 6)!, 9, 10),
+    ).toBe(24);
   });
 });
 
@@ -230,14 +256,27 @@ describe("the solver and the check, against a plain search", () => {
       const order: number[] = [];
       for (const cell of stones) if (!order.includes(pairOf.get(cell)!)) order.push(pairOf.get(cell)!);
       for (const cell of stones) cells[cell] = order.indexOf(pairOf.get(cell)!);
-      const code = encodeLayout(cells, [], { wrap: random() < 0.3, portals: Array.from({ length: portalCount }, (_, each) => [portalCells[2 * each]!, portalCells[2 * each + 1]!] as const) });
+      const code = encodeLayout(cells, [], {
+        wrap: random() < 0.3,
+        portals: Array.from(
+          { length: portalCount },
+          (_, each) => [portalCells[2 * each]!, portalCells[2 * each + 1]!] as const,
+        ),
+      });
       const layout = decodeLayout(code, size);
       if (layout === null) continue;
       tested += 1;
       const plain = brute(layout);
-      const counted = countSolutionsSat(layout, 50, Number.POSITIVE_INFINITY, null, tested % 2 === 0 ? "one-hot" : "binary");
+      const counted = countSolutionsSat(
+        layout,
+        50,
+        Number.POSITIVE_INFINITY,
+        null,
+        tested % 2 === 0 ? "one-hot" : "binary",
+      );
       expect(counted.count, code).toBe(Math.min(plain.answers.length, 50));
-      if (plain.answers.length <= 50) expect(new Set(counted.solutions.map(encodeAnswer))).toEqual(new Set(plain.answers));
+      if (plain.answers.length <= 50)
+        expect(new Set(counted.solutions.map(encodeAnswer))).toEqual(new Set(plain.answers));
       if (plain.answers.length > 0) solvable += 1;
       plain.answers.forEach((answer, index) => {
         const verdict = checkTsunagiAnswer(size, code, answer);
@@ -267,7 +306,10 @@ describe("the solver and the check, against a plain search", () => {
 
 describe("a finger drawing through a portal", () => {
   const layout = decodeLayout(SIX, 6)!;
-  const start = (): { lines: Lines; reach: typeof NO_REACH } => ({ lines: pressAt(layout, noLines(layout), 12).lines, reach: NO_REACH });
+  const start = (): { lines: Lines; reach: typeof NO_REACH } => ({
+    lines: pressAt(layout, noLines(layout), 12).lines,
+    reach: NO_REACH,
+  });
   /** The finger over each of these cells in turn. */
   const along = (cells: number[]): { lines: Lines; reach: typeof NO_REACH } => {
     let state = start();
@@ -323,7 +365,10 @@ describe("a finger drawing through a portal", () => {
   it("cuts another line back to before the cell it comes out at when it goes through", () => {
     // A is a line down the right-hand column that holds 29, the cell the portal comes out into; B is drawn from 12.
     const two = decodeLayout(codeOf(6, { A: [11, 34], B: [12, 35] }, "14-28"), 6)!;
-    const lines: Lines = [[11, 17, 23, 29], [12, 13]];
+    const lines: Lines = [
+      [11, 17, 23, 29],
+      [12, 13],
+    ];
     const dragged = dragFinger(two, lines, 1, 14, NO_REACH).lines;
     expect(dragged[1]).toEqual([12, 13, 14, 28, 29]);
     expect(dragged[0]).toEqual([11, 17, 23]);
@@ -354,7 +399,12 @@ describe("boards made with portals", () => {
   };
 
   it("have exactly one answer, which the check takes and the lines draw, with every portal on one line", () => {
-    for (const [size, seed, portals, wrap] of [[6, 3, 1, false], [7, 4, 2, false], [8, 5, 2, true], [10, 6, 3, false]] as const) {
+    for (const [size, seed, portals, wrap] of [
+      [6, 3, 1, false],
+      [7, 4, 2, false],
+      [8, 5, 2, true],
+      [10, 6, 3, false],
+    ] as const) {
       const board = made(size, seed, portals, { wrap });
       const layout = decodeLayout(board.layout, size)!;
       expect(layout.portalPairs).toHaveLength(portals);
@@ -404,7 +454,8 @@ describe("boards made with portals", () => {
       const blown = explosionAfter(exploding, board.layout, drawn, stroke);
       if (blown === null) continue;
       // No line is left ending on a portal.
-      for (const line of blown.lines) if (line.length > 0) expect(layout.portals.has(line[line.length - 1]!)).toBe(false);
+      for (const line of blown.lines)
+        if (line.length > 0) expect(layout.portals.has(line[line.length - 1]!)).toBe(false);
     }
     const cheated = cheatLine(layout, noLines(layout), drawn)!;
     expect(cheated.lines[cheated.pair]).toEqual(drawn[cheated.pair]);
@@ -425,7 +476,11 @@ describe("boards made with portals", () => {
         for (let at = 1; at < line.length; at += 1) {
           const [before, cell] = [line[at - 1]!, line[at]!];
           // The line comes out of the second ring and on into the cell beyond it by itself: neither is a step of the finger's.
-          if (layout.portals.has(before) || layout.portals.has(line[at - 2] ?? -1) && layout.portals.get(line[at - 2]!) === before) continue;
+          if (
+            layout.portals.has(before) ||
+            (layout.portals.has(line[at - 2] ?? -1) && layout.portals.get(line[at - 2]!) === before)
+          )
+            continue;
           const [dr, dc] = [Math.floor(cell / 7) - Math.floor(before / 7), (cell % 7) - (before % 7)];
           if (row + dr < 0 || row + dr >= 7 || col + dc < 0 || col + dc >= 7) {
             // Off the board: let go, and take the line up again by its end, where it is.

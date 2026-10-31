@@ -40,7 +40,8 @@ describe("counting a board's answers by SAT", () => {
     for (const [at, [layout]] of TSUNAGI_6.entries()) {
       if (!/[|+a-p]/.test(layout) || at % 2 !== 0) continue;
       const cells = layoutCells(layout);
-      for (const variant of [layout, cells, cells.replace(/[a-p]/g, "."), `${cells}|wrap`]) if (agree(variant, 6) > 1) several += 1;
+      for (const variant of [layout, cells, cells.replace(/[a-p]/g, "."), `${cells}|wrap`])
+        if (agree(variant, 6) > 1) several += 1;
     }
     expect(several).toBeGreaterThan(5);
   });

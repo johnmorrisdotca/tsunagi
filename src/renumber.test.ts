@@ -21,21 +21,23 @@ describe("the renumbering", () => {
     expect(RENUMBERED).toEqual([4, 5, 6, 7, 8, 9]);
   });
 
-  it.each(RENUMBERED.map((size) => [size]))("moves each of the hundred old %i×%i levels to its own new number, no two to one", (size) => {
-    const to = TSUNAGI_RENUMBERED[size]!;
-    expect(to).toHaveLength(100);
-    expect(new Set(to).size).toBe(100);
-    for (const level of to) {
-      expect(level).toBeGreaterThanOrEqual(1);
-      expect(level).toBeLessThanOrEqual(TSUNAGI_LEVEL_COUNTS[size]!);
-    }
-  });
+  it.each(RENUMBERED.map((size) => [size]))(
+    "moves each of the hundred old %i×%i levels to its own new number, no two to one",
+    (size) => {
+      const to = TSUNAGI_RENUMBERED[size]!;
+      expect(to).toHaveLength(100);
+      expect(new Set(to).size).toBe(100);
+      for (const level of to) {
+        expect(level).toBeGreaterThanOrEqual(1);
+        expect(level).toBeLessThanOrEqual(TSUNAGI_LEVEL_COUNTS[size]!);
+      }
+    },
+  );
 
   it("put John's four straight rows, old 4×4 level 10, at level 1", () => {
     expect(TSUNAGI_RENUMBERED[4]![9]).toBe(1);
     expect(tsunagiLevelsOf(4)[0]![0]).toBe("A..AB..BC..CD..D");
   });
-
 });
 
 describe("a browser's record, moved", () => {

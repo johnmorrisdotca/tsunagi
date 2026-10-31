@@ -116,11 +116,16 @@ function grown(size: number, now: readonly Level[]): Level[] {
   const have = new Set(now.map(([layout]) => symmetryKey(layout, size)));
   const fresh = new Map<string, LinkCandidate>();
   for (let each = 0; each < plan.tries; each += 1) {
-    const made = size >= MEND_FROM ? repairedCandidate(size, random, plan.longest, plan.ceiling, MOST_PAIRS) : candidate(size, random, plan.longest, plan.ceiling);
+    const made =
+      size >= MEND_FROM
+        ? repairedCandidate(size, random, plan.longest, plan.ceiling, MOST_PAIRS)
+        : candidate(size, random, plan.longest, plan.ceiling);
     if (made === null || made.pairs > MOST_PAIRS || have.has(made.key) || fresh.has(made.key)) continue;
     fresh.set(made.key, made);
   }
-  const pool = [...fresh.values()].sort((a, b) => a.branches - b.branches || a.nodes - b.nodes || a.turns - b.turns || (a.key < b.key ? -1 : 1));
+  const pool = [...fresh.values()].sort(
+    (a, b) => a.branches - b.branches || a.nodes - b.nodes || a.turns - b.turns || (a.key < b.key ? -1 : 1),
+  );
   const target = Math.min(WANTED[size]!, Math.floor((now.length + pool.length) / TSUNAGI_BLOCK) * TSUNAGI_BLOCK);
   const need = Math.max(0, target - now.length);
   const picked: Level[] = [];
@@ -180,7 +185,10 @@ function renumberedFile(moves: Record<number, number[]>): string {
   ].join("\n");
 }
 
-function migrationFor(moved: readonly Moved[], bands: readonly { size: number; layout: string; band: string }[]): string {
+function migrationFor(
+  moved: readonly Moved[],
+  bands: readonly { size: number; layout: string; band: string }[],
+): string {
   const values = (rows: string[]) => rows.join(",\n");
   return [
     "-- Tsunagi's levels renumbered: 256 a size (192 at 4x4), easiest first by the",
@@ -229,7 +237,10 @@ for (const each of keepList.split(",").filter(Boolean)) {
 // The sizes a run may add boards to, named: `--grow 10,11`. Never all of them by default.
 const growList = args.includes("--grow") ? (args[args.indexOf("--grow") + 1] ?? "") : "";
 const growing = new Set(growList.split(",").filter(Boolean).map(Number));
-const asked = args.filter((arg, at) => !["--keep", "--migration", "--grow"].includes(args[at - 1] ?? "")).map(Number).filter((size) => PLAN[size] !== undefined);
+const asked = args
+  .filter((arg, at) => !["--keep", "--migration", "--grow"].includes(args[at - 1] ?? ""))
+  .map(Number)
+  .filter((size) => PLAN[size] !== undefined);
 // A run over some sizes keeps the marks and roles of the rest as they were.
 const marks: Record<number, string> = { ...TSUNAGI_MARKS };
 const roles: Record<number, Record<number, TwistRole>> = { ...TSUNAGI_ROLES };
@@ -247,26 +258,38 @@ for (const size of asked.length > 0 ? asked : Object.keys(PLAN).map(Number)) {
   const ordered = order.map((at) => all[at]!);
   const twisted = withTwists(size, ordered, keep.get(size) ?? new Set(), PLAN_TWISTS[size]!);
   const levels = twisted.levels;
-  writeFileSync(`src/levels/size${size}.data.ts`, withLevelExamples(fileFor(size, levels), `@johnmorrisdotca/tsunagi/levels-${size}`));
+  writeFileSync(
+    `src/levels/size${size}.data.ts`,
+    withLevelExamples(fileFor(size, levels), `@johnmorrisdotca/tsunagi/levels-${size}`),
+  );
   marks[size] = marksOf(levels, size);
   const layouts = levels.map(([layout]) => layout);
-  roles[size] = Object.fromEntries(layouts.flatMap((_, at) => {
-    const role = twistRole(layouts, at + 1);
-    return role === null ? [] : [[at + 1, role]];
-  }));
+  roles[size] = Object.fromEntries(
+    layouts.flatMap((_, at) => {
+      const role = twistRole(layouts, at + 1);
+      return role === null ? [] : [[at + 1, role]];
+    }),
+  );
   for (const each of twisted.placed) console.log(`  level ${each.level}: ${each.kind}`);
   if (twisted.kept.length > 0) console.log(`  blocks kept plain: ${twisted.kept.join(", ")}`);
   // Where each board that was already here went: its old number is its place in `now`, its new one its place in `order`.
   const to = now.map((_, from) => order.indexOf(from) + 1);
   moves[size] = to;
-  to.forEach((level, from) => moved.push({ size, from: from + 1, to: level, layout: now[from]![0], band: bandOf(level, levels.length) }));
+  to.forEach((level, from) =>
+    moved.push({ size, from: from + 1, to: level, layout: now[from]![0], band: bandOf(level, levels.length) }),
+  );
   levels.forEach(([layout], at) => bands.push({ size, layout, band: bandOf(at + 1, levels.length) }));
   const stayed = to.filter((level, from) => level === from + 1).length;
-  console.log(`${size}×${size}: ${levels.length} levels (${levels.length - now.length} new), ${now.length - stayed} of ${now.length} old ones moved, ${Math.round((performance.now() - started) / 1000)} s`);
+  console.log(
+    `${size}×${size}: ${levels.length} levels (${levels.length - now.length} new), ${now.length - stayed} of ${now.length} old ones moved, ${Math.round((performance.now() - started) / 1000)} s`,
+  );
 }
 writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles, { ...TSUNAGI_PORTAL_MARKS }));
 if (Object.values(moves).some((to) => to.some((level, from) => level !== from + 1))) {
-  writeFileSync("src/levels/renumbered.data.ts", withLevelExamples(renumberedFile(moves), "@johnmorrisdotca/tsunagi/renumbered"));
+  writeFileSync(
+    "src/levels/renumbered.data.ts",
+    withLevelExamples(renumberedFile(moves), "@johnmorrisdotca/tsunagi/renumbered"),
+  );
   if (migrationAt !== undefined) {
     mkdirSync(migrationAt, { recursive: true });
     writeFileSync(`${migrationAt}/migration.sql`, migrationFor(moved, bands));

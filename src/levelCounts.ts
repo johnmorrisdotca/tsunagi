@@ -32,7 +32,23 @@ export const TSUNAGI_SIZES = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 
  * console.log(TSUNAGI_LEVEL_COUNTS);
  * ```
  */
-export const TSUNAGI_LEVEL_COUNTS: Record<number, number> = { 4: 192, 5: 256, 6: 256, 7: 256, 8: 256, 9: 256, 10: 128, 11: 64, 12: 128, 13: 128, 14: 128, 15: 128, 20: 64, 25: 64, 30: 64 };
+export const TSUNAGI_LEVEL_COUNTS: Record<number, number> = {
+  4: 192,
+  5: 256,
+  6: 256,
+  7: 256,
+  8: 256,
+  9: 256,
+  10: 128,
+  11: 64,
+  12: 128,
+  13: 128,
+  14: 128,
+  15: 128,
+  20: 64,
+  25: 64,
+  30: 64,
+};
 
 /**
  * A second set of levels, boards with portals (`code.ts`): a line goes in at one
@@ -57,7 +73,16 @@ export const TSUNAGI_PORTAL_SIZES = [5, 6, 7, 8, 9, 10, 12, 15] as const;
  * console.log(TSUNAGI_PORTAL_COUNTS);
  * ```
  */
-export const TSUNAGI_PORTAL_COUNTS: Record<number, number> = { 5: 32, 6: 32, 7: 32, 8: 32, 9: 32, 10: 32, 12: 32, 15: 32 };
+export const TSUNAGI_PORTAL_COUNTS: Record<number, number> = {
+  5: 32,
+  6: 32,
+  7: 32,
+  8: 32,
+  9: 32,
+  10: 32,
+  12: 32,
+  15: 32,
+};
 
 /** Which set of levels: the ones from 4×4 up, or the ones with portals.
  *
@@ -109,7 +134,9 @@ export function levelSeed(set: TsunagiSet, level: number): number {
  * ```
  */
 export function setOfSeed(seed: number): { set: TsunagiSet; level: number } {
-  return seed > TSUNAGI_PORTAL_SEED ? { set: "portals", level: seed - TSUNAGI_PORTAL_SEED } : { set: "classic", level: seed };
+  return seed > TSUNAGI_PORTAL_SEED
+    ? { set: "portals", level: seed - TSUNAGI_PORTAL_SEED }
+    : { set: "classic", level: seed };
 }
 
 /** How many levels a size has in a set; zero for a size the set has none at.
@@ -254,7 +281,11 @@ export function nextTsunagiLevel(size: number, solved: ReadonlySet<number>, set:
  * console.log(firstUnsolvedTsunagiLevel(4,new Set([1,2])));
  * ```
  */
-export function firstUnsolvedTsunagiLevel(size: number, solved: ReadonlySet<number>, set: TsunagiSet = "classic"): number | null {
+export function firstUnsolvedTsunagiLevel(
+  size: number,
+  solved: ReadonlySet<number>,
+  set: TsunagiSet = "classic",
+): number | null {
   const count = levelCountOf(size, set);
   for (let level = 1; level <= count; level += 1) if (!solved.has(level)) return level;
   return null;

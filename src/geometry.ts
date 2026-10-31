@@ -147,13 +147,18 @@ export function tsunagiGeometry(layout: LinkLayout, options: GeometryOptions = {
       coordinates,
       side: 2 * origin + across,
       paper: { x: room, y: room, width: across + 2 * ring * CELL, height: across + 2 * ring * CELL },
-      centre: (cell) => ({ x: origin + ((cell % size) + 0.5) * CELL, y: origin + (Math.floor(cell / size) + 0.5) * CELL }),
+      centre: (cell) => ({
+        x: origin + ((cell % size) + 0.5) * CELL,
+        y: origin + (Math.floor(cell / size) + 0.5) * CELL,
+      }),
       onBoard,
     };
   }
   // A honeycomb: x slides half a cell a row, rows packed to cos 30°. Centre the cells on the board's box.
   const at = (cell: number) => ({ x: (cell % size) + Math.floor(cell / size) / 2, y: Math.floor(cell / size) * ROW });
-  const used = Array.from({ length: size * size }, (_, cell) => cell).filter(onBoard).map(at);
+  const used = Array.from({ length: size * size }, (_, cell) => cell)
+    .filter(onBoard)
+    .map(at);
   const left = Math.min(...used.map((p) => p.x)) - 0.5;
   const right = Math.max(...used.map((p) => p.x)) + 0.5;
   const top = Math.min(...used.map((p) => p.y)) - HEX_RADIUS;
@@ -314,8 +319,13 @@ export function lineRuns(layout: LinkLayout, geometry: TsunagiGeometry, line: re
     }
     // Into a portal's first cell: it stops just inside the ring, on the side it came in.
     const entering = layout.portals.get(to) === line[at + 1];
-    const stop = (cell: number, dx: number, dy: number): TsunagiPoint => (entering ? point(cell, -dx * PORTAL_STUB, -dy * PORTAL_STUB) : point(cell));
-    const plain = layout.hex || stepBetween(size, from, to, false) !== 0 || Math.abs(to - from) === 2 || Math.abs(to - from) === 2 * size;
+    const stop = (cell: number, dx: number, dy: number): TsunagiPoint =>
+      entering ? point(cell, -dx * PORTAL_STUB, -dy * PORTAL_STUB) : point(cell);
+    const plain =
+      layout.hex ||
+      stepBetween(size, from, to, false) !== 0 ||
+      Math.abs(to - from) === 2 ||
+      Math.abs(to - from) === 2 * size;
     if (plain || !layout.wrap) {
       const [dx, dy] = entering ? heading(from, to) : [0, 0];
       runs[runs.length - 1]!.push(stop(to, dx, dy));

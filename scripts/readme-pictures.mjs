@@ -23,10 +23,14 @@ const withChallenge = (challenge, size) => {
 /** The demo keeps its size, level and what was solved on the device: this is the page opened on a finished board. */
 const keepSolved = ({ size, level, set }) => {
   const slot = set === "portals" ? `p${size}` : String(size);
-  localStorage.setItem("tsunagi.page", JSON.stringify({ size, set, levels: { [slot]: level }, solved: { [slot]: [level] } }));
+  localStorage.setItem(
+    "tsunagi.page",
+    JSON.stringify({ size, set, levels: { [slot]: level }, solved: { [slot]: [level] } }),
+  );
 };
 /** The demo keeps its size and level, and nothing solved: this is the page opened on a board to draw. */
-const keepOpen = ({ size, level }) => localStorage.setItem("tsunagi.page", JSON.stringify({ size, levels: { [size]: level }, solved: {} }));
+const keepOpen = ({ size, level }) =>
+  localStorage.setItem("tsunagi.page", JSON.stringify({ size, levels: { [size]: level }, solved: {} }));
 
 /** A finished board, cropped to its drawing. */
 const finished = (subject, { size, level, set = "classic", look = "" }) => ({
@@ -82,7 +86,9 @@ await takePictures({
           await page.goto("http://tsunagi.test/?lang=ja&size=6&level=1");
           await page.waitForSelector(READY);
           await draw(page, 6, 1, 3);
-          await page.locator("#board").evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 4));
+          await page
+            .locator("#board")
+            .evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 4));
         }
       },
     },

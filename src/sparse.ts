@@ -27,7 +27,9 @@ function joined(a: readonly number[], b: readonly number[], around: readonly (re
       if (!around[end]!.includes(start)) continue;
       // Clean: no cell of one next to a cell of the other, but at the join itself.
       const inSecond = new Set(second);
-      const touches = first.some((cell, at) => around[cell]!.some((next) => inSecond.has(next) && !(at === first.length - 1 && next === start)));
+      const touches = first.some((cell, at) =>
+        around[cell]!.some((next) => inSecond.has(next) && !(at === first.length - 1 && next === start)),
+      );
       if (!touches) return [...first, ...second];
     }
   }
@@ -35,7 +37,11 @@ function joined(a: readonly number[], b: readonly number[], around: readonly (re
 }
 
 /** Whether a layout made from these lines has exactly one answer, its own, inside `budget`. */
-function unique(size: number, paths: readonly number[][], budget: number): { layout: string; answer: string; nodes: number; branches: number } | null {
+function unique(
+  size: number,
+  paths: readonly number[][],
+  budget: number,
+): { layout: string; answer: string; nodes: number; branches: number } | null {
   const made = layoutOf(size, paths, { sparse: false });
   const decoded = decodeLayout(made.layout, size);
   if (decoded === null) return null;

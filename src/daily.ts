@@ -68,7 +68,8 @@ export function isTsunagiDay(text: string): boolean {
  */
 export function tsunagiDay(date: string | Date): TsunagiDay {
   const day = typeof date === "string" ? date : Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
-  if (!isTsunagiDay(day)) throw new RangeError(`tsunagi: ${String(typeof date === "string" ? date : "an invalid Date")} is not a day`);
+  if (!isTsunagiDay(day))
+    throw new RangeError(`tsunagi: ${String(typeof date === "string" ? date : "an invalid Date")} is not a day`);
   return day;
 }
 

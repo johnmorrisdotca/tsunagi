@@ -55,7 +55,16 @@ describe("a sparse board", () => {
 });
 
 describe("the ladder's stroke limits and sparse boards", () => {
-  const levels = () => TSUNAGI_SIZES.flatMap((size) => tsunagiLevelsOf(size).map(([layout, answer], at) => ({ size, level: at + 1, layout, answer, decoded: decodeLayout(layout, size)! })));
+  const levels = () =>
+    TSUNAGI_SIZES.flatMap((size) =>
+      tsunagiLevelsOf(size).map(([layout, answer], at) => ({
+        size,
+        level: at + 1,
+        layout,
+        answer,
+        decoded: decodeLayout(layout, size)!,
+      })),
+    );
 
   it("gives every stroke limit at least the fewest strokes its board can be solved in: none to spare at a 16th, three at a 15th", () => {
     const limited = levels().filter((each) => each.decoded.strokes !== null);
@@ -67,7 +76,8 @@ describe("the ladder's stroke limits and sparse boards", () => {
         for (let at = 0; at < size * size; at += 1) {
           for (const by of [1, size]) {
             const next = wrappedStep(size, at, by);
-            if (stepBetween(size, at, next, false) === 0 && /[A-P]/.test(answer[at]!) && answer[at] === answer[next]) least += 1;
+            if (stepBetween(size, at, next, false) === 0 && /[A-P]/.test(answer[at]!) && answer[at] === answer[next])
+              least += 1;
           }
         }
       }

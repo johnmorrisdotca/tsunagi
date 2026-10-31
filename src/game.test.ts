@@ -61,11 +61,20 @@ describe("a game of a real level", () => {
     expect(won.solved).toBe(true);
     expect(won.strokes).toBe(start.layout.ends.length);
     expect(checkTsunagiAnswer(size, givens, answerOf(won.layout, won.lines)).ok).toBe(true);
-    expect(tsunagiProgress(won)).toMatchObject({ solved: true, joined: start.layout.ends.length, filled: won.layout.cells.length });
+    expect(tsunagiProgress(won)).toMatchObject({
+      solved: true,
+      joined: start.layout.ends.length,
+      filled: won.layout.cells.length,
+    });
   });
 
   it("is solved on a board with bridges, walls and explosions too, since the stroke that solves sets nothing off", () => {
-    const { size, givens, answer } = find((g) => challengesOf(g).includes("bridges") && challengesOf(g).includes("explosions") && challengesOf(g).includes("walls"));
+    const { size, givens, answer } = find(
+      (g) =>
+        challengesOf(g).includes("bridges") &&
+        challengesOf(g).includes("explosions") &&
+        challengesOf(g).includes("walls"),
+    );
     const won = solve(newTsunagiGame(givens, size, { answer, explosions: "off" })!);
     expect(won.solved).toBe(true);
   });

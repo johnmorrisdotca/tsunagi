@@ -238,9 +238,12 @@ const TAIL_ORDER = ["hex", "sparse", "wrap", "portals", "explosion", "strokes"] 
  * console.log(tailWord("strokes5"));
  * ```
  */
-export function tailWord(segment: string): { word: (typeof TAIL_ORDER)[number]; every?: number; blast?: boolean; list?: string } | null {
+export function tailWord(
+  segment: string,
+): { word: (typeof TAIL_ORDER)[number]; every?: number; blast?: boolean; list?: string } | null {
   if (segment === LINK_WRAP) return { word: "wrap" };
-  if (segment.startsWith(LINK_PORTALS) && /^portals\d+-\d+(,\d+-\d+)*$/.test(segment)) return { word: "portals", list: segment.slice(LINK_PORTALS.length) };
+  if (segment.startsWith(LINK_PORTALS) && /^portals\d+-\d+(,\d+-\d+)*$/.test(segment))
+    return { word: "portals", list: segment.slice(LINK_PORTALS.length) };
   if (segment === LINK_HEX) return { word: "hex" };
   if (segment === LINK_SPARSE) return { word: "sparse" };
   const limit = /^strokes([1-9][0-9]?)$/.exec(segment);
@@ -456,7 +459,8 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
       portals.set(b, a);
     }
     // No two portal cells side by side, whichever pairs they are of: a line goes in and straight out, and its way is never another portal.
-    for (const at of portals.keys()) for (const beside of squareNeighbours(size, at, wrap)) if (portals.has(beside)) return null;
+    for (const at of portals.keys())
+      for (const beside of squareNeighbours(size, at, wrap)) if (portals.has(beside)) return null;
   }
   // A bridge away from the edge, beside no other bridge, and with no wall on any of its four sides.
   for (let at = 0; at < cells.length; at += 1) {
@@ -464,9 +468,23 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     const row = Math.floor(at / size);
     const col = at % size;
     if (row === 0 || col === 0 || row === size - 1 || col === size - 1) return null;
-    for (const beside of neighboursOf(size, at)) if (cells[beside] === CELL_BRIDGE || walls.has(edgeKey(at, beside))) return null;
+    for (const beside of neighboursOf(size, at))
+      if (cells[beside] === CELL_BRIDGE || walls.has(edgeKey(at, beside))) return null;
   }
-  const layout: LinkLayout = { size, cells, ends: seen.map((stones) => [stones[0]!, stones[1]!]), walls, waypoints: marked, wrap, portalPairs, portals, hex, sparse, strokes, explosions };
+  const layout: LinkLayout = {
+    size,
+    cells,
+    ends: seen.map((stones) => [stones[0]!, stones[1]!]),
+    walls,
+    waypoints: marked,
+    wrap,
+    portalPairs,
+    portals,
+    hex,
+    sparse,
+    strokes,
+    explosions,
+  };
   // Two cells joined two ways (beside each other and through a portal, or through two portals) could not be told apart in an answer.
   if (portalPairs.length > 0 && portalsAreAmbiguous(layout)) return null;
   return layout;
@@ -494,7 +512,12 @@ export function portalExit(layout: LinkLayout, from: number, into: number): numb
   const by = stepBetween(size, from, into, layout.wrap);
   if (other === undefined || by === 0) return -1;
   const out = layout.wrap ? wrappedStep(size, other, by) : other + by;
-  if (out < 0 || out >= size * size || (!layout.wrap && Math.abs(by) === 1 && Math.floor(out / size) !== Math.floor(other / size))) return -1;
+  if (
+    out < 0 ||
+    out >= size * size ||
+    (!layout.wrap && Math.abs(by) === 1 && Math.floor(out / size) !== Math.floor(other / size))
+  )
+    return -1;
   return edgeOpen(layout, other, out) ? out : -1;
 }
 
@@ -551,7 +574,9 @@ function readPortals(list: string, size: number, wrap: boolean): [number, number
 
 /** The cells beside `at` on a square board, across the join where it wraps. */
 function squareNeighbours(size: number, at: number, wrap: boolean): number[] {
-  return wrap ? [...new Set([-size, 1, size, -1].map((by) => wrappedStep(size, at, by)))].filter((next) => next !== at) : neighboursOf(size, at);
+  return wrap
+    ? [...new Set([-size, 1, size, -1].map((by) => wrappedStep(size, at, by)))].filter((next) => next !== at)
+    : neighboursOf(size, at);
 }
 
 /** The walls after a layout's `|`, or null for a list that is not one: an edge that is not two neighbouring cells, out of order, or twice. */
@@ -626,20 +651,48 @@ const NO_LETTER = "?";
  * console.log(encodeLayout(layout.cells,layout.walls));
  * ```
  */
-export function encodeLayout(cells: readonly number[], walls: Iterable<string> = [], more: { waypoints?: ReadonlyMap<number, number>; wrap?: boolean; hex?: boolean; sparse?: boolean; portals?: Iterable<readonly [number, number]>; strokes?: number | null; explosions?: LinkLayout["explosions"] } = {}): string {
+export function encodeLayout(
+  cells: readonly number[],
+  walls: Iterable<string> = [],
+  more: {
+    waypoints?: ReadonlyMap<number, number>;
+    wrap?: boolean;
+    hex?: boolean;
+    sparse?: boolean;
+    portals?: Iterable<readonly [number, number]>;
+    strokes?: number | null;
+    explosions?: LinkLayout["explosions"];
+  } = {},
+): string {
   const lastPair = Math.max(-1, ...cells);
   // A pair past the last letter has no spelling: it is written `?`, which no layout reads, so a filling of too many lines is refused rather than thrown on.
   const grid = cells
     .map((cell, at) => {
       const waypoint = more.waypoints?.get(at);
       // A board of thirty-six pairs or more has no waypoints: its small letters are stones.
-      if (waypoint !== undefined) return lastPair < CAPITAL_PAIRS - 1 ? (WAYPOINT_LETTERS[waypoint] ?? NO_LETTER) : NO_LETTER;
-      return cell === CELL_EMPTY ? LINK_EMPTY : cell === CELL_BLOCKED ? LINK_BLOCKED : cell === CELL_BRIDGE ? LINK_BRIDGE : (PAIR_LETTERS[cell] ?? NO_LETTER);
+      if (waypoint !== undefined)
+        return lastPair < CAPITAL_PAIRS - 1 ? (WAYPOINT_LETTERS[waypoint] ?? NO_LETTER) : NO_LETTER;
+      return cell === CELL_EMPTY
+        ? LINK_EMPTY
+        : cell === CELL_BLOCKED
+          ? LINK_BLOCKED
+          : cell === CELL_BRIDGE
+            ? LINK_BRIDGE
+            : (PAIR_LETTERS[cell] ?? NO_LETTER);
     })
     .join("");
-  const boom = more.explosions == null ? "" : `${LINK_WALLS}${more.explosions.blast ? "blast" : "boom"}${more.explosions.every}`;
+  const boom =
+    more.explosions == null ? "" : `${LINK_WALLS}${more.explosions.blast ? "blast" : "boom"}${more.explosions.every}`;
   const portalList = encodePortals(more.portals ?? []);
-  const words = [more.hex === true ? LINK_HEX : "", more.sparse === true ? LINK_SPARSE : "", more.wrap === true ? LINK_WRAP : "", portalList].filter(Boolean).map((word) => `${LINK_WALLS}${word}`).join("");
+  const words = [
+    more.hex === true ? LINK_HEX : "",
+    more.sparse === true ? LINK_SPARSE : "",
+    more.wrap === true ? LINK_WRAP : "",
+    portalList,
+  ]
+    .filter(Boolean)
+    .map((word) => `${LINK_WALLS}${word}`)
+    .join("");
   const limit = more.strokes == null ? "" : `${LINK_WALLS}strokes${more.strokes}`;
   return grid + encodeWalls(walls) + words + boom + limit;
 }
@@ -677,7 +730,17 @@ export function encodePortals(pairs: Iterable<readonly [number, number]>): strin
  * ```
  */
 export function encodeAnswer(owners: readonly number[]): string {
-  return owners.map((owner) => (owner === CELL_BLOCKED ? LINK_BLOCKED : owner === CELL_BRIDGE ? LINK_BRIDGE : owner < 0 ? LINK_EMPTY : PAIR_LETTERS[owner]!)).join("");
+  return owners
+    .map((owner) =>
+      owner === CELL_BLOCKED
+        ? LINK_BLOCKED
+        : owner === CELL_BRIDGE
+          ? LINK_BRIDGE
+          : owner < 0
+            ? LINK_EMPTY
+            : PAIR_LETTERS[owner]!,
+    )
+    .join("");
 }
 
 /** A layout's cells without its walls or wrap: the part of the code one character a cell.
@@ -812,8 +875,14 @@ export function layoutNeighbours(layout: LinkLayout): number[][] {
   const { size } = layout;
   // On a board that wraps, every cell has four neighbours, the edges' ones across the join.
   if (layout.hex) return hexNeighbourTable(size);
-  const table = layout.wrap ? Array.from({ length: size * size }, (_, at) => [...new Set([-size, 1, size, -1].map((by) => wrappedStep(size, at, by)))].filter((next) => next !== at)) : neighbourTable(size);
-  return layout.walls.size === 0 ? table : table.map((around, at) => around.filter((next) => edgeOpen(layout, at, next)));
+  const table = layout.wrap
+    ? Array.from({ length: size * size }, (_, at) =>
+        [...new Set([-size, 1, size, -1].map((by) => wrappedStep(size, at, by)))].filter((next) => next !== at),
+      )
+    : neighbourTable(size);
+  return layout.walls.size === 0
+    ? table
+    : table.map((around, at) => around.filter((next) => edgeOpen(layout, at, next)));
 }
 
 /** The four neighbours of a cell on a square grid, as indexes; fewer at an edge.

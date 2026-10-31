@@ -35,7 +35,15 @@
  * nothing. Levels 1 to 14 of every block are never touched.
  */
 import { orderByDifficulty } from "../src/difficulty.ts";
-import { bridgeAndWallCandidate, bridgeCandidate, hexCandidate, wallCandidate, waypointCandidate, wrapCandidate, type TwistCandidate } from "../src/twists.ts";
+import {
+  bridgeAndWallCandidate,
+  bridgeCandidate,
+  hexCandidate,
+  wallCandidate,
+  waypointCandidate,
+  wrapCandidate,
+  type TwistCandidate,
+} from "../src/twists.ts";
 import { type FillingStyle, symmetryKey } from "../src/generate.ts";
 import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
 import { challengesOf, isTwist, type Challenge } from "../src/ladder.ts";
@@ -45,16 +53,45 @@ import { seededRandom } from "../src/random.ts";
 
 type Level = readonly [string, string];
 
-export type Kind = "bridge" | "bridges" | "walls" | "wallsAndBlocked" | "bridgeAndWalls" | "waypoints" | "wrap" | "boom" | "blast" | "hexagon" | "sparse" | "strokes";
+export type Kind =
+  | "bridge"
+  | "bridges"
+  | "walls"
+  | "wallsAndBlocked"
+  | "bridgeAndWalls"
+  | "waypoints"
+  | "wrap"
+  | "boom"
+  | "blast"
+  | "hexagon"
+  | "sparse"
+  | "strokes";
 
 // A new kind goes on the end: each kind's stream is seeded by its place here, so the others keep making the boards they made.
-export const KINDS: readonly Kind[] = ["bridge", "bridges", "walls", "wallsAndBlocked", "bridgeAndWalls", "waypoints", "wrap", "hexagon", "sparse"];
+export const KINDS: readonly Kind[] = [
+  "bridge",
+  "bridges",
+  "walls",
+  "wallsAndBlocked",
+  "bridgeAndWalls",
+  "waypoints",
+  "wrap",
+  "hexagon",
+  "sparse",
+];
 
 /** How many times a kind's tries a sparse pool gets: few fillings join down to a sparse board with one answer. */
 const SPARSE_TRIES = 5;
 
 /** One kind's candidate, from its own random stream. */
-export function candidateOf(kind: Kind, size: number, random: () => number, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
+export function candidateOf(
+  kind: Kind,
+  size: number,
+  random: () => number,
+  longest: number,
+  budget: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   if (kind === "bridge") return bridgeCandidate(size, random, longest, budget, 1, style);
   if (kind === "bridges") return bridgeCandidate(size, random, longest, budget, 2, style);
   if (kind === "walls") return wallCandidate(size, random, longest, budget, 0, 6, style);
@@ -74,7 +111,13 @@ export function candidateOf(kind: Kind, size: number, random: () => number, long
  * kind. Every kind draws from a random stream of its own, so adding a kind
  * never changes the boards another kind makes.
  */
-function pools(size: number, tries: number, longest: number, budget: number, wanted: ReadonlySet<Kind>): Record<Kind, TwistCandidate[]> {
+function pools(
+  size: number,
+  tries: number,
+  longest: number,
+  budget: number,
+  wanted: ReadonlySet<Kind>,
+): Record<Kind, TwistCandidate[]> {
   const out = {} as Record<Kind, TwistCandidate[]>;
   KINDS.forEach((kind, index) => {
     // Only the kinds a lesson still to be made can use: a big board's pool takes minutes a kind.
@@ -89,7 +132,13 @@ function pools(size: number, tries: number, longest: number, budget: number, wan
       if (made !== null && !found.has(made.key)) found.set(made.key, made);
     }
     const list = [...found.values()];
-    out[kind] = list.length === 0 ? [] : orderByDifficulty(list.map((made) => [made.layout, made.answer] as const), size).map((at) => list[at]!);
+    out[kind] =
+      list.length === 0
+        ? []
+        : orderByDifficulty(
+            list.map((made) => [made.layout, made.answer] as const),
+            size,
+          ).map((at) => list[at]!);
   });
   return out;
 }
@@ -127,14 +176,20 @@ const LATER: Record<Exclude<Challenge, "explosions">, { teach: Kind[]; test: Kin
  * that wraps, where it is let go and taken up on the far side — with three to
  * spare at the 15th and none at the 16th.
  */
-export function limited(layout: string, answer: string, size: number, role: "teach" | "test"): { layout: string; kind: Kind } {
+export function limited(
+  layout: string,
+  answer: string,
+  size: number,
+  role: "teach" | "test",
+): { layout: string; kind: Kind } {
   const decoded = decodeLayout(layout, size)!;
   let least = decoded.ends.length;
   if (decoded.wrap) {
     for (let at = 0; at < size * size; at += 1) {
       for (const by of [1, size]) {
         const next = wrappedStep(size, at, by);
-        if (stepBetween(size, at, next, false) === 0 && /[A-P]/.test(answer[at]!) && answer[at] === answer[next]) least += 1;
+        if (stepBetween(size, at, next, false) === 0 && /[A-P]/.test(answer[at]!) && answer[at] === answer[next])
+          least += 1;
       }
     }
   }
@@ -145,7 +200,13 @@ export function limited(layout: string, answer: string, size: number, role: "tea
 function lessons(count: number, size: number): Lesson[] {
   const out: Lesson[] = [
     { twist: "bridges", teach: ["bridge"], test: ["bridges", "bridge", "bridgeAndWalls"], teachAt: 0, testAt: 0.5 },
-    { twist: "walls", teach: ["walls", "wallsAndBlocked"], test: ["wallsAndBlocked", "walls"], teachAt: 0, testAt: 0.5 },
+    {
+      twist: "walls",
+      teach: ["walls", "wallsAndBlocked"],
+      test: ["wallsAndBlocked", "walls"],
+      teachAt: 0,
+      testAt: 0.5,
+    },
     { twist: "waypoints", teach: ["waypoints"], test: ["waypoints"], teachAt: 0, testAt: 0.5 },
     { twist: "wrap", teach: ["wrap"], test: ["wrap"], teachAt: 0, testAt: 0.5 },
   ];
@@ -189,7 +250,12 @@ export type TwistPlan = { levels: Level[]; placed: { level: number; kind: Kind; 
  * order, untouched: play arriving on a shipped lesson must not deal every later
  * lesson of the size one block along. A played block left plain has no place.
  */
-export function withTwists(size: number, levels: readonly Level[], keep: ReadonlySet<number>, plan: { tries: number; longest: number; budget: number; pool?: Record<Kind, TwistCandidate[]> }): TwistPlan {
+export function withTwists(
+  size: number,
+  levels: readonly Level[],
+  keep: ReadonlySet<number>,
+  plan: { tries: number; longest: number; budget: number; pool?: Record<Kind, TwistCandidate[]> },
+): TwistPlan {
   const out = [...levels];
   const blocks = Math.floor(levels.length / TSUNAGI_BLOCK);
   const placed: TwistPlan["placed"] = [];
@@ -215,13 +281,24 @@ export function withTwists(size: number, levels: readonly Level[], keep: Readonl
     return on.includes(planned[at]!.twist) && on.every((twist) => allowed[at]!.has(twist));
   };
   // Which free blocks already hold their lesson, and which need boards made.
-  const needed = free.filter((block, at) => !frozen.has(block) && !(fits(levels[block * TSUNAGI_BLOCK - 2]![0], at) && fits(levels[block * TSUNAGI_BLOCK - 1]![0], at)));
+  const needed = free.filter(
+    (block, at) =>
+      !frozen.has(block) &&
+      !(fits(levels[block * TSUNAGI_BLOCK - 2]![0], at) && fits(levels[block * TSUNAGI_BLOCK - 1]![0], at)),
+  );
   if (needed.length === 0) return { levels: out, placed, kept };
   // Explosions change no cell: their lesson is the slot's own board with one added. The rest need boards made.
   const madeNeeded = needed.some((block) => !["explosions", "strokes"].includes(planned[free.indexOf(block)]!.twist));
-  const wanted = new Set(needed.flatMap((block) => { const lesson = planned[free.indexOf(block)]!; return [...lesson.teach, ...lesson.test]; }));
+  const wanted = new Set(
+    needed.flatMap((block) => {
+      const lesson = planned[free.indexOf(block)]!;
+      return [...lesson.teach, ...lesson.test];
+    }),
+  );
   // A pool made beforehand, in parallel (`tsunagi-pool.ts`), is read in place of the serial one.
-  const pool = madeNeeded ? (plan.pool ?? pools(size, plan.tries, plan.longest, plan.budget, wanted)) : ({} as Record<Kind, TwistCandidate[]>);
+  const pool = madeNeeded
+    ? (plan.pool ?? pools(size, plan.tries, plan.longest, plan.budget, wanted))
+    : ({} as Record<Kind, TwistCandidate[]>);
   const used = new Set<string>(levels.map(([layout]) => symmetryKey(layout, size)));
   const take = (kinds: Kind[], at: number, lesson: number): { made: TwistCandidate; kind: Kind } | null => {
     for (const kind of kinds) {

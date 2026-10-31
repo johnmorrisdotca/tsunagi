@@ -33,13 +33,16 @@ import { joined, letGo, withoutPortalTail, type Lines } from "./lines.ts";
  * ```
  */
 export function cheatLine(layout: LinkLayout, lines: Lines, answer: Lines): { lines: Lines; pair: number } | null {
-  const same = (a: readonly number[], b: readonly number[]) => a.length === b.length && (a.every((cell, at) => cell === b[at]) || a.every((cell, at) => cell === b[b.length - 1 - at]));
+  const same = (a: readonly number[], b: readonly number[]) =>
+    a.length === b.length &&
+    (a.every((cell, at) => cell === b[at]) || a.every((cell, at) => cell === b[b.length - 1 - at]));
   let pair = layout.ends.findIndex((_, each) => !joined(layout, lines, each));
   if (pair === -1) pair = answer.findIndex((line, each) => !same(line, lines[each]!));
   if (pair === -1) return null;
   const drawn = answer[pair]!;
   // The way the drawn line goes over each bridge on it: across (a step of one) or down.
-  const across = (line: readonly number[], at: number) => Math.abs(line[at]! - line[at - 1]!) === 1 || Math.abs(line[at + 1]! - line[at]!) === 1;
+  const across = (line: readonly number[], at: number) =>
+    Math.abs(line[at]! - line[at - 1]!) === 1 || Math.abs(line[at + 1]! - line[at]!) === 1;
   const claimed = new Map<number, boolean | null>();
   drawn.forEach((cell, at) => claimed.set(cell, layout.cells[cell] === CELL_BRIDGE ? across(drawn, at) : null));
   const next = lines.map((line, each) => {

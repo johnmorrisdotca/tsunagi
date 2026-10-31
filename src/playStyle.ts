@@ -10,7 +10,7 @@ import { TSUNAGI_STYLE } from "./style.ts";
  * Nothing moves when something is chosen: the board is one square box, the
  * lines of words keep the room their longest wording takes, and the buttons
  * are one size. Nothing the player touches can be selected.
-  * @example
+ * @example
  * ```ts
  * import { TSUNAGI_PLAY_STYLE } from "@johnmorrisdotca/tsunagi/play";
  * console.log(TSUNAGI_PLAY_STYLE.includes(".tsunagi-play")); // true

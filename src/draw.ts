@@ -1,7 +1,30 @@
 import { TSUNAGI_BOARDS, type TsunagiBoardLook, type TsunagiBoardName } from "./boards.ts";
-import { colourOfPair, beadShades, hsl, lineColour, marbleShades, portalMark, TSUNAGI_PORTAL_COLOURS, tsunagiColourSet, washColour, type TsunagiColour, type TsunagiColourSetName, type TsunagiFill, type TsunagiMarks } from "./colours.ts";
+import {
+  colourOfPair,
+  beadShades,
+  hsl,
+  lineColour,
+  marbleShades,
+  portalMark,
+  TSUNAGI_PORTAL_COLOURS,
+  tsunagiColourSet,
+  washColour,
+  type TsunagiColour,
+  type TsunagiColourSetName,
+  type TsunagiFill,
+  type TsunagiMarks,
+} from "./colours.ts";
 import { CELL_BLOCKED, CELL_BRIDGE, decodeLayout, type LinkLayout } from "./code.ts";
-import { CELL, hexagonPoints, HEX_RADIUS, lineRuns, round, tsunagiGeometry, type TsunagiGeometry, type TsunagiPoint } from "./geometry.ts";
+import {
+  CELL,
+  hexagonPoints,
+  HEX_RADIUS,
+  lineRuns,
+  round,
+  tsunagiGeometry,
+  type TsunagiGeometry,
+  type TsunagiPoint,
+} from "./geometry.ts";
 import { noLines, overBridge, ownersOf, type Lines } from "./lines.ts";
 import { tsunagiSay, type TsunagiLanguage } from "./strings.ts";
 import { TSUNAGI_STYLE } from "./style.ts";
@@ -66,7 +89,8 @@ export type TsunagiDrawOptions = {
   id?: string;
 };
 
-const escape = (text: string): string => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const escape = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** FNV-1a, as a short base-36 string: the same drawing always gets the same ids. */
 function hashOf(text: string): string {
@@ -101,23 +125,51 @@ function boardStyle(look: TsunagiBoardLook): string {
 }
 
 /** The marbles on a board, each with its pair's number where the marks are numbers. */
-function marbleSvg(layout: LinkLayout, geometry: TsunagiGeometry, cell: number, pair: number, marks: TsunagiMarks, colours: readonly TsunagiColour[], language: TsunagiLanguage, flagged: boolean, ghost = false): string {
+function marbleSvg(
+  layout: LinkLayout,
+  geometry: TsunagiGeometry,
+  cell: number,
+  pair: number,
+  marks: TsunagiMarks,
+  colours: readonly TsunagiColour[],
+  language: TsunagiLanguage,
+  flagged: boolean,
+  ghost = false,
+): string {
   const { x, y } = geometry.centre(cell);
   const shades = marbleShades(colourOfPair(colours, pair), marks);
   const shadow = `<circle cx="${round(x)}" cy="${round(y + 2.5)}" r="${MARBLE}" fill="#000" opacity=".32"/>`;
   const ball = `<circle cx="${round(x)}" cy="${round(y)}" r="${MARBLE}" fill="url(#__ID__-m${pair})"/>`;
-  const number = marks === "numbers" ? `<text class="tsu-num" x="${round(x)}" y="${round(y)}" dy=".35em" fill="${shades.ink}" ${numberType(pair + 1, MARBLE * 2)}>${pair + 1}</text>` : "";
+  const number =
+    marks === "numbers"
+      ? `<text class="tsu-num" x="${round(x)}" y="${round(y)}" dy=".35em" fill="${shades.ink}" ${numberType(pair + 1, MARBLE * 2)}>${pair + 1}</text>`
+      : "";
   if (ghost) return `<g>${shadow}${ball}${number}</g>`;
-  const label = tsunagiSay(language, "marble", { n: pair + 1, row: Math.floor(cell / layout.size) + 1, col: (cell % layout.size) + 1 });
-  const flag = flagged ? `<circle class="tsu-flag" data-pair="${pair}" cx="${round(x)}" cy="${round(y)}" r="${MARBLE + 4}" stroke="${lineColour(colourOfPair(colours, pair), marks)}"/>` : "";
+  const label = tsunagiSay(language, "marble", {
+    n: pair + 1,
+    row: Math.floor(cell / layout.size) + 1,
+    col: (cell % layout.size) + 1,
+  });
+  const flag = flagged
+    ? `<circle class="tsu-flag" data-pair="${pair}" cx="${round(x)}" cy="${round(y)}" r="${MARBLE + 4}" stroke="${lineColour(colourOfPair(colours, pair), marks)}"/>`
+    : "";
   return `<g class="tsu-marble" data-pair="${pair}" data-cell="${cell}" role="img" aria-label="${escape(label)}">${flag}${shadow}${ball}${number}</g>`;
 }
 
 /** A pair's line as SVG text: a group of its runs, or nothing for a pair with no line drawn. */
-function lineSvg(layout: LinkLayout, geometry: TsunagiGeometry, line: readonly number[], pair: number, stroke: string): string {
+function lineSvg(
+  layout: LinkLayout,
+  geometry: TsunagiGeometry,
+  line: readonly number[],
+  pair: number,
+  stroke: string,
+): string {
   if (line.length < 2) return "";
   const runs = lineRuns(layout, geometry, line)
-    .map((run) => `<polyline points="${run.map((point) => `${round(point.x)},${round(point.y)}`).join(" ")}" stroke="${stroke}"/>`)
+    .map(
+      (run) =>
+        `<polyline points="${run.map((point) => `${round(point.x)},${round(point.y)}`).join(" ")}" stroke="${stroke}"/>`,
+    )
     .join("");
   return `<g class="tsu-line" data-pair="${pair}" data-cells="${line.length}">${runs}</g>`;
 }
@@ -132,7 +184,14 @@ function portalSvg(geometry: TsunagiGeometry, a: number, b: number, index: numbe
   const link = `<path class="tsu-portal-link" d="M${round(from.x)} ${round(from.y)}Q${round(bow.x)} ${round(bow.y)} ${round(to.x)} ${round(to.y)}" stroke="${colour}"/>`;
   const ring = (cell: number, at: TsunagiPoint) =>
     `<g class="tsu-portal-end" data-cell="${cell}"><circle cx="${round(at.x)}" cy="${round(at.y)}" r="40" fill="${colour}" fill-opacity=".14" stroke="${colour}" stroke-width="7"/><circle cx="${round(at.x)}" cy="${round(at.y)}" r="28" fill="none" stroke="${colour}" stroke-width="3" stroke-dasharray="4 6" stroke-linecap="round"/><text class="tsu-glyph" x="${round(at.x)}" y="${round(at.y)}" dy=".35em" fill="${colour}" font-size="${mark.length > 1 ? 28 : 38}">${escape(mark)}</text></g>`;
-  const label = tsunagiSay(language, "portal", { n: index + 1, mark, row: Math.floor(a / geometry.size) + 1, col: (a % geometry.size) + 1, row2: Math.floor(b / geometry.size) + 1, col2: (b % geometry.size) + 1 });
+  const label = tsunagiSay(language, "portal", {
+    n: index + 1,
+    mark,
+    row: Math.floor(a / geometry.size) + 1,
+    col: (a % geometry.size) + 1,
+    row2: Math.floor(b / geometry.size) + 1,
+    col2: (b % geometry.size) + 1,
+  });
   return `<g class="tsu-portal" data-portal="${index}" data-cells="${a},${b}" role="img" aria-label="${escape(label)}">${link}${ring(a, from)}${ring(b, to)}</g>`;
 }
 
@@ -177,7 +236,8 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
   const flagged = new Set(options.flagged ?? []);
   const blasted = new Set(options.blasted ?? []);
   const bridges = layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
-  const boardName = typeof options.board === "string" ? options.board : options.board === undefined ? "paper" : "custom";
+  const boardName =
+    typeof options.board === "string" ? options.board : options.board === undefined ? "paper" : "custom";
   const { side, paper } = geometry;
   const pairColour = (pair: number): TsunagiColour => colourOfPair(colours, pair);
   const wash = (pair: number): string => washColour(pairColour(pair), marks);
@@ -186,8 +246,13 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
 
   // The paper and its frame.
   parts.push(`<rect class="tsu-frame" width="${round(side)}" height="${round(side)}" rx="22"/>`);
-  parts.push(`<rect class="tsu-paper" x="${paper.x}" y="${paper.y}" width="${round(paper.width)}" height="${round(paper.height)}" rx="6" fill="url(#__ID__-paper)"/>`);
-  if (options.done === true) parts.push(`<rect class="tsu-solved" x="${paper.x}" y="${paper.y}" width="${round(paper.width)}" height="${round(paper.height)}" rx="6"/>`);
+  parts.push(
+    `<rect class="tsu-paper" x="${paper.x}" y="${paper.y}" width="${round(paper.width)}" height="${round(paper.height)}" rx="6" fill="url(#__ID__-paper)"/>`,
+  );
+  if (options.done === true)
+    parts.push(
+      `<rect class="tsu-solved" x="${paper.x}" y="${paper.y}" width="${round(paper.width)}" height="${round(paper.height)}" rx="6"/>`,
+    );
 
   // Row numbers and column letters, on the frame.
   if (geometry.coordinates) {
@@ -195,9 +260,13 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
     for (let at = 0; at < size; at += 1) {
       const middle = geometry.centre(at);
       const letter = String.fromCharCode(65 + (at % 26));
-      parts.push(`<text class="tsu-coordinate" x="${round(middle.x)}" y="${round(room)}" dy=".35em" aria-hidden="true">${letter}</text>`);
+      parts.push(
+        `<text class="tsu-coordinate" x="${round(middle.x)}" y="${round(room)}" dy=".35em" aria-hidden="true">${letter}</text>`,
+      );
       const row = geometry.centre(at * size);
-      parts.push(`<text class="tsu-coordinate" x="${round(room)}" y="${round(row.y)}" dy=".35em" aria-hidden="true">${at + 1}</text>`);
+      parts.push(
+        `<text class="tsu-coordinate" x="${round(room)}" y="${round(row.y)}" dy=".35em" aria-hidden="true">${at + 1}</text>`,
+      );
     }
   }
 
@@ -213,14 +282,23 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
     if (hex) {
       const points = hexagonPoints(x, y, HEX_RADIUS * CELL);
       if (shows) washed[owner]!.push(`<polygon points="${points}" fill="${wash(owner)}"/>`);
-      if (cell === CELL_BLOCKED) blocked.push(`<polygon class="tsu-blocked" points="${hexagonPoints(x, y, HEX_RADIUS * CELL - 6)}"/>`);
+      if (cell === CELL_BLOCKED)
+        blocked.push(`<polygon class="tsu-blocked" points="${hexagonPoints(x, y, HEX_RADIUS * CELL - 6)}"/>`);
       hexes.push(`<polygon class="tsu-hex-cell" points="${points}"/>`);
       return;
     }
-    if (shows) washed[owner]!.push(`<rect x="${round(x - CELL / 2)}" y="${round(y - CELL / 2)}" width="${CELL}" height="${CELL}" fill="${wash(owner)}"/>`);
-    else if (cell === CELL_BLOCKED) blocked.push(`<rect class="tsu-blocked" x="${round(x - 42)}" y="${round(y - 42)}" width="84" height="84" rx="8"/>`);
+    if (shows)
+      washed[owner]!.push(
+        `<rect x="${round(x - CELL / 2)}" y="${round(y - CELL / 2)}" width="${CELL}" height="${CELL}" fill="${wash(owner)}"/>`,
+      );
+    else if (cell === CELL_BLOCKED)
+      blocked.push(
+        `<rect class="tsu-blocked" x="${round(x - 42)}" y="${round(y - 42)}" width="84" height="84" rx="8"/>`,
+      );
   });
-  parts.push(`<g class="tsu-washes">${washed.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`);
+  parts.push(
+    `<g class="tsu-washes">${washed.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`,
+  );
   if (hex) parts.push(`<g class="tsu-hexes">${hexes.join("")}</g>`);
   parts.push(...blocked);
   if (!hex) {
@@ -228,9 +306,12 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
     const top = geometry.centre(0).y - CELL / 2;
     const across = size * CELL;
     let rules = "";
-    for (let at = 1; at < size; at += 1) rules += `M${round(left + at * CELL)} ${round(top)}v${across}M${round(left)} ${round(top + at * CELL)}h${across}`;
+    for (let at = 1; at < size; at += 1)
+      rules += `M${round(left + at * CELL)} ${round(top)}v${across}M${round(left)} ${round(top + at * CELL)}h${across}`;
     parts.push(`<path class="tsu-grid" d="${rules}"/>`);
-    parts.push(`<rect class="${layout.wrap ? "tsu-rim" : "tsu-border"}" x="${round(left)}" y="${round(top)}" width="${across}" height="${across}"/>`);
+    parts.push(
+      `<rect class="${layout.wrap ? "tsu-rim" : "tsu-border"}" x="${round(left)}" y="${round(top)}" width="${across}" height="${across}"/>`,
+    );
   }
 
   // Walls: a thick bar on the edge between two square cells.
@@ -262,7 +343,9 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
         return `<rect x="${round(x - 40)}" y="${round(y - 40)}" width="80" height="80" rx="14" fill="black"/>`;
       })
       .join("");
-    parts.push(`<defs><mask id="__ID__-under" maskUnits="userSpaceOnUse" x="-100" y="-100" width="${round(side + 200)}" height="${round(side + 200)}"><rect x="-100" y="-100" width="${round(side + 200)}" height="${round(side + 200)}" fill="white"/>${holes}</mask></defs>`);
+    parts.push(
+      `<defs><mask id="__ID__-under" maskUnits="userSpaceOnUse" x="-100" y="-100" width="${round(side + 200)}" height="${round(side + 200)}"><rect x="-100" y="-100" width="${round(side + 200)}" height="${round(side + 200)}" fill="white"/>${holes}</mask></defs>`,
+    );
     parts.push(`<g class="tsu-lines" mask="url(#__ID__-under)">${lineParts.join("")}</g>`);
   } else parts.push(`<g class="tsu-lines">${lineParts.join("")}</g>`);
 
@@ -287,8 +370,13 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
   for (const [at, pair] of layout.waypoints) {
     if (!geometry.onBoard(at)) continue;
     const { x, y } = geometry.centre(at);
-    const number = marks === "numbers" && owners[at]! < 0 ? `<text class="tsu-num" x="${round(x)}" y="${round(y)}" dy=".35em" fill="${stroke(pair)}" ${numberType(pair + 1, WAYPOINT * 1.8)}>${pair + 1}</text>` : "";
-    parts.push(`<g class="tsu-waypoint" data-pair="${pair}" data-cell="${at}"><circle cx="${round(x)}" cy="${round(y)}" r="${WAYPOINT}" fill="none" stroke="${stroke(pair)}" stroke-width="6"/>${number}</g>`);
+    const number =
+      marks === "numbers" && owners[at]! < 0
+        ? `<text class="tsu-num" x="${round(x)}" y="${round(y)}" dy=".35em" fill="${stroke(pair)}" ${numberType(pair + 1, WAYPOINT * 1.8)}>${pair + 1}</text>`
+        : "";
+    parts.push(
+      `<g class="tsu-waypoint" data-pair="${pair}" data-cell="${at}"><circle cx="${round(x)}" cy="${round(y)}" r="${WAYPOINT}" fill="none" stroke="${stroke(pair)}" stroke-width="6"/>${number}</g>`,
+    );
   }
   // The little marbles along each line, in a group of each pair's.
   const beads: string[][] = layout.ends.map(() => []);
@@ -299,11 +387,14 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
       beads[owners[at]!]!.push(beadSvg(geometry, at, owners[at]!));
     });
   }
-  parts.push(`<g class="tsu-beads">${beads.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`);
+  parts.push(
+    `<g class="tsu-beads">${beads.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`,
+  );
   // Portals: two rings alike, with a faint link between them that shows where the pointer is over one.
   layout.portalPairs.forEach(([a, b], index) => parts.push(portalSvg(geometry, a, b, index, language)));
   layout.ends.forEach((ends, pair) => {
-    for (const at of ends) parts.push(marbleSvg(layout, geometry, at, pair, marks, colours, language, flagged.has(pair)));
+    for (const at of ends)
+      parts.push(marbleSvg(layout, geometry, at, pair, marks, colours, language, flagged.has(pair)));
   });
   for (const at of blasted) {
     if (!geometry.onBoard(at)) continue;
@@ -327,22 +418,36 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
         else if (fill === "marbles" && owners[at]! >= 0) ghostBeads[owners[at]!]!.push(beadSvg(place, at, owners[at]!));
       }
     }
-    parts.push(`<g class="tsu-ghosts" aria-hidden="true">${ghosts.join("")}${ghostBeads.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`);
+    parts.push(
+      `<g class="tsu-ghosts" aria-hidden="true">${ghosts.join("")}${ghostBeads.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`,
+    );
   }
 
   // The gradients every marble and bead is shaded with, one of each for every pair, so that a page can redraw one pair's line without redrawing the rest.
   const pairs = layout.ends.map((_, pair) => pair);
   const defs = `<defs><linearGradient id="__ID__-paper" x1="0" y1="0" x2="0" y2="1"><stop class="tsu-paper-stop-a" offset="0"/><stop class="tsu-paper-stop-b" offset="1"/></linearGradient>${pairs
-    .map((pair) => `<radialGradient id="__ID__-m${pair}" cx=".35" cy=".3" r=".955">${stops(marbleShades(pairColour(pair), marks))}</radialGradient>`)
+    .map(
+      (pair) =>
+        `<radialGradient id="__ID__-m${pair}" cx=".35" cy=".3" r=".955">${stops(marbleShades(pairColour(pair), marks))}</radialGradient>`,
+    )
     .join("")}${pairs
-    .map((pair) => `<radialGradient id="__ID__-b${pair}" cx=".35" cy=".3" r=".955">${stops(beadShades(pairColour(pair), marks))}</radialGradient>`)
+    .map(
+      (pair) =>
+        `<radialGradient id="__ID__-b${pair}" cx=".35" cy=".3" r=".955">${stops(beadShades(pairColour(pair), marks))}</radialGradient>`,
+    )
     .join("")}</defs>`;
 
   const label = options.label ?? tsunagiSay(language, hex ? "boardHex" : "board", { size });
   const solved = options.done === true;
   const body = `${options.style === true ? `<style>${TSUNAGI_STYLE}</style>` : ""}${defs}${parts.join("")}`;
   const id = options.id ?? `tsu${hashOf(body)}`;
-  const flags = [layout.wrap ? ' data-wrap="true"' : "", hex ? ' data-hex="true"' : "", boardName === "paper" ? "" : ` style="${boardStyle(boardName === "custom" ? (options.board as TsunagiBoardLook) : TSUNAGI_BOARDS[boardName as TsunagiBoardName])}"`].join("");
+  const flags = [
+    layout.wrap ? ' data-wrap="true"' : "",
+    hex ? ' data-hex="true"' : "",
+    boardName === "paper"
+      ? ""
+      : ` style="${boardStyle(boardName === "custom" ? (options.board as TsunagiBoardLook) : TSUNAGI_BOARDS[boardName as TsunagiBoardName])}"`,
+  ].join("");
   return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 ${round(side)} ${round(side)}" role="group" aria-label="${escape(label)}" data-size="${size}" data-marks="${marks}" data-fill="${fill}" data-board="${boardName}" data-solved="${solved}"${flags}>${body.replaceAll("__ID__", id)}</svg>`;
 }
 
@@ -378,12 +483,24 @@ export function drawTsunagiCode(givens: string, size: number, options: TsunagiDr
  * console.log(drawTsunagiMarble(0,{marks:"numbers"}).length);
  * ```
  */
-export function drawTsunagiMarble(pair: number, options: { marks?: TsunagiMarks; colours?: TsunagiColourSetName | readonly TsunagiColour[]; label?: string; style?: boolean; id?: string } = {}): string {
+export function drawTsunagiMarble(
+  pair: number,
+  options: {
+    marks?: TsunagiMarks;
+    colours?: TsunagiColourSetName | readonly TsunagiColour[];
+    label?: string;
+    style?: boolean;
+    id?: string;
+  } = {},
+): string {
   const marks = options.marks ?? "colours";
   const colours = tsunagiColourSet(options.colours);
   const shades = marbleShades(colourOfPair(colours, pair), marks);
   const id = options.id ?? `tsum${pair}${marks}`;
-  const number = marks === "numbers" ? `<text class="tsu-num" x="50" y="50" dy=".35em" fill="${shades.ink}" ${numberType(pair + 1, 74)}>${pair + 1}</text>` : "";
+  const number =
+    marks === "numbers"
+      ? `<text class="tsu-num" x="50" y="50" dy=".35em" fill="${shades.ink}" ${numberType(pair + 1, 74)}>${pair + 1}</text>`
+      : "";
   const label = options.label ?? `marble ${pair + 1}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 100 100" role="img" aria-label="${escape(label)}">${options.style === true ? `<style>${TSUNAGI_STYLE}</style>` : ""}<defs><radialGradient id="${id}" cx=".35" cy=".3" r=".955">${stops(shades)}</radialGradient></defs><circle cx="50" cy="53" r="37" fill="#000" opacity=".32"/><circle cx="50" cy="50" r="37" fill="url(#${id})"/>${number}</svg>`;
 }
@@ -414,7 +531,12 @@ export function drawTsunagiMarble(pair: number, options: { marks?: TsunagiMarks;
  * console.log(drawTsunagiPair(layout,0,"sample").line.length);
  * ```
  */
-export function drawTsunagiPair(layout: LinkLayout, pair: number, id: string, options: TsunagiDrawOptions = {}): { washes: string; line: string; beads: string; ghosts: string } {
+export function drawTsunagiPair(
+  layout: LinkLayout,
+  pair: number,
+  id: string,
+  options: TsunagiDrawOptions = {},
+): { washes: string; line: string; beads: string; ghosts: string } {
   const lines = options.lines ?? noLines(layout);
   const marks = options.marks ?? "colours";
   const fill = options.fill ?? "marbles";
@@ -431,7 +553,10 @@ export function drawTsunagiPair(layout: LinkLayout, pair: number, id: string, op
     if (!geometry.onBoard(at) || owners[at] !== pair || cell >= 0) return;
     const { x, y } = geometry.centre(at);
     if (hex) washed.push(`<polygon points="${hexagonPoints(x, y, HEX_RADIUS * CELL)}" fill="${wash}"/>`);
-    else washed.push(`<rect x="${round(x - CELL / 2)}" y="${round(y - CELL / 2)}" width="${CELL}" height="${CELL}" fill="${wash}"/>`);
+    else
+      washed.push(
+        `<rect x="${round(x - CELL / 2)}" y="${round(y - CELL / 2)}" width="${CELL}" height="${CELL}" fill="${wash}"/>`,
+      );
     if (fill === "marbles" && !layout.portals.has(at)) beads.push(beadSvg(geometry, at, pair));
   });
   if (geometry.ring > 0 && fill === "marbles") {
@@ -446,5 +571,10 @@ export function drawTsunagiPair(layout: LinkLayout, pair: number, id: string, op
       }
     }
   }
-  return { washes: washed.join("").replaceAll("__ID__", id), line: lineSvg(layout, geometry, lines[pair] ?? [], pair, lineColour(colour, marks)), beads: beads.join("").replaceAll("__ID__", id), ghosts: ghosts.join("").replaceAll("__ID__", id) };
+  return {
+    washes: washed.join("").replaceAll("__ID__", id),
+    line: lineSvg(layout, geometry, lines[pair] ?? [], pair, lineColour(colour, marks)),
+    beads: beads.join("").replaceAll("__ID__", id),
+    ghosts: ghosts.join("").replaceAll("__ID__", id),
+  };
 }

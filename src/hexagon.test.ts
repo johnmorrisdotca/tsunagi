@@ -59,16 +59,29 @@ describe("six neighbours a cell", () => {
 
   it("lets a line step along the slant on a hexagon and never on a square", () => {
     const hex = decodeLayout(FIVE, 5)!;
-    const started = pressAt(hex, hex.ends.map(() => []), 10);
+    const started = pressAt(
+      hex,
+      hex.ends.map(() => []),
+      10,
+    );
     expect(dragTo(hex, started.lines, started.drawing!, 6)[started.drawing!]).toEqual([10, 6]);
     const square = decodeLayout(FIVE.replace(/#/g, ".").replace("|hex", ""), 5)!;
-    const onSquare = pressAt(square, square.ends.map(() => []), 10);
+    const onSquare = pressAt(
+      square,
+      square.ends.map(() => []),
+      10,
+    );
     expect(dragTo(square, onSquare.lines, onSquare.drawing!, 6)[onSquare.drawing!]).toEqual([10]);
   });
 });
 
 describe("the hexagon levels", () => {
-  const hexLevels = () => TSUNAGI_SIZES.flatMap((size) => tsunagiLevelsOf(size).flatMap(([layout, answer], at) => (decodeLayout(layout, size)!.hex ? [{ size, level: at + 1, layout, answer }] : [])));
+  const hexLevels = () =>
+    TSUNAGI_SIZES.flatMap((size) =>
+      tsunagiLevelsOf(size).flatMap(([layout, answer], at) =>
+        decodeLayout(layout, size)!.hex ? [{ size, level: at + 1, layout, answer }] : [],
+      ),
+    );
 
   it("are at the odd sizes, as the 15th and 16th of their blocks", () => {
     const levels = hexLevels();

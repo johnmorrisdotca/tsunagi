@@ -66,7 +66,7 @@ describe("the score", () => {
 });
 
 describe("the levels the site plays", () => {
-  it("makes John's four straight rows 4×4 level 1: \"that would have to be number one\"", () => {
+  it('makes John\'s four straight rows 4×4 level 1: "that would have to be number one"', () => {
     const levels = tsunagiLevelsOf(4);
     const at = levels.findIndex(([layout]) => layout === STRAIGHT_ROWS.layout);
     expect(at + 1, "its level number").toBe(1);

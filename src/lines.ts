@@ -1,4 +1,16 @@
-import { CELL_BLOCKED, CELL_BRIDGE, CELL_EMPTY, edgeOpen, encodeAnswer, hexNeighboursOf, layoutStep, PAIR_LETTERS, portalExit, wrappedStep, type LinkLayout } from "./code.ts";
+import {
+  CELL_BLOCKED,
+  CELL_BRIDGE,
+  CELL_EMPTY,
+  edgeOpen,
+  encodeAnswer,
+  hexNeighboursOf,
+  layoutStep,
+  PAIR_LETTERS,
+  portalExit,
+  wrappedStep,
+  type LinkLayout,
+} from "./code.ts";
 import { stepTable } from "./steps.ts";
 
 /**
@@ -81,7 +93,9 @@ export function noLines(layout: LinkLayout): Lines {
  * ```
  */
 export function ownersOf(layout: LinkLayout, lines: Lines): number[] {
-  const owners = layout.cells.map((cell) => (cell === CELL_BLOCKED || cell === CELL_BRIDGE ? cell : cell >= 0 ? cell : CELL_EMPTY));
+  const owners = layout.cells.map((cell) =>
+    cell === CELL_BLOCKED || cell === CELL_BRIDGE ? cell : cell >= 0 ? cell : CELL_EMPTY,
+  );
   lines.forEach((line, pair) => line.forEach((cell) => owners[cell] !== CELL_BRIDGE && (owners[cell] = pair)));
   return owners;
 }
@@ -134,7 +148,10 @@ export function overBridge(lines: Lines, bridge: number): { across: number; down
 export function joined(layout: LinkLayout, lines: Lines, pair: number): boolean {
   const line = lines[pair]!;
   const [a, b] = layout.ends[pair]!;
-  return line.length >= 2 && ((line[0] === a && line[line.length - 1] === b) || (line[0] === b && line[line.length - 1] === a));
+  return (
+    line.length >= 2 &&
+    ((line[0] === a && line[line.length - 1] === b) || (line[0] === b && line[line.length - 1] === a))
+  );
 }
 
 /** Solved: every pair joined, every open cell on a line, and every bridge gone over both ways.
@@ -395,7 +412,8 @@ export function dragTo(layout: LinkLayout, lines: Lines, pair: number, cell: num
   // Past its own far stone: a joined line only shortens.
   if (line.length >= 2 && layout.cells[tip] === pair) return lines;
   // Off a bridge only straight on.
-  if (layout.cells[tip] === CELL_BRIDGE && line.length >= 2 && cell - tip !== tip - line[line.length - 2]!) return lines;
+  if (layout.cells[tip] === CELL_BRIDGE && line.length >= 2 && cell - tip !== tip - line[line.length - 2]!)
+    return lines;
   const what = layout.cells[cell]!;
   if (what === CELL_BLOCKED || (what >= 0 && what !== pair)) return lines;
   // A waypoint is its own pair's alone.
@@ -480,11 +498,16 @@ export function dragThrough(layout: LinkLayout, lines: Lines, pair: number, cell
     if (line.length === 0) return now;
     const tip = line[line.length - 1]!;
     // Already there, or one step away (across a joined edge counts): straight to it.
-    if (tip === cell || line.includes(cell) || layoutStep(layout, tip, cell) !== 0) return dragTo(layout, now, pair, cell);
+    if (tip === cell || line.includes(cell) || layoutStep(layout, tip, cell) !== 0)
+      return dragTo(layout, now, pair, cell);
     const [tr, tc] = [Math.floor(tip / size), tip % size];
     const [cr, cc] = [Math.floor(cell / size), cell % size];
     // On a square, along the row and then the column; on a hexagon, whichever of the six steps comes nearest.
-    const step = layout.hex ? hexToward(size, tip, cell) : tc !== cc ? tip + Math.sign(cc - tc) : tip + Math.sign(cr - tr) * size;
+    const step = layout.hex
+      ? hexToward(size, tip, cell)
+      : tc !== cc
+        ? tip + Math.sign(cc - tc)
+        : tip + Math.sign(cr - tr) * size;
     const after = dragTo(layout, now, pair, step);
     if (after === now) return now;
     now = after;
@@ -549,7 +572,13 @@ export const NO_REACH: Reach = { dr: 0, dc: 0 };
  * console.log(dragFinger(layout,lines,0,layout.ends[0][0]));
  * ```
  */
-export function dragFinger(layout: LinkLayout, lines: Lines, pair: number, finger: number, reach: Reach = NO_REACH): { lines: Lines; reach: Reach } {
+export function dragFinger(
+  layout: LinkLayout,
+  lines: Lines,
+  pair: number,
+  finger: number,
+  reach: Reach = NO_REACH,
+): { lines: Lines; reach: Reach } {
   const { size } = layout;
   let row = Math.floor(finger / size) + reach.dr;
   let col = (finger % size) + reach.dc;
@@ -560,10 +589,14 @@ export function dragFinger(layout: LinkLayout, lines: Lines, pair: number, finge
   const before = lines[pair]!;
   const after = dragThrough(layout, lines, pair, row * size + col);
   const now = after[pair]!;
-  if (after === lines || portalCells(layout, now) === portalCells(layout, before) || now.length === 0) return { lines: after, reach };
+  if (after === lines || portalCells(layout, now) === portalCells(layout, before) || now.length === 0)
+    return { lines: after, reach };
   // A portal gone through or back over: the finger is over the end of the line from here.
   const tip = now[now.length - 1]!;
-  return { lines: after, reach: { dr: Math.floor(tip / size) - Math.floor(finger / size), dc: (tip % size) - (finger % size) } };
+  return {
+    lines: after,
+    reach: { dr: Math.floor(tip / size) - Math.floor(finger / size), dc: (tip % size) - (finger % size) },
+  };
 }
 
 /** The neighbour of `from` on the hexagon lattice fewest steps from `to`. */
@@ -593,7 +626,8 @@ function hexToward(size: number, from: number, to: number): number {
  * ```
  */
 export function letGo(lines: Lines, layout?: LinkLayout): Lines {
-  const onBridge = (line: readonly number[]) => layout !== undefined && line.length > 0 && layout.cells[line[line.length - 1]!] === CELL_BRIDGE;
+  const onBridge = (line: readonly number[]) =>
+    layout !== undefined && line.length > 0 && layout.cells[line[line.length - 1]!] === CELL_BRIDGE;
   if (!lines.some((line) => line.length === 1 || onBridge(line))) return lines;
   return lines.map((line) => {
     const kept = onBridge(line) ? line.slice(0, -1) : line;
@@ -648,7 +682,8 @@ export function encodeLines(layout: LinkLayout, lines: Lines): string {
       }
       // Which side it came in from, across a joined edge too: the step from here back to where it came from.
       const by = layoutStep(layout, cell, came);
-      out[cell] = by === -size ? "n" : by === 1 ? "e" : by === size ? "s" : by === -1 ? "w" : by === 1 - size ? "u" : "v";
+      out[cell] =
+        by === -size ? "n" : by === 1 ? "e" : by === size ? "s" : by === -1 ? "w" : by === 1 - size ? "u" : "v";
     });
   }
   return out.join("");

@@ -1,4 +1,16 @@
-import { CAPITAL_PAIRS, CELL_BLOCKED, CELL_EMPTY, decodeLayout, encodeAnswer, layoutNeighbours, PAIR_LETTERS, portalsAreAmbiguous, stepBetween, wrappedStep, type LinkLayout } from "./code.ts";
+import {
+  CAPITAL_PAIRS,
+  CELL_BLOCKED,
+  CELL_EMPTY,
+  decodeLayout,
+  encodeAnswer,
+  layoutNeighbours,
+  PAIR_LETTERS,
+  portalsAreAmbiguous,
+  stepBetween,
+  wrappedStep,
+  type LinkLayout,
+} from "./code.ts";
 import { layoutOf, randomFilling, symmetryKey, turnsIn, type FillingStyle, type LinkCandidate } from "./generate.ts";
 import type { Random } from "./random.ts";
 import { countSolutionsOfLevel } from "./solve.ts";
@@ -142,11 +154,30 @@ function tidy(layout: LinkLayout, lines: readonly (readonly number[])[]): boolea
  * console.log(withPortals(4,solvedLines.map(line=>[...line]),seededRandom(42),1,false));
  * ```
  */
-export function withPortals(size: number, paths: readonly number[][], random: Random, count: number, wrap: boolean): { paths: number[][]; pairs: [number, number][] } | null {
+export function withPortals(
+  size: number,
+  paths: readonly number[][],
+  random: Random,
+  count: number,
+  wrap: boolean,
+): { paths: number[][]; pairs: [number, number][] } | null {
   const total = size * size;
   let lines = paths.map((path) => [...path]);
   const pairs: [number, number][] = [];
-  const base: LinkLayout = { size, cells: new Array<number>(total).fill(CELL_EMPTY), ends: [], walls: new Set(), waypoints: new Map(), wrap, portalPairs: [], portals: new Map(), hex: false, sparse: false, strokes: null, explosions: null };
+  const base: LinkLayout = {
+    size,
+    cells: new Array<number>(total).fill(CELL_EMPTY),
+    ends: [],
+    walls: new Set(),
+    waypoints: new Map(),
+    wrap,
+    portalPairs: [],
+    portals: new Map(),
+    hex: false,
+    sparse: false,
+    strokes: null,
+    explosions: null,
+  };
   for (let made = 0; made < count; made += 1) {
     let done = false;
     for (let attempt = 0; attempt < 300 && !done; attempt += 1) {
@@ -164,7 +195,9 @@ export function withPortals(size: number, paths: readonly number[][], random: Ra
         if (each === aLine) return;
         for (const reversed of [false, true]) {
           const walked = reversed ? [...line].reverse() : line;
-          for (let index = 0; index + 1 < walked.length; index += 1) if (stepOf(size, wrap, walked[index]!, by) === walked[index + 1]) found.push({ line: each, reversed, at: index });
+          for (let index = 0; index + 1 < walked.length; index += 1)
+            if (stepOf(size, wrap, walked[index]!, by) === walked[index + 1])
+              found.push({ line: each, reversed, at: index });
         }
       });
       if (found.length === 0) continue;
@@ -176,10 +209,16 @@ export function withPortals(size: number, paths: readonly number[][], random: Ra
       const tailOfA = a.slice(at + 1);
       const joined = [...a.slice(0, at), p1, p2, ...b.slice(pick.at + 1)];
       // What is left of each is a line of its own, or nothing.
-      if ((headOfB.length > 0 && headOfB.length < SHORTEST) || (tailOfA.length > 0 && tailOfA.length < SHORTEST)) continue;
+      if ((headOfB.length > 0 && headOfB.length < SHORTEST) || (tailOfA.length > 0 && tailOfA.length < SHORTEST))
+        continue;
       const chosen = [...pairs, [Math.min(p1, p2), Math.max(p1, p2)] as [number, number]].sort((x, y) => x[0] - y[0]);
       const rest = lines.filter((_, each) => each !== aLine && each !== pick.line);
-      const next = [...rest, joined, ...(headOfB.length > 0 ? [headOfB] : []), ...(tailOfA.length > 0 ? [tailOfA] : [])];
+      const next = [
+        ...rest,
+        joined,
+        ...(headOfB.length > 0 ? [headOfB] : []),
+        ...(tailOfA.length > 0 ? [tailOfA] : []),
+      ];
       const portals = new Map<number, number>();
       for (const [x, y] of chosen) {
         portals.set(x, y);
@@ -202,7 +241,20 @@ export function withPortals(size: number, paths: readonly number[][], random: Ra
 /** `count` blocked cells scattered over a board, never two beside each other, never on an edge of a board that does not wrap, so that every line has room to go round. */
 function scattered(size: number, wrap: boolean, count: number, random: Random): Set<number> {
   const out = new Set<number>();
-  const around = layoutNeighbours({ size, cells: [], ends: [], walls: new Set(), waypoints: new Map(), wrap, portalPairs: [], portals: new Map(), hex: false, sparse: false, strokes: null, explosions: null });
+  const around = layoutNeighbours({
+    size,
+    cells: [],
+    ends: [],
+    walls: new Set(),
+    waypoints: new Map(),
+    wrap,
+    portalPairs: [],
+    portals: new Map(),
+    hex: false,
+    sparse: false,
+    strokes: null,
+    explosions: null,
+  });
   for (let tries = 0; tries < count * 50 && out.size < count; tries += 1) {
     const cell = Math.floor(random() * size * size);
     const edge = !wrap && (cell < size || cell >= size * (size - 1) || cell % size === 0 || cell % size === size - 1);
@@ -238,7 +290,8 @@ export function reducedCandidate(size: number, random: Random, options: ReduceOp
   const blocked = options.blocked ?? scattered(size, wrap, options.blockedCount ?? 0, random);
   const style: FillingStyle = { greed: options.greed ?? 1 };
   let filling: number[][] | null = null;
-  for (let tries = 0; tries < 40 && filling === null; tries += 1) filling = randomFilling(size, random, options.longest ?? size * 3, blocked, wrap, false, style);
+  for (let tries = 0; tries < 40 && filling === null; tries += 1)
+    filling = randomFilling(size, random, options.longest ?? size * 3, blocked, wrap, false, style);
   if (filling === null) return null;
   let portalPairs: [number, number][] = [];
   if ((options.portals ?? 0) > 0) {
@@ -254,8 +307,23 @@ export function reducedCandidate(size: number, random: Random, options: ReduceOp
   }
   // Waypoints sit on cells of a line that no cut will make a marble: a cell deep in a line, never beside a portal or another waypoint.
   const marked = new Set<number>();
-  const around = layoutNeighbours({ size, cells: [], ends: [], walls: new Set(), waypoints: new Map(), wrap, portalPairs: [], portals: new Map(), hex: false, sparse: false, strokes: null, explosions: null });
-  const interior = filling.flatMap((line) => line.slice(1, -1).filter((cell) => !portals.has(cell) && !around[cell]!.some((next) => portals.has(next))));
+  const around = layoutNeighbours({
+    size,
+    cells: [],
+    ends: [],
+    walls: new Set(),
+    waypoints: new Map(),
+    wrap,
+    portalPairs: [],
+    portals: new Map(),
+    hex: false,
+    sparse: false,
+    strokes: null,
+    explosions: null,
+  });
+  const interior = filling.flatMap((line) =>
+    line.slice(1, -1).filter((cell) => !portals.has(cell) && !around[cell]!.some((next) => portals.has(next))),
+  );
   for (let each = 0; each < interior.length * 4 && marked.size < (options.waypoints ?? 0); each += 1) {
     const cell = interior[Math.floor(random() * interior.length)]!;
     if (!marked.has(cell) && !around[cell]!.some((next) => marked.has(next))) marked.add(cell);
@@ -263,7 +331,8 @@ export function reducedCandidate(size: number, random: Random, options: ReduceOp
   if (marked.size < (options.waypoints ?? 0)) return null;
   // A cut may fall between two cells that are neither a portal's nor a waypoint's, nor beside one: those stay inside a line.
   const sealed = new Set<number>([...portals.keys(), ...marked]);
-  const mayCutBefore = (line: readonly number[], index: number): boolean => !sealed.has(line[index - 1]!) && !sealed.has(line[index]!);
+  const mayCutBefore = (line: readonly number[], index: number): boolean =>
+    !sealed.has(line[index - 1]!) && !sealed.has(line[index]!);
   let pieces: Piece[] = [];
   filling.forEach((line, path) => {
     let from = 0;
@@ -285,11 +354,30 @@ export function reducedCandidate(size: number, random: Random, options: ReduceOp
       cells[piece.cells[piece.cells.length - 1]!] = pair;
       for (const cell of piece.cells) if (marked.has(cell)) waypoints.set(cell, pair);
     });
-    return { size, cells, ends: each.map((piece) => [piece.cells[0]!, piece.cells[piece.cells.length - 1]!] as [number, number]), walls: new Set(), waypoints, wrap, portalPairs, portals, hex: false, sparse: false, strokes: null, explosions: null };
+    return {
+      size,
+      cells,
+      ends: each.map((piece) => [piece.cells[0]!, piece.cells[piece.cells.length - 1]!] as [number, number]),
+      walls: new Set(),
+      waypoints,
+      wrap,
+      portalPairs,
+      portals,
+      hex: false,
+      sparse: false,
+      strokes: null,
+      explosions: null,
+    };
   };
   const unique = (each: readonly Piece[], spend: number): boolean => {
     const layout = layoutFor(each);
-    const proved = countSolutionsSat(layout, 2, spend, each.map((piece) => piece.cells), "binary");
+    const proved = countSolutionsSat(
+      layout,
+      2,
+      spend,
+      each.map((piece) => piece.cells),
+      "binary",
+    );
     return !proved.gaveUp && proved.count === 1;
   };
   // The cut pieces must themselves make a board of one answer, or there is nothing to take clues from.
@@ -300,7 +388,9 @@ export function reducedCandidate(size: number, random: Random, options: ReduceOp
   const fewest = options.fewest ?? 1;
   for (let guard = 0; guard < total * 4 && pieces.length > fewest; guard += 1) {
     const candidates: number[] = [];
-    for (let at = 0; at + 1 < pieces.length; at += 1) if (pieces[at]!.path === pieces[at + 1]!.path && !needed.has(keyOf(pieces[at]!, pieces[at + 1]!))) candidates.push(at);
+    for (let at = 0; at + 1 < pieces.length; at += 1)
+      if (pieces[at]!.path === pieces[at + 1]!.path && !needed.has(keyOf(pieces[at]!, pieces[at + 1]!)))
+        candidates.push(at);
     if (candidates.length === 0) break;
     const at = candidates[Math.floor(random() * candidates.length)]!;
     const joined: Piece = { path: pieces[at]!.path, cells: [...pieces[at]!.cells, ...pieces[at + 1]!.cells] };
@@ -310,7 +400,11 @@ export function reducedCandidate(size: number, random: Random, options: ReduceOp
   }
   if (pieces.length > most) return null;
 
-  const { layout, answer } = layoutOf(size, pieces.map((piece) => piece.cells), { blocked, wrap, waypoints: marked, portals: portalPairs });
+  const { layout, answer } = layoutOf(
+    size,
+    pieces.map((piece) => piece.cells),
+    { blocked, wrap, waypoints: marked, portals: portalPairs },
+  );
   const decoded = decodeLayout(layout, size);
   if (decoded === null) return null;
   // Measured as the levels' own tests will measure it: from the answer, which is how a level is proved.

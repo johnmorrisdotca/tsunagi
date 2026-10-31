@@ -90,7 +90,12 @@ function fromHex(hex: string): TsunagiColour {
   if (most === least) return [0, 0, Math.round(light * 100)];
   const span = most - least;
   const saturation = light > 0.5 ? span / (2 - most - least) : span / (most + least);
-  const hue = most === red ? (green - blue) / span + (green < blue ? 6 : 0) : most === green ? (blue - red) / span + 2 : (red - green) / span + 4;
+  const hue =
+    most === red
+      ? (green - blue) / span + (green < blue ? 6 : 0)
+      : most === green
+        ? (blue - red) / span + 2
+        : (red - green) / span + 4;
   return [Math.round(hue * 60), Math.round(saturation * 100), Math.round(light * 100)];
 }
 
@@ -107,7 +112,11 @@ function extended(base: readonly TsunagiColour[], golden: boolean): readonly Tsu
       continue;
     }
     const [hue, saturation, lightness] = base[pair % SIXTEEN_PAIRS]!;
-    out.push([(hue + 29 * round) % 360, saturation, Math.max(18, Math.min(88, lightness + [14, -14, 8, -8][(round - 1) % 4]!))]);
+    out.push([
+      (hue + 29 * round) % 360,
+      saturation,
+      Math.max(18, Math.min(88, lightness + [14, -14, 8, -8][(round - 1) % 4]!)),
+    ]);
   }
   return out;
 }
@@ -140,8 +149,42 @@ const SIXTEEN: Record<TsunagiColourSetName, readonly TsunagiColour[]> = {
     [186, 90, 48], // cyan
     [0, 0, 62], // grey
   ],
-  bright: ["#d7263d", "#1b6ca8", "#f2a541", "#2e933c", "#8e44ad", "#e86a92", "#16a3a3", "#7a4b2a", "#f25c05", "#4b5d67", "#a3b915", "#c2185b", "#3949ab", "#00897b", "#b8860b", "#6d4c41"].map(fromHex),
-  "colour-blind": ["#e69f00", "#56b4e9", "#009e73", "#f0e442", "#0072b2", "#d55e00", "#cc79a7", "#6b6b6b", "#f7c96b", "#a6dcf5", "#66c9ac", "#f7f1a0", "#66a9d4", "#e89b66", "#e0aecb", "#b3b3b3"].map(fromHex),
+  bright: [
+    "#d7263d",
+    "#1b6ca8",
+    "#f2a541",
+    "#2e933c",
+    "#8e44ad",
+    "#e86a92",
+    "#16a3a3",
+    "#7a4b2a",
+    "#f25c05",
+    "#4b5d67",
+    "#a3b915",
+    "#c2185b",
+    "#3949ab",
+    "#00897b",
+    "#b8860b",
+    "#6d4c41",
+  ].map(fromHex),
+  "colour-blind": [
+    "#e69f00",
+    "#56b4e9",
+    "#009e73",
+    "#f0e442",
+    "#0072b2",
+    "#d55e00",
+    "#cc79a7",
+    "#6b6b6b",
+    "#f7c96b",
+    "#a6dcf5",
+    "#66c9ac",
+    "#f7f1a0",
+    "#66a9d4",
+    "#e89b66",
+    "#e0aecb",
+    "#b3b3b3",
+  ].map(fromHex),
   soft: Array.from({ length: SIXTEEN_PAIRS }, (_, at): TsunagiColour => [Math.round((at * 137.5) % 360), 55, 64]),
 };
 
@@ -219,7 +262,9 @@ export function portalMark(index: number): string {
  * console.log(tsunagiColourSet("marble").length);
  * ```
  */
-export function tsunagiColourSet(set: TsunagiColourSetName | readonly TsunagiColour[] | undefined): readonly TsunagiColour[] {
+export function tsunagiColourSet(
+  set: TsunagiColourSetName | readonly TsunagiColour[] | undefined,
+): readonly TsunagiColour[] {
   if (set === undefined) return TSUNAGI_COLOUR_SETS[TSUNAGI_DEFAULT_COLOUR_SET];
   if (typeof set === "string") return TSUNAGI_COLOUR_SETS[set] ?? TSUNAGI_COLOUR_SETS[TSUNAGI_DEFAULT_COLOUR_SET];
   return set.length > 0 ? set : TSUNAGI_COLOUR_SETS[TSUNAGI_DEFAULT_COLOUR_SET];
@@ -281,9 +326,17 @@ export const TSUNAGI_SHELL = { light: "#ffffff", body: "#ececec", rim: "#bfbfbf"
  * console.log(marbleShades([120,50,40],"colours"));
  * ```
  */
-export function marbleShades(colour: TsunagiColour, marks: TsunagiMarks): { light: string; body: string; rim: string; ink: string } {
+export function marbleShades(
+  colour: TsunagiColour,
+  marks: TsunagiMarks,
+): { light: string; body: string; rim: string; ink: string } {
   if (marks === "numbers") return TSUNAGI_SHELL;
-  return { light: hsl(colour, 28), body: hsl(colour), rim: hsl(colour, -22), ink: colour[2] > 55 ? "#1a1a1a" : "#ffffff" };
+  return {
+    light: hsl(colour, 28),
+    body: hsl(colour),
+    rim: hsl(colour, -22),
+    ink: colour[2] > 55 ? "#1a1a1a" : "#ffffff",
+  };
 }
 
 /** A marble on a line's way between its ends: the pair's colour, or for numbers the line's own soft tint, with nothing written on it.

@@ -21,11 +21,16 @@ import { countSolutionsOfLevel, type SolveCount } from "./solve.ts";
 export function levelSuite(size: number): void {
   describe(`tsunagi at ${size}×${size}`, () => {
     let solves: SolveCount[] = [];
-    beforeAll(async () => {
-      await loadTsunagiLevels(size);
-      solves = tsunagiLevelsOf(size).map(([givens, answer]) => countSolutionsOfLevel(decodeLayout(givens, size)!, answer));
-    // From 13×13 each proof is a SAT search (`solveSat.ts`): a second or so a level, and a runner is slower than a desk.
-    }, size >= 13 ? 900_000 : 240_000);
+    beforeAll(
+      async () => {
+        await loadTsunagiLevels(size);
+        solves = tsunagiLevelsOf(size).map(([givens, answer]) =>
+          countSolutionsOfLevel(decodeLayout(givens, size)!, answer),
+        );
+        // From 13×13 each proof is a SAT search (`solveSat.ts`): a second or so a level, and a runner is slower than a desk.
+      },
+      size >= 13 ? 900_000 : 240_000,
+    );
 
     it("has as many levels as the board of levels counts, in whole blocks of sixteen, and at least fifty", () => {
       expect(tsunagiLevelsOf(size).length).toBe(TSUNAGI_LEVEL_COUNTS[size]);
@@ -48,7 +53,10 @@ export function levelSuite(size: number): void {
         const layout = decodeLayout(givens, size)!;
         for (const [a, b] of layout.ends) {
           // Side by side on the board's own lattice: six ways round on a hexagon.
-          expect(layout.hex ? hexNeighboursOf(size, a) : neighboursOf(size, a), `level ${index + 1}: a pair sits side by side`).not.toContain(b);
+          expect(
+            layout.hex ? hexNeighboursOf(size, a) : neighboursOf(size, a),
+            `level ${index + 1}: a pair sits side by side`,
+          ).not.toContain(b);
           expect([...answer].filter((letter) => letter === answer[a]).length).toBeGreaterThanOrEqual(3);
         }
       }
@@ -68,7 +76,8 @@ export function levelSuite(size: number): void {
     });
 
     /** Every level measured from its one solve. */
-    const measured = (): LevelMeasure[] => tsunagiLevelsOf(size).map(([layout, answer], at) => measureSolved(layout, answer, size, solves[at]!)!);
+    const measured = (): LevelMeasure[] =>
+      tsunagiLevelsOf(size).map(([layout, answer], at) => measureSolved(layout, answer, size, solves[at]!)!);
 
     it("climbs block by block: each block's plain levels no easier on average than the block before's", () => {
       const levels = tsunagiLevelsOf(size);
@@ -79,9 +88,12 @@ export function levelSuite(size: number): void {
         size,
       );
       const byBlock = new Map<number, number[]>();
-      plain.forEach((at, index) => byBlock.set(Math.floor(at / 16), [...(byBlock.get(Math.floor(at / 16)) ?? []), scores[index]!]));
+      plain.forEach((at, index) =>
+        byBlock.set(Math.floor(at / 16), [...(byBlock.get(Math.floor(at / 16)) ?? []), scores[index]!]),
+      );
       const means = [...byBlock.values()].map((each) => each.reduce((sum, score) => sum + score, 0) / each.length);
-      for (let block = 1; block < means.length; block += 1) expect(means[block]!, `block ${block + 1}`).toBeGreaterThanOrEqual(means[block - 1]!);
+      for (let block = 1; block < means.length; block += 1)
+        expect(means[block]!, `block ${block + 1}`).toBeGreaterThanOrEqual(means[block - 1]!);
     });
 
     it("marks every level 1 to 5 by its measured score among the size's levels", () => {

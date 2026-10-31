@@ -74,8 +74,11 @@ describe("drawing a board", () => {
   it("wears the board asked for, and the plain paper leaves its colours to the page", () => {
     expect(drawTsunagi(plainLayout)).not.toContain("style=");
     expect(drawTsunagi(plainLayout)).toContain('data-board="paper"');
-    for (const name of TSUNAGI_BOARD_NAMES.filter((each) => each !== "paper")) expect(drawTsunagi(plainLayout, { board: name })).toContain(`--tsu-frame:${TSUNAGI_BOARDS[name].frame}`);
-    expect(drawTsunagi(plainLayout, { board: { ...TSUNAGI_BOARDS.paper, paper: "#ffeedd" } })).toContain("--tsu-paper:#ffeedd");
+    for (const name of TSUNAGI_BOARD_NAMES.filter((each) => each !== "paper"))
+      expect(drawTsunagi(plainLayout, { board: name })).toContain(`--tsu-frame:${TSUNAGI_BOARDS[name].frame}`);
+    expect(drawTsunagi(plainLayout, { board: { ...TSUNAGI_BOARDS.paper, paper: "#ffeedd" } })).toContain(
+      "--tsu-paper:#ffeedd",
+    );
   });
 
   it("flashes both marbles of the pairs flagged, bursts the cells blasted, and washes a solved board", () => {
@@ -102,7 +105,9 @@ describe("drawing a board", () => {
   });
 
   it("draws a level from its code, and nothing for a code that is none", () => {
-    expect(drawTsunagiCode(plain.givens, plain.size, { lines: solved })).toBe(drawTsunagi(plainLayout, { lines: solved }));
+    expect(drawTsunagiCode(plain.givens, plain.size, { lines: solved })).toBe(
+      drawTsunagi(plainLayout, { lines: solved }),
+    );
     expect(drawTsunagiCode("junk", 7)).toBe("");
   });
 
@@ -141,7 +146,9 @@ describe("the twists", () => {
     const level = find((g) => challengesOf(g).includes("waypoints"));
     const layout = decodeLayout(level.givens, level.size)!;
     expect(count(drawTsunagi(layout), 'class="tsu-waypoint"')).toBe(layout.waypoints.size);
-    expect(count(drawTsunagi(layout, { marks: "numbers" }), 'class="tsu-num"')).toBe(layout.ends.length * 2 + layout.waypoints.size);
+    expect(count(drawTsunagi(layout, { marks: "numbers" }), 'class="tsu-num"')).toBe(
+      layout.ends.length * 2 + layout.waypoints.size,
+    );
   });
 
   it("a board that wraps has a dashed rim and a ghost of the far edge, which can be left out", () => {
@@ -159,7 +166,9 @@ describe("the twists", () => {
     const level = find((g) => challengesOf(g).includes("hexagon"));
     const layout = decodeLayout(level.givens, level.size)!;
     const svg = drawTsunagi(layout, { lines: linesOfAnswer(layout, level.answer)! });
-    const cells = Array.from({ length: layout.size * layout.size }, (_, at) => at).filter((at) => inHex(layout.size, at)).length;
+    const cells = Array.from({ length: layout.size * layout.size }, (_, at) => at).filter((at) =>
+      inHex(layout.size, at),
+    ).length;
     expect(count(svg, 'class="tsu-hex-cell"')).toBe(cells);
     expect(svg).toContain('data-hex="true"');
     expect(svg).not.toContain("tsu-grid");
@@ -203,33 +212,54 @@ describe("where a finger lands", () => {
 
   it("is the same box for every board of a size, whatever is drawn on it", () => {
     const empty = drawTsunagi(plainLayout).match(/viewBox="([^"]+)"/)![1];
-    expect(drawTsunagi(plainLayout, { lines: solved, marks: "numbers", fill: "lines", board: "wood" }).match(/viewBox="([^"]+)"/)![1]).toBe(empty);
+    expect(
+      drawTsunagi(plainLayout, { lines: solved, marks: "numbers", fill: "lines", board: "wood" }).match(
+        /viewBox="([^"]+)"/,
+      )![1],
+    ).toBe(empty);
   });
 });
 
 describe("colour sets and words", () => {
   it("each colour set has a colour for every one of the eighty-two pairs a board can have, a set of your own is used round and round, and an unknown one is the default", () => {
     for (const name of TSUNAGI_COLOUR_SET_NAMES) expect(TSUNAGI_COLOUR_SETS[name]).toHaveLength(82);
-    expect(colourOfPair([[1, 2, 3], [4, 5, 6]], 3)).toEqual([4, 5, 6]);
+    expect(
+      colourOfPair(
+        [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+        3,
+      ),
+    ).toEqual([4, 5, 6]);
     expect(tsunagiColourSet("nonsense" as never)).toBe(TSUNAGI_COLOUR_SETS.marble);
     expect(tsunagiColourSet(undefined)).toBe(TSUNAGI_COLOUR_SETS.marble);
     expect(tsunagiColourSet([])).toBe(TSUNAGI_COLOUR_SETS.marble);
   });
 
   it("no colour set repeats a colour anywhere in its eighty-two, and begins with the sixteen every board to 15×15 was drawn in", () => {
-    for (const name of TSUNAGI_COLOUR_SET_NAMES) expect(new Set(TSUNAGI_COLOUR_SETS[name].map((colour) => colour.join())).size, name).toBe(82);
-    expect(TSUNAGI_COLOUR_SETS.marble.slice(0, 3)).toEqual([[24, 100, 44], [202, 77, 60], [54, 88, 56]]);
+    for (const name of TSUNAGI_COLOUR_SET_NAMES)
+      expect(new Set(TSUNAGI_COLOUR_SETS[name].map((colour) => colour.join())).size, name).toBe(82);
+    expect(TSUNAGI_COLOUR_SETS.marble.slice(0, 3)).toEqual([
+      [24, 100, 44],
+      [202, 77, 60],
+      [54, 88, 56],
+    ]);
   });
 
   it("no colour set repeats a colour within its first eight pairs", () => {
-    for (const name of TSUNAGI_COLOUR_SET_NAMES) expect(new Set(TSUNAGI_COLOUR_SETS[name].slice(0, 8).map((colour) => colour.join())).size).toBe(8);
+    for (const name of TSUNAGI_COLOUR_SET_NAMES)
+      expect(new Set(TSUNAGI_COLOUR_SETS[name].slice(0, 8).map((colour) => colour.join())).size).toBe(8);
   });
 
   it("English and Japanese say the same things, with the same values left to fill in", () => {
     const en = Object.keys(TSUNAGI_STRINGS.en).filter((key) => !key.endsWith("One"));
     for (const key of en) expect(TSUNAGI_STRINGS.ja[key], key).toBeTruthy();
     for (const key of Object.keys(TSUNAGI_STRINGS.ja)) expect(TSUNAGI_STRINGS.en[key], key).toBeTruthy();
-    for (const key of en) expect([...(TSUNAGI_STRINGS.ja[key] ?? "").matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(), key).toEqual([...TSUNAGI_STRINGS.en[key]!.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort());
+    for (const key of en)
+      expect([...(TSUNAGI_STRINGS.ja[key] ?? "").matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(), key).toEqual(
+        [...TSUNAGI_STRINGS.en[key]!.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
+      );
   });
 
   it("fills values in, says one where there is one, and falls back to English and then to the key", () => {
@@ -255,7 +285,9 @@ describe("one pair's part of a drawing", () => {
         // The line is the very group the whole drawing has.
         const line = new RegExp(`<g class="tsu-line" data-pair="${pair}" data-cells="\\d+">.*?</g>`).exec(whole)?.[0];
         expect(part.line, `pair ${pair}`).toBe(line);
-        expect(count(part.beads, 'class="tsu-bead"'), `pair ${pair}`).toBe(count(whole, `class="tsu-bead" data-pair="${pair}"`));
+        expect(count(part.beads, 'class="tsu-bead"'), `pair ${pair}`).toBe(
+          count(whole, `class="tsu-bead" data-pair="${pair}"`),
+        );
         const washes = new RegExp(`<g class="tsu-washes">(?:.*?)<g data-pair="${pair}">(.*?)</g>`).exec(whole)![1]!;
         expect(part.washes, `pair ${pair}`).toBe(washes);
       }
@@ -274,7 +306,9 @@ describe("one pair's part of a drawing", () => {
     const lines = linesOfAnswer(layout, wrap.answer)!;
     const whole = drawTsunagi(layout, { lines });
     const id = idOf(whole);
-    const ghostBeads = layout.ends.map((_, pair) => count(drawTsunagiPair(layout, pair, id, { lines }).ghosts, 'class="tsu-bead"'));
+    const ghostBeads = layout.ends.map((_, pair) =>
+      count(drawTsunagiPair(layout, pair, id, { lines }).ghosts, 'class="tsu-bead"'),
+    );
     expect(ghostBeads.some((each) => each > 0)).toBe(true);
     // The ghosts are the last thing in the drawing: every ghost bead in it is some pair's.
     const ghosts = whole.slice(whole.indexOf('<g class="tsu-ghosts"'), whole.indexOf("</svg>"));

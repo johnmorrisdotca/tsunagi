@@ -72,7 +72,8 @@ export function stepTable(layout: LinkLayout): Step[][] {
       const beyond = cell + by;
       const across = Math.abs(by) === 1;
       // Straight on, in the same row or column: a bridge is never at an edge, so the cell beyond is on the board.
-      if (beyond < 0 || beyond >= size * size || (across && Math.floor(beyond / size) !== Math.floor(cell / size))) return [];
+      if (beyond < 0 || beyond >= size * size || (across && Math.floor(beyond / size) !== Math.floor(cell / size)))
+        return [];
       if (!around[cell]!.includes(beyond)) return [];
       return [{ to: beyond, over: cell, across, through: NO_CELLS }];
     });

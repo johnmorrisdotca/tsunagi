@@ -46,7 +46,13 @@ export type TwistCandidate = LinkCandidate & {
 };
 
 /** A candidate from a layout and its answer, if the solver finds exactly that answer and no other inside `budget`. */
-function proved(layout: string, answer: string, size: number, budget: number, extras: { bridges: number; walls: number; blocked: number }): TwistCandidate | null {
+function proved(
+  layout: string,
+  answer: string,
+  size: number,
+  budget: number,
+  extras: { bridges: number; walls: number; blocked: number },
+): TwistCandidate | null {
   const decoded = decodeLayout(layout, size);
   if (decoded === null || !runsClear(decoded, answer)) return null;
   const solved = countSolutions(decoded, 2, budget);
@@ -81,7 +87,13 @@ function runsClear(layout: LinkLayout, answer: string): boolean {
 }
 
 /** A filled grid with `want` bridges made in it — its lines, one of them over each bridge — or null where it offers no place for them. */
-function bridgedFilling(size: number, random: Random, longest: number, want: number, style: FillingStyle = {}): { paths: number[][]; bridges: Set<number> } | null {
+function bridgedFilling(
+  size: number,
+  random: Random,
+  longest: number,
+  want: number,
+  style: FillingStyle = {},
+): { paths: number[][]; bridges: Set<number> } | null {
   const filling = randomFilling(size, random, longest, new Set(), false, false, style);
   if (filling === null) return null;
   let paths = filling.map((path) => [...path]);
@@ -99,7 +111,8 @@ function bridgedFilling(size: number, random: Random, longest: number, want: num
         // Straight through, and the two cells the other way each the end of a different line.
         if (path[at - 1]! !== cell - by) continue;
         const cross = Math.abs(by) === 1 ? size : 1;
-        const endOf = (target: number) => paths.findIndex((each, id) => id !== over && (each[0] === target || each[each.length - 1] === target));
+        const endOf = (target: number) =>
+          paths.findIndex((each, id) => id !== over && (each[0] === target || each[each.length - 1] === target));
         const a = endOf(cell - cross);
         const b = endOf(cell + cross);
         if (a === -1 || b === -1 || a === b) continue;
@@ -135,7 +148,14 @@ function bridgedFilling(size: number, random: Random, longest: number, want: num
  * console.log(bridgeCandidate(5,seededRandom(42),10,20000,1));
  * ```
  */
-export function bridgeCandidate(size: number, random: Random, longest: number, budget: number, want: number, style: FillingStyle = {}): TwistCandidate | null {
+export function bridgeCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  want: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   const made = bridgedFilling(size, random, longest, want, style);
   if (made === null) return null;
   const { layout, answer } = layoutOf(size, made.paths, { bridges: made.bridges });
@@ -148,7 +168,13 @@ export function bridgeCandidate(size: number, random: Random, longest: number, b
  * beside a bridge) until it is unique, then each taken away again where it is
  * not needed. Null where `mostWalls` is not enough.
  */
-function wallsNeeded(decoded: LinkLayout, answer: string, random: Random, budget: number, mostWalls: number): Set<string> | null {
+function wallsNeeded(
+  decoded: LinkLayout,
+  answer: string,
+  random: Random,
+  budget: number,
+  mostWalls: number,
+): Set<string> | null {
   const { size } = decoded;
   const free: string[] = [];
   for (let at = 0; at < size * size; at += 1) {
@@ -163,7 +189,10 @@ function wallsNeeded(decoded: LinkLayout, answer: string, random: Random, budget
     return !counted.gaveUp && counted.count === 1;
   };
   let walls = new Set<string>();
-  const order = free.map((edge) => [random(), edge] as const).sort((x, y) => x[0] - y[0]).map(([, edge]) => edge);
+  const order = free
+    .map((edge) => [random(), edge] as const)
+    .sort((x, y) => x[0] - y[0])
+    .map(([, edge]) => edge);
   for (const edge of order) {
     if (unique(walls)) break;
     if (walls.size >= mostWalls) return null;
@@ -194,7 +223,15 @@ function wallsNeeded(decoded: LinkLayout, answer: string, random: Random, budget
  * console.log(wallCandidate(4,seededRandom(42),8,20000,1,2));
  * ```
  */
-export function wallCandidate(size: number, random: Random, longest: number, budget: number, blockedWanted: number, mostWalls: number, style: FillingStyle = {}): TwistCandidate | null {
+export function wallCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  blockedWanted: number,
+  mostWalls: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   const blocked = new Set<number>();
   while (blocked.size < blockedWanted) blocked.add(Math.floor(random() * size * size));
   const filling = randomFilling(size, random, longest, blocked, false, false, style);
@@ -225,7 +262,15 @@ export function wallCandidate(size: number, random: Random, longest: number, bud
  * console.log(bridgeAndWallCandidate(5,seededRandom(42),10,20000,1,2));
  * ```
  */
-export function bridgeAndWallCandidate(size: number, random: Random, longest: number, budget: number, bridgesWanted: number, mostWalls: number, style: FillingStyle = {}): TwistCandidate | null {
+export function bridgeAndWallCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  bridgesWanted: number,
+  mostWalls: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   const made = bridgedFilling(size, random, longest, bridgesWanted, style);
   if (made === null) return null;
   const { layout: plain, answer } = layoutOf(size, made.paths, { bridges: made.bridges });
@@ -257,7 +302,14 @@ export function bridgeAndWallCandidate(size: number, random: Random, longest: nu
  * console.log(waypointCandidate(4,seededRandom(42),8,20000,2));
  * ```
  */
-export function waypointCandidate(size: number, random: Random, longest: number, budget: number, most: number, style: FillingStyle = {}): TwistCandidate | null {
+export function waypointCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  most: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   const filling = randomFilling(size, random, longest, new Set(), false, false, style);
   if (filling === null) return null;
   const middles = filling.flatMap((path) => path.slice(1, -1));
@@ -272,7 +324,10 @@ export function waypointCandidate(size: number, random: Random, longest: number,
   // A layout already unique without one teaches nothing about waypoints.
   if (unique(new Set())) return null;
   let marked = new Set<number>();
-  const order = middles.map((cell) => [random(), cell] as const).sort((x, y) => x[0] - y[0]).map(([, cell]) => cell);
+  const order = middles
+    .map((cell) => [random(), cell] as const)
+    .sort((x, y) => x[0] - y[0])
+    .map(([, cell]) => cell);
   for (const cell of order) {
     if (unique(marked)) break;
     if (marked.size >= most) return null;
@@ -307,10 +362,18 @@ export function waypointCandidate(size: number, random: Random, longest: number,
  * console.log(wrapCandidate(4,seededRandom(42),8,20000));
  * ```
  */
-export function wrapCandidate(size: number, random: Random, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
+export function wrapCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   const filling = randomFilling(size, random, longest, new Set(), true, false, style);
   if (filling === null) return null;
-  const crosses = filling.some((path) => path.some((cell, at) => at > 0 && stepBetween(size, path[at - 1]!, cell, false) === 0));
+  const crosses = filling.some((path) =>
+    path.some((cell, at) => at > 0 && stepBetween(size, path[at - 1]!, cell, false) === 0),
+  );
   if (!crosses) return null;
   const { layout, answer } = layoutOf(size, filling, { wrap: true });
   return proved(layout, answer, size, budget, { bridges: 0, walls: 0, blocked: 0 });
@@ -334,7 +397,13 @@ export function wrapCandidate(size: number, random: Random, longest: number, bud
  * console.log(hexCandidate(5,seededRandom(42),10,20000));
  * ```
  */
-export function hexCandidate(size: number, random: Random, longest: number, budget: number, style: FillingStyle = {}): TwistCandidate | null {
+export function hexCandidate(
+  size: number,
+  random: Random,
+  longest: number,
+  budget: number,
+  style: FillingStyle = {},
+): TwistCandidate | null {
   if (size % 2 === 0) return null;
   const off = new Set(Array.from({ length: size * size }, (_, at) => at).filter((at) => !inHex(size, at)));
   const filling = randomFilling(size, random, longest, off, false, true, style);

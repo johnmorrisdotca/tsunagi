@@ -45,7 +45,9 @@ describe("the binary way of writing the pairs", () => {
 
   it("finds the second answer where a board has two, as the first way does", () => {
     // A level of 8×8 with its walls taken away has several answers.
-    const [givens] = tsunagiLevelsOf(8).find(([layout]) => layout.includes("|") && challengesOf(layout).includes("walls"))!;
+    const [givens] = tsunagiLevelsOf(8).find(
+      ([layout]) => layout.includes("|") && challengesOf(layout).includes("walls"),
+    )!;
     const layout = decodeLayout(givens, 8)!;
     const freed = { ...layout, walls: new Set<string>() };
     const one = countSolutionsSat(freed, 400, 5_000_000, null, "one-hot");

@@ -42,7 +42,9 @@ function readPool(size: number, kind: string): ReducedPoolBoard[] {
 }
 
 function measureOf(board: ReducedPoolBoard): LevelMeasure {
-  const lengths = [...new Set([...board.answer].filter((char) => PAIR_LETTERS.includes(char)))].map((letter) => [...board.answer].filter((char) => char === letter).length);
+  const lengths = [...new Set([...board.answer].filter((char) => PAIR_LETTERS.includes(char)))].map(
+    (letter) => [...board.answer].filter((char) => char === letter).length,
+  );
   const cells = board.layout.split("|")[0]!;
   return {
     pairs: board.pairs,
@@ -75,13 +77,20 @@ function fileFor(all: Record<number, readonly Level[]>): string {
     " * answer by `portalLevels.test.ts`, and no two are the same board under a turn or a mirror.",
     " */",
     "export const TSUNAGI_PORTAL_LEVELS: Readonly<Record<number, readonly (readonly [string, string])[]>> = {",
-    ...Object.entries(all).flatMap(([size, levels]) => [`  ${size}: [`, ...levels.map(([layout, answer]) => `    ["${layout}", "${answer}"],`), "  ],"]),
+    ...Object.entries(all).flatMap(([size, levels]) => [
+      `  ${size}: [`,
+      ...levels.map(([layout, answer]) => `    ["${layout}", "${answer}"],`),
+      "  ],",
+    ]),
     "};",
     "",
   ].join("\n");
 }
 
-const asked = process.argv.slice(2).map(Number).filter((size) => (TSUNAGI_PORTAL_SIZES as readonly number[]).includes(size));
+const asked = process.argv
+  .slice(2)
+  .map(Number)
+  .filter((size) => (TSUNAGI_PORTAL_SIZES as readonly number[]).includes(size));
 const written: Record<number, readonly Level[]> = {};
 // A run over some sizes keeps the levels of the rest as they were.
 if (existsSync("src/levels/portals.data.ts")) {
@@ -93,20 +102,34 @@ for (const size of asked.length > 0 ? asked : TSUNAGI_PORTAL_SIZES) {
   const started = performance.now();
   const used = new Set<string>();
   const block = (kinds: readonly string[]): Level[] => {
-    const pool = byDifficulty(kinds.flatMap((kind) => readPool(size, kind)).filter((board) => !used.has(board.key)), size);
-    if (pool.length < TSUNAGI_BLOCK) throw new Error(`${size}×${size} ${kinds.join("+")}: ${pool.length} boards in the pool, ${TSUNAGI_BLOCK} wanted`);
-    const picked = Array.from({ length: TSUNAGI_BLOCK }, (_, at) => pool[Math.round((at * (pool.length - 1)) / (TSUNAGI_BLOCK - 1))]!);
+    const pool = byDifficulty(
+      kinds.flatMap((kind) => readPool(size, kind)).filter((board) => !used.has(board.key)),
+      size,
+    );
+    if (pool.length < TSUNAGI_BLOCK)
+      throw new Error(`${size}×${size} ${kinds.join("+")}: ${pool.length} boards in the pool, ${TSUNAGI_BLOCK} wanted`);
+    const picked = Array.from(
+      { length: TSUNAGI_BLOCK },
+      (_, at) => pool[Math.round((at * (pool.length - 1)) / (TSUNAGI_BLOCK - 1))]!,
+    );
     for (const board of picked) used.add(board.key);
     const levels = picked.map((board) => [board.layout, board.answer] as const);
     return orderByDifficulty(levels, size).map((at) => levels[at]!);
   };
   const levels = [...block(["portals1"]), ...block(["portals2", "portals3"])];
-  if (levels.length !== TSUNAGI_PORTAL_COUNTS[size]) throw new Error(`${size}×${size}: ${levels.length} levels, ${TSUNAGI_PORTAL_COUNTS[size]} wanted`);
+  if (levels.length !== TSUNAGI_PORTAL_COUNTS[size])
+    throw new Error(`${size}×${size}: ${levels.length} levels, ${TSUNAGI_PORTAL_COUNTS[size]} wanted`);
   written[size] = levels;
-  const scores = difficultyScores(levels.map(([layout, answer]) => measureLevel(layout, answer, size)!), size);
+  const scores = difficultyScores(
+    levels.map(([layout, answer]) => measureLevel(layout, answer, size)!),
+    size,
+  );
   portalMarks[size] = scores.map((score) => String(Math.min(5, 1 + Math.floor(score / 20)))).join("");
   console.log(`${size}×${size}: ${levels.length} portal levels, ${Math.round((performance.now() - started) / 1000)} s`);
 }
 const sorted = Object.fromEntries(Object.entries(written).sort(([a], [b]) => Number(a) - Number(b)));
-writeFileSync("src/levels/portals.data.ts", withLevelExamples(fileFor(sorted), "@johnmorrisdotca/tsunagi/levels-portals"));
+writeFileSync(
+  "src/levels/portals.data.ts",
+  withLevelExamples(fileFor(sorted), "@johnmorrisdotca/tsunagi/levels-portals"),
+);
 writeFileSync("src/levels/marks.data.ts", marksFile({ ...TSUNAGI_MARKS }, { ...TSUNAGI_ROLES }, portalMarks));

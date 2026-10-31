@@ -1,7 +1,21 @@
 import { decodeLayout, type LinkLayout } from "./code.ts";
 import { cheatLine } from "./cheat.ts";
 import { explosionAfter, explosionsAsChosen, strokesToExplosion } from "./explosions.ts";
-import { allJoined, answerOf, dragFinger, filled, joined, letGo, linesOfAnswer, NO_REACH, noLines, pressAt, unjoinedPairs, type Lines, type Reach } from "./lines.ts";
+import {
+  allJoined,
+  answerOf,
+  dragFinger,
+  filled,
+  joined,
+  letGo,
+  linesOfAnswer,
+  NO_REACH,
+  noLines,
+  pressAt,
+  unjoinedPairs,
+  type Lines,
+  type Reach,
+} from "./lines.ts";
 
 /**
  * A TSUNAGI GAME IN PLAY, as pure functions: the lines drawn so far, the
@@ -161,7 +175,12 @@ export function newTsunagiGame(givens: string, size: number, options: TsunagiGam
     checked: null,
     cheats: options.cheats === true,
     explosions,
-    eased: layout.explosions === null || explosions === "on" ? null : explosions === "off" ? "explosions-off" : "explosions-soft",
+    eased:
+      layout.explosions === null || explosions === "on"
+        ? null
+        : explosions === "off"
+          ? "explosions-off"
+          : "explosions-soft",
     cheated: false,
     solved: isSolved(played, lines, options.answer ?? null),
   };
@@ -234,7 +253,13 @@ export function pressGame(game: TsunagiGame, cell: number): TsunagiGame {
   if (gameOver(game) || game.drawing !== null) return game;
   const pressed = pressAt(game.layout, game.lines, cell);
   if (pressed.drawing === null) return game;
-  return shown(game, pressed.lines, { drawing: pressed.drawing, before: game.lines, reach: NO_REACH, blasted: null, exploded: null });
+  return shown(game, pressed.lines, {
+    drawing: pressed.drawing,
+    before: game.lines,
+    reach: NO_REACH,
+    blasted: null,
+    exploded: null,
+  });
 }
 
 /** The finger carried into a cell: the line grows, shortens or cuts another back, as the rules say.
@@ -259,7 +284,9 @@ export function pressGame(game: TsunagiGame, cell: number): TsunagiGame {
 export function dragGame(game: TsunagiGame, cell: number): TsunagiGame {
   if (game.drawing === null) return game;
   const dragged = dragFinger(game.layout, game.lines, game.drawing, cell, game.reach);
-  return dragged.lines === game.lines && dragged.reach === game.reach ? game : shown(game, dragged.lines, { reach: dragged.reach });
+  return dragged.lines === game.lines && dragged.reach === game.reach
+    ? game
+    : shown(game, dragged.lines, { reach: dragged.reach });
 }
 
 /** The finger lifted: the stroke is counted if it changed the board, the board may be solved, and an explosion may go off.
@@ -287,7 +314,14 @@ export function liftGame(game: TsunagiGame): TsunagiGame {
   if (isSolved(game.layout, lines, game.answer)) return { ...ended, strokes, solved: true };
   const blown = explosionAfter(game.layout, game.givens, lines, strokes);
   if (blown === null) return { ...ended, strokes, undo: [...game.undo.slice(-(UNDO_MOST - 1)), was] };
-  return { ...ended, strokes, lines: blown.lines, undo: [], blasted: blown.cells, exploded: blown.hit.length > 1 ? "blast" : "boom" };
+  return {
+    ...ended,
+    strokes,
+    lines: blown.lines,
+    undo: [],
+    blasted: blown.cells,
+    exploded: blown.hit.length > 1 ? "blast" : "boom",
+  };
 }
 
 /** Undo: the lines as they were before the last stroke. Nothing once the game is over.
@@ -308,7 +342,12 @@ export function liftGame(game: TsunagiGame): TsunagiGame {
 export function undoGame(game: TsunagiGame): TsunagiGame {
   if (gameOver(game) || game.drawing !== null || game.undo.length === 0) return game;
   const lines = game.undo[game.undo.length - 1]!;
-  return shown(game, lines, { undo: game.undo.slice(0, -1), blasted: null, exploded: null, solved: isSolved(game.layout, lines, game.answer) });
+  return shown(game, lines, {
+    undo: game.undo.slice(0, -1),
+    blasted: null,
+    exploded: null,
+    solved: isSolved(game.layout, lines, game.answer),
+  });
 }
 
 /** Restart: every line cleared and the strokes counted again (Undo can bring the lines back). A game that is solved or out of strokes restarts too.
@@ -328,7 +367,14 @@ export function undoGame(game: TsunagiGame): TsunagiGame {
  */
 export function restartGame(game: TsunagiGame): TsunagiGame {
   if (game.drawing !== null || game.lines.every((line) => line.length === 0)) return game;
-  return shown(game, noLines(game.layout), { undo: [...game.undo.slice(-(UNDO_MOST - 1)), game.lines], strokes: 0, blasted: null, exploded: null, cheated: false, solved: false });
+  return shown(game, noLines(game.layout), {
+    undo: [...game.undo.slice(-(UNDO_MOST - 1)), game.lines],
+    strokes: 0,
+    blasted: null,
+    exploded: null,
+    cheated: false,
+    solved: false,
+  });
 }
 
 /** Check: the pairs not joined yet are flagged, and how many cells are still empty is said.
@@ -349,7 +395,11 @@ export function restartGame(game: TsunagiGame): TsunagiGame {
 export function checkGame(game: TsunagiGame): TsunagiGame {
   if (gameOver(game) || game.drawing !== null) return game;
   const filledNow = filled(game.layout, game.lines);
-  return { ...game, flagged: unjoinedPairs(game.layout, game.lines), checked: { unjoined: unjoinedPairs(game.layout, game.lines).length, empty: filledNow.of - filledNow.done } };
+  return {
+    ...game,
+    flagged: unjoinedPairs(game.layout, game.lines),
+    checked: { unjoined: unjoinedPairs(game.layout, game.lines).length, empty: filledNow.of - filledNow.done },
+  };
 }
 
 /**
@@ -376,7 +426,13 @@ export function cheatGame(game: TsunagiGame): TsunagiGame {
   const drawn = cheatLine(game.layout, game.lines, answerLines);
   if (drawn === null) return game;
   const solved = isSolved(game.layout, drawn.lines, game.answer);
-  return shown(game, drawn.lines, { undo: [...game.undo.slice(-(UNDO_MOST - 1)), game.lines], cheated: true, solved, blasted: null, exploded: null });
+  return shown(game, drawn.lines, {
+    undo: [...game.undo.slice(-(UNDO_MOST - 1)), game.lines],
+    cheated: true,
+    solved,
+    blasted: null,
+    exploded: null,
+  });
 }
 
 /** The help a game has used so far, the one that costs more where it used two; null for none.

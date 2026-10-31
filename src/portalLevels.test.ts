@@ -5,7 +5,17 @@ import { decodeLayout, encodeAnswer, hexNeighboursOf, neighboursOf } from "./cod
 import { difficultyScores, measureSolved, type LevelMeasure } from "./difficulty.ts";
 import { symmetryKey } from "./generate.ts";
 import { challengesOf } from "./ladder.ts";
-import { levelCountOf, TSUNAGI_PORTAL_COUNTS, TSUNAGI_PORTAL_SEED, TSUNAGI_PORTAL_SIZES, levelSeed, setOfSeed, isTsunagiLevel, openTsunagiLevels, tsunagiBand } from "./levelCounts.ts";
+import {
+  levelCountOf,
+  TSUNAGI_PORTAL_COUNTS,
+  TSUNAGI_PORTAL_SEED,
+  TSUNAGI_PORTAL_SIZES,
+  levelSeed,
+  setOfSeed,
+  isTsunagiLevel,
+  openTsunagiLevels,
+  tsunagiBand,
+} from "./levelCounts.ts";
 import { loadTsunagiLevels, tsunagiLevelOf, tsunagiLevelsOf } from "./levels.ts";
 import { TSUNAGI_PORTAL_MARKS } from "./levels/marks.data.ts";
 import { countSolutionsOfLevel, type SolveCount } from "./solve.ts";
@@ -19,7 +29,9 @@ describe.each(TSUNAGI_PORTAL_SIZES.map((size) => [size]))("the portal levels at 
   let solves: SolveCount[] = [];
   beforeAll(async () => {
     await loadTsunagiLevels(size, "portals");
-    solves = tsunagiLevelsOf(size, "portals").map(([givens, answer]) => countSolutionsOfLevel(decodeLayout(givens, size)!, answer));
+    solves = tsunagiLevelsOf(size, "portals").map(([givens, answer]) =>
+      countSolutionsOfLevel(decodeLayout(givens, size)!, answer),
+    );
   }, 600_000);
 
   it("has as many levels as the counts say, in whole blocks of sixteen", () => {
@@ -51,7 +63,10 @@ describe.each(TSUNAGI_PORTAL_SIZES.map((size) => [size]))("the portal levels at 
     for (const [index, [givens, answer]] of levels.entries()) {
       const layout = decodeLayout(givens, size)!;
       for (const [a, b] of layout.ends) {
-        expect(layout.hex ? hexNeighboursOf(size, a) : neighboursOf(size, a), `level ${index + 1}: a pair sits side by side`).not.toContain(b);
+        expect(
+          layout.hex ? hexNeighboursOf(size, a) : neighboursOf(size, a),
+          `level ${index + 1}: a pair sits side by side`,
+        ).not.toContain(b);
         expect([...answer].filter((letter) => letter === answer[a]).length).toBeGreaterThanOrEqual(3);
       }
     }
@@ -71,13 +86,21 @@ describe.each(TSUNAGI_PORTAL_SIZES.map((size) => [size]))("the portal levels at 
   });
 
   it("marks every level 1 to 5 by its measured score among the size's portal levels, each block easiest first", () => {
-    const measured: LevelMeasure[] = tsunagiLevelsOf(size, "portals").map(([layout, answer], at) => measureSolved(layout, answer, size, solves[at]!)!);
+    const measured: LevelMeasure[] = tsunagiLevelsOf(size, "portals").map(
+      ([layout, answer], at) => measureSolved(layout, answer, size, solves[at]!)!,
+    );
     const scores = difficultyScores(measured, size);
-    expect(TSUNAGI_PORTAL_MARKS[size]).toBe(scores.map((score) => String(Math.min(5, 1 + Math.floor(score / 20)))).join(""));
+    expect(TSUNAGI_PORTAL_MARKS[size]).toBe(
+      scores.map((score) => String(Math.min(5, 1 + Math.floor(score / 20)))).join(""),
+    );
     // Within a block, no level is easier by the measure than the one before it.
-    for (const [from, to] of [[0, 16], [16, 32]] as const) {
+    for (const [from, to] of [
+      [0, 16],
+      [16, 32],
+    ] as const) {
       const block = difficultyScores(measured.slice(from, to), size);
-      for (let at = 1; at < block.length; at += 1) expect(block[at]!, `level ${from + at + 1}`).toBeGreaterThanOrEqual(block[at - 1]!);
+      for (let at = 1; at < block.length; at += 1)
+        expect(block[at]!, `level ${from + at + 1}`).toBeGreaterThanOrEqual(block[at - 1]!);
     }
   });
 });

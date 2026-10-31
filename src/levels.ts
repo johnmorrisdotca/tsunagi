@@ -92,7 +92,10 @@ export async function loadEveryTsunagiLevel(): Promise<void> {
  */
 export function tsunagiLevelsOf(size: number, set: TsunagiSet = "classic"): readonly LevelRow[] {
   const levels = (set === "portals" ? loadedPortals : loaded).get(size);
-  if (levels === undefined) throw new Error(`The ${size}×${size} Tsunagi ${set === "portals" ? "portal " : ""}levels have not been loaded (loadTsunagiLevels).`);
+  if (levels === undefined)
+    throw new Error(
+      `The ${size}×${size} Tsunagi ${set === "portals" ? "portal " : ""}levels have not been loaded (loadTsunagiLevels).`,
+    );
   return levels;
 }
 

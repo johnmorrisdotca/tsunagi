@@ -34,7 +34,13 @@ describe("the layout says how often, and how hard", () => {
 
   it("writes them back the one way, and a turned board keeps them", () => {
     const layout = board("|1-2|blast5");
-    expect(encodeLayout(layout.cells.map((cell) => (cell >= 0 ? cell : -1)), layout.walls, { explosions: layout.explosions })).toBe(`${CELLS}|1-2|blast5`);
+    expect(
+      encodeLayout(
+        layout.cells.map((cell) => (cell >= 0 ? cell : -1)),
+        layout.walls,
+        { explosions: layout.explosions },
+      ),
+    ).toBe(`${CELLS}|1-2|blast5`);
     const turned = relettered(transformed(`${CELLS}|1-2|blast5`, 4, 1, false));
     expect(turned.endsWith("|blast5")).toBe(true);
     expect(decodeLayout(turned, 4)!.explosions).toEqual({ every: 5, blast: true });
@@ -73,7 +79,9 @@ describe("an explosion", () => {
     const blown = explosionAfter(layout, CELLS + "|boom3", drawn, 3)!;
     expect(blown.hit).toHaveLength(1);
     const pair = blown.hit[0]!;
-    expect(blown.lines[pair]).toEqual(drawn[pair]!.length / 2 >= 2 ? drawn[pair]!.slice(0, Math.floor(drawn[pair]!.length / 2)) : []);
+    expect(blown.lines[pair]).toEqual(
+      drawn[pair]!.length / 2 >= 2 ? drawn[pair]!.slice(0, Math.floor(drawn[pair]!.length / 2)) : [],
+    );
     blown.lines.forEach((line, other) => other !== pair && expect(line).toEqual(drawn[other]));
     expect(blown.cells.every((cell) => drawn[pair]!.includes(cell) && !blown.lines[pair]!.includes(cell))).toBe(true);
     expect(JSON.stringify(drawn)).toBe(before);
@@ -102,7 +110,10 @@ describe("an explosion", () => {
     // A runs down the second column over a bridge at 5; halved, it would end on it.
     const code = ".A..B+.B.A......|boom1";
     const layout = decodeLayout(code, 4)!;
-    const lines: Lines = [[1, 5, 9], [4, 5, 6, 7]];
+    const lines: Lines = [
+      [1, 5, 9],
+      [4, 5, 6, 7],
+    ];
     for (let stroke = 1; stroke <= 20; stroke += 1) {
       const blown = explosionAfter(layout, code, lines, stroke)!;
       for (const line of blown.lines) if (line.length > 0) expect(layout.cells[line[line.length - 1]!]).not.toBe(-3);

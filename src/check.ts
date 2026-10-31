@@ -1,4 +1,12 @@
-import { CELL_BLOCKED, CELL_BRIDGE, CELL_EMPTY, decodeLayout, LINK_BLOCKED, LINK_BRIDGE, PAIR_LETTERS } from "./code.ts";
+import {
+  CELL_BLOCKED,
+  CELL_BRIDGE,
+  CELL_EMPTY,
+  decodeLayout,
+  LINK_BLOCKED,
+  LINK_BRIDGE,
+  PAIR_LETTERS,
+} from "./code.ts";
 import { bridgesOf, stepTable, type Step } from "./steps.ts";
 
 /**
@@ -54,7 +62,8 @@ export type TsunagiCheck = { ok: true } | { ok: false; reason: string };
 export function checkTsunagiAnswer(size: number, givens: string, answer: string): TsunagiCheck {
   const layout = decodeLayout(givens, size);
   if (layout === null) return { ok: false, reason: "the givens are not a Tsunagi layout" };
-  if (typeof answer !== "string" || answer.length !== size * size) return { ok: false, reason: "not a grid of that size" };
+  if (typeof answer !== "string" || answer.length !== size * size)
+    return { ok: false, reason: "not a grid of that size" };
   const steps = stepTable(layout);
   const pairs = layout.ends.length;
   const owners: number[] = [];
@@ -62,7 +71,8 @@ export function checkTsunagiAnswer(size: number, givens: string, answer: string)
     const char = answer[at]!;
     const cell = layout.cells[at]!;
     if (cell === CELL_BLOCKED || cell === CELL_BRIDGE) {
-      if (char !== (cell === CELL_BLOCKED ? LINK_BLOCKED : LINK_BRIDGE)) return { ok: false, reason: cell === CELL_BLOCKED ? "a blocked cell is used" : "a bridge is not a bridge" };
+      if (char !== (cell === CELL_BLOCKED ? LINK_BLOCKED : LINK_BRIDGE))
+        return { ok: false, reason: cell === CELL_BLOCKED ? "a blocked cell is used" : "a bridge is not a bridge" };
       owners.push(cell);
       continue;
     }
@@ -70,19 +80,22 @@ export function checkTsunagiAnswer(size: number, givens: string, answer: string)
     if (pair === -1 || pair >= pairs) return { ok: false, reason: "a cell has no line through it" };
     if (cell !== CELL_EMPTY && cell !== pair) return { ok: false, reason: "a stone is moved" };
     const waypoint = layout.waypoints.get(at);
-    if (waypoint !== undefined && waypoint !== pair) return { ok: false, reason: "a waypoint is passed by another line" };
+    if (waypoint !== undefined && waypoint !== pair)
+      return { ok: false, reason: "a waypoint is passed by another line" };
     owners.push(pair);
   }
   // Each bridge: one line straight across it, a different one straight down.
   for (const bridge of bridgesOf(layout)) {
     const acrossPair = owners[bridge - 1];
     const downPair = owners[bridge - size];
-    if (acrossPair !== owners[bridge + 1] || downPair !== owners[bridge + size] || acrossPair === downPair) return { ok: false, reason: "a bridge is not crossed both ways by two lines" };
+    if (acrossPair !== owners[bridge + 1] || downPair !== owners[bridge + size] || acrossPair === downPair)
+      return { ok: false, reason: "a bridge is not crossed both ways by two lines" };
   }
   // How many steps, either way, went through each portal (by the cell it is stepped into): a portal is gone through once, which is two steps counted from either end.
   const wentThrough = new Map<number, number>();
   // A portal's two cells are one line's.
-  for (const [a, b] of layout.portalPairs) if (owners[a] !== owners[b]) return { ok: false, reason: "a portal's two cells are on different lines" };
+  for (const [a, b] of layout.portalPairs)
+    if (owners[a] !== owners[b]) return { ok: false, reason: "a portal's two cells are on different lines" };
   for (let pair = 0; pair < pairs; pair += 1) {
     const from: number = layout.ends[pair]![0];
     const to: number = layout.ends[pair]![1];
@@ -93,7 +106,9 @@ export function checkTsunagiAnswer(size: number, givens: string, answer: string)
       // A portal cell is gone through, never stood on: it has no steps, and its line is checked by the steps that go through it.
       if (layout.portals.has(at)) continue;
       const same = steps[at]!.filter(joins).length;
-      for (const step of steps[at]!) if (step.through.length > 0 && joins(step)) wentThrough.set(step.through[0]!, (wentThrough.get(step.through[0]!) ?? 0) + 1);
+      for (const step of steps[at]!)
+        if (step.through.length > 0 && joins(step))
+          wentThrough.set(step.through[0]!, (wentThrough.get(step.through[0]!) ?? 0) + 1);
       const want = at === from || at === to ? 1 : 2;
       if (same !== want) return { ok: false, reason: `line ${PAIR_LETTERS[pair]} is not one line` };
     }
@@ -110,9 +125,12 @@ export function checkTsunagiAnswer(size: number, givens: string, answer: string)
         }
       }
     }
-    if (!seen.has(to) || seen.size !== mine.length) return { ok: false, reason: `line ${PAIR_LETTERS[pair]} does not join its stones` };
+    if (!seen.has(to) || seen.size !== mine.length)
+      return { ok: false, reason: `line ${PAIR_LETTERS[pair]} does not join its stones` };
   }
   // A portal is gone through by exactly one step of its line, and so is not a way round for a second one.
-  for (const [a, b] of layout.portalPairs) if ((wentThrough.get(a) ?? 0) + (wentThrough.get(b) ?? 0) !== 2) return { ok: false, reason: "a portal is not gone through exactly once" };
+  for (const [a, b] of layout.portalPairs)
+    if ((wentThrough.get(a) ?? 0) + (wentThrough.get(b) ?? 0) !== 2)
+      return { ok: false, reason: "a portal is not gone through exactly once" };
   return { ok: true };
 }

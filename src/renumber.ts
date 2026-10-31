@@ -23,7 +23,11 @@ import { TSUNAGI_RENUMBERED } from "./levels/renumbered.data.ts";
  * console.log(renumberedRecord(4,{1:100},{4:[2,1]}));
  * ```
  */
-export function renumberedRecord(size: number, old: Readonly<Record<number, number>>, moves: Readonly<Record<number, readonly number[]>> = TSUNAGI_RENUMBERED): Record<number, number> {
+export function renumberedRecord(
+  size: number,
+  old: Readonly<Record<number, number>>,
+  moves: Readonly<Record<number, readonly number[]>> = TSUNAGI_RENUMBERED,
+): Record<number, number> {
   const to = moves[size];
   const out: Record<number, number> = {};
   if (to === undefined) return out;

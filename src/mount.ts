@@ -166,9 +166,18 @@ export type TsunagiMount = {
   game: () => TsunagiGame;
   progress: () => TsunagiProgress;
   /** Play another level (or the same one again, fresh). `lines` carries on a kept game. */
-  load: (level: { size: number; givens: string; answer?: string; level?: number; set?: TsunagiSet; lines?: Lines }) => void;
+  load: (level: {
+    size: number;
+    givens: string;
+    answer?: string;
+    level?: number;
+    set?: TsunagiSet;
+    lines?: Lines;
+  }) => void;
   /** Change how the board looks, or how it is played: marks, fill, colours, board, coordinates, explosions, cheats, language. A look takes effect at once; explosions and cheats from the next `load` or `restart`. */
-  set: (changes: TsunagiLook & { explosions?: TsunagiExplosionChoice; cheats?: boolean; language?: TsunagiLanguage }) => void;
+  set: (
+    changes: TsunagiLook & { explosions?: TsunagiExplosionChoice; cheats?: boolean; language?: TsunagiLanguage },
+  ) => void;
   undo: () => void;
   restart: () => void;
   check: () => void;
@@ -185,7 +194,17 @@ const BLAST_MS = 1200;
 /** How long a tapped portal shows its link to the other ring. */
 const LINK_MS = 1800;
 
-const CHALLENGE_KEYS: readonly Challenge[] = ["bridges", "walls", "waypoints", "wrap", "portals", "explosions", "strokes", "hexagon", "sparse"];
+const CHALLENGE_KEYS: readonly Challenge[] = [
+  "bridges",
+  "walls",
+  "waypoints",
+  "wrap",
+  "portals",
+  "explosions",
+  "strokes",
+  "hexagon",
+  "sparse",
+];
 
 /** Put the style in the page once: in the document's head, or in the shadow root the host is in.
  *
@@ -203,7 +222,8 @@ const CHALLENGE_KEYS: readonly Challenge[] = ["bridges", "walls", "waypoints", "
  */
 export function ensureTsunagiPlayStyle(host: Element): void {
   const root = host.getRootNode();
-  const target: ParentNode = typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : host.ownerDocument.head;
+  const target: ParentNode =
+    typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : host.ownerDocument.head;
   if (target.querySelector("style[data-tsunagi-play]") !== null) return;
   const style = host.ownerDocument.createElement("style");
   style.setAttribute("data-tsunagi-play", "");
@@ -211,7 +231,12 @@ export function ensureTsunagiPlayStyle(host: Element): void {
   target.append(style);
 }
 
-function create<K extends keyof HTMLElementTagNameMap>(document: Document, tag: K, className: string, text?: string): HTMLElementTagNameMap[K] {
+function create<K extends keyof HTMLElementTagNameMap>(
+  document: Document,
+  tag: K,
+  className: string,
+  text?: string,
+): HTMLElementTagNameMap[K] {
   const element = document.createElement(tag);
   element.className = className;
   if (text !== undefined) element.textContent = text;
@@ -231,12 +256,23 @@ function create<K extends keyof HTMLElementTagNameMap>(document: Document, tag: 
  */
 export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): TsunagiMount | null {
   const document = host.ownerDocument;
-  const first = newTsunagiGame(options.givens, options.size, { answer: options.answer, explosions: options.explosions, cheats: options.cheats, lines: options.lines });
+  const first = newTsunagiGame(options.givens, options.size, {
+    answer: options.answer,
+    explosions: options.explosions,
+    cheats: options.cheats,
+    lines: options.lines,
+  });
   if (first === null) return null;
   let game: TsunagiGame = first;
   ensureTsunagiPlayStyle(host);
 
-  let look: TsunagiLook = { marks: options.marks, fill: options.fill, colours: options.colours, board: options.board, coordinates: options.coordinates };
+  let look: TsunagiLook = {
+    marks: options.marks,
+    fill: options.fill,
+    colours: options.colours,
+    board: options.board,
+    coordinates: options.coordinates,
+  };
   let explosions: TsunagiExplosionChoice = options.explosions ?? "on";
   let cheats = options.cheats === true;
   let level = options.level;
@@ -247,7 +283,9 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   let explicitLanguage = options.language;
   const withControls = options.controls !== false;
   const withChips = options.chips === true;
-  let language: TsunagiLanguage = explicitLanguage ?? tsunagiLanguageOf(host.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang);
+  let language: TsunagiLanguage =
+    explicitLanguage ??
+    tsunagiLanguageOf(host.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang);
   const callbacks = options;
 
   // The parts.
@@ -270,7 +308,12 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   host.append(box, pad, chips, says);
   if (withControls) host.append(controls, progress, messages, hint);
 
-  const button = (name: string, onPress: () => void, parent: HTMLElement, className = "tsp-button"): HTMLButtonElement => {
+  const button = (
+    name: string,
+    onPress: () => void,
+    parent: HTMLElement,
+    className = "tsp-button",
+  ): HTMLButtonElement => {
     const one = create(document, "button", className);
     one.type = "button";
     one.dataset.action = name;
@@ -291,7 +334,14 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     down: (view, width) => ({ ...view, y: view.y - Math.round(width / 4) }),
     right: (view, width) => ({ ...view, x: view.x - Math.round(width / 4) }),
   };
-  for (const [name, glyph] of [["out", "−"], ["in", "+"], ["left", "←"], ["up", "↑"], ["down", "↓"], ["right", "→"]] as const) {
+  for (const [name, glyph] of [
+    ["out", "−"],
+    ["in", "+"],
+    ["left", "←"],
+    ["up", "↑"],
+    ["down", "↓"],
+    ["right", "→"],
+  ] as const) {
     const one = button(name, () => changeView(padMoves[name]!), pad);
     one.textContent = glyph;
     padButtons[name] = one;
@@ -326,7 +376,9 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   });
   const tell = (name: string, info: TsunagiEventDetail, callback?: (detail: TsunagiEventDetail) => void): void => {
     callback?.(info);
-    host.dispatchEvent(new CustomEvent(name, { detail: JSON.parse(JSON.stringify(info)), bubbles: true, composed: true }));
+    host.dispatchEvent(
+      new CustomEvent(name, { detail: JSON.parse(JSON.stringify(info)), bubbles: true, composed: true }),
+    );
   };
   const say = (key: string, values: Record<string, string | number> = {}): string => tsunagiSay(language, key, values);
 
@@ -355,9 +407,17 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     const marks = level === undefined ? null : tsunagiMarks(size, level, set);
     if (marks !== null) keys.push({ key: "difficulty", label: "", strong: false, says: say("difficultySays") });
     const role = level === undefined ? null : tsunagiRole(size, level, set);
-    if (role?.role === "teaches" && role.newOnes.length > 0) keys.push({ key: "teaches", label: say("teaches", { what: role.newOnes.map((each) => say(each)).join(language === "ja" ? "、" : " and ") }), strong: true, says: say("teachesSays") });
+    if (role?.role === "teaches" && role.newOnes.length > 0)
+      keys.push({
+        key: "teaches",
+        label: say("teaches", { what: role.newOnes.map((each) => say(each)).join(language === "ja" ? "、" : " and ") }),
+        strong: true,
+        says: say("teachesSays"),
+      });
     if (role?.role === "tests") keys.push({ key: "tests", label: say("tests"), strong: true, says: say("testsSays") });
-    for (const challenge of challengesOf(givens)) if (CHALLENGE_KEYS.includes(challenge)) keys.push({ key: challenge, label: say(challenge), strong: false, says: say(`${challenge}Says`) });
+    for (const challenge of challengesOf(givens))
+      if (CHALLENGE_KEYS.includes(challenge))
+        keys.push({ key: challenge, label: say(challenge), strong: false, says: say(`${challenge}Says`) });
     for (const chip of keys) {
       const one = create(document, "button", "tsp-chip");
       one.type = "button";
@@ -408,15 +468,51 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     host.dataset.filled = String(info.filled);
     if (!withControls) return;
     hint.textContent = say("hint");
-    progress.textContent = game.solved ? say("solved") : info.joined === info.pairs && info.filled < info.cells ? say("fullButEmpty", { n: info.cells - info.filled }) : say("progress", { joined: info.joined, pairs: info.pairs, percent: Math.round((100 * info.filled) / info.cells) });
+    progress.textContent = game.solved
+      ? say("solved")
+      : info.joined === info.pairs && info.filled < info.cells
+        ? say("fullButEmpty", { n: info.cells - info.filled })
+        : say("progress", {
+            joined: info.joined,
+            pairs: info.pairs,
+            percent: Math.round((100 * info.filled) / info.cells),
+          });
     const lines: { text: string; warn?: boolean; name: string }[] = [];
-    if (info.strokeLimit !== null) lines.push({ name: "strokes", text: info.outOfStrokes ? say("outOfStrokes") : say("strokesLeft", { n: info.strokesLeft ?? 0, left: info.strokesLeft ?? 0, limit: info.strokeLimit }), warn: info.outOfStrokes });
+    if (info.strokeLimit !== null)
+      lines.push({
+        name: "strokes",
+        text: info.outOfStrokes
+          ? say("outOfStrokes")
+          : say("strokesLeft", { n: info.strokesLeft ?? 0, left: info.strokesLeft ?? 0, limit: info.strokeLimit }),
+        warn: info.outOfStrokes,
+      });
     if (info.boomIn !== null && !game.solved) {
       const burst = game.exploded === null || shownBlast === null ? "" : `${say(game.exploded)} `;
-      lines.push({ name: "boom", text: `${burst}${info.boomIn === 1 ? say("boomNext") : say("boomIn", { n: info.boomIn })}`, warn: info.boomIn === 1 });
+      lines.push({
+        name: "boom",
+        text: `${burst}${info.boomIn === 1 ? say("boomNext") : say("boomIn", { n: info.boomIn })}`,
+        warn: info.boomIn === 1,
+      });
     }
-    if (game.eased !== null || game.cheated) lines.push({ name: "help", text: say(game.eased === "explosions-off" ? "helpExplosionsOff" : game.eased === "explosions-soft" ? "helpExplosionsSoft" : "helpCheated") });
-    if (game.checked !== null) lines.push({ name: "check", text: game.checked.unjoined > 0 ? say("checkMissing", { n: game.checked.unjoined }) : say("checkEmpty", { n: game.checked.empty }) });
+    if (game.eased !== null || game.cheated)
+      lines.push({
+        name: "help",
+        text: say(
+          game.eased === "explosions-off"
+            ? "helpExplosionsOff"
+            : game.eased === "explosions-soft"
+              ? "helpExplosionsSoft"
+              : "helpCheated",
+        ),
+      });
+    if (game.checked !== null)
+      lines.push({
+        name: "check",
+        text:
+          game.checked.unjoined > 0
+            ? say("checkMissing", { n: game.checked.unjoined })
+            : say("checkEmpty", { n: game.checked.empty }),
+      });
     messages.replaceChildren(
       ...lines.map((line) => {
         const one = create(document, "p", "tsp-message", line.text);
@@ -462,38 +558,89 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   box.tabIndex = 0;
   box.setAttribute("role", "application");
   function paintKeyboard(): void {
-    if (keyboardCell >= game.layout.cells.length || game.layout.cells[keyboardCell] === CELL_BLOCKED) keyboardCell = game.layout.ends[0]?.[0] ?? 0;
+    if (keyboardCell >= game.layout.cells.length || game.layout.cells[keyboardCell] === CELL_BLOCKED)
+      keyboardCell = game.layout.ends[0]?.[0] ?? 0;
     box.dataset.keyboardCell = String(keyboardCell);
     box.setAttribute("aria-label", say("keyboardHelp"));
-    keyboardStatus.textContent = say("keyboardCell", { row: Math.floor(keyboardCell / size) + 1, col: keyboardCell % size + 1 });
+    keyboardStatus.textContent = say("keyboardCell", {
+      row: Math.floor(keyboardCell / size) + 1,
+      col: (keyboardCell % size) + 1,
+    });
     const svg = inner.querySelector("svg");
     if (!svg) return;
     svg.querySelector(".tsp-key-cursor")?.remove();
     const point = geometry.centre(keyboardCell);
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    circle.setAttribute("class", "tsp-key-cursor"); circle.setAttribute("aria-hidden", "true");
-    circle.setAttribute("cx", String(point.x)); circle.setAttribute("cy", String(point.y)); circle.setAttribute("r", "44"); svg.append(circle);
+    circle.setAttribute("class", "tsp-key-cursor");
+    circle.setAttribute("aria-hidden", "true");
+    circle.setAttribute("cx", String(point.x));
+    circle.setAttribute("cy", String(point.y));
+    circle.setAttribute("r", "44");
+    svg.append(circle);
   }
   function showKeyboardCell(): void {
     if (view.zoom <= 1) return;
-    const svg = inner.querySelector("svg"); const matrix = svg?.getScreenCTM();
+    const svg = inner.querySelector("svg");
+    const matrix = svg?.getScreenCTM();
     if (!svg || !matrix) return;
-    const centre = geometry.centre(keyboardCell); const point = svg.createSVGPoint(); point.x = centre.x; point.y = centre.y;
-    const at = point.matrixTransform(matrix); const rect = box.getBoundingClientRect(); const margin = 28;
-    const dx = at.x < rect.left + margin ? rect.left + margin - at.x : at.x > rect.right - margin ? rect.right - margin - at.x : 0;
-    const dy = at.y < rect.top + margin ? rect.top + margin - at.y : at.y > rect.bottom - margin ? rect.bottom - margin - at.y : 0;
-    if (dx || dy) { view = keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width); applyView(); }
+    const centre = geometry.centre(keyboardCell);
+    const point = svg.createSVGPoint();
+    point.x = centre.x;
+    point.y = centre.y;
+    const at = point.matrixTransform(matrix);
+    const rect = box.getBoundingClientRect();
+    const margin = 28;
+    const dx =
+      at.x < rect.left + margin
+        ? rect.left + margin - at.x
+        : at.x > rect.right - margin
+          ? rect.right - margin - at.x
+          : 0;
+    const dy =
+      at.y < rect.top + margin
+        ? rect.top + margin - at.y
+        : at.y > rect.bottom - margin
+          ? rect.bottom - margin - at.y
+          : 0;
+    if (dx || dy) {
+      view = keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width);
+      applyView();
+    }
   }
 
   function render(force = false): void {
     const g = game;
     const over = g.solved || tsunagiProgress(g).outOfStrokes;
-    const still = JSON.stringify([shownFlags, shownBlast, g.solved, look.marks, look.fill, look.board, look.colours, look.coordinates, language, g.layout.size]);
+    const still = JSON.stringify([
+      shownFlags,
+      shownBlast,
+      g.solved,
+      look.marks,
+      look.fill,
+      look.board,
+      look.colours,
+      look.coordinates,
+      language,
+      g.layout.size,
+    ]);
     const key = JSON.stringify([g.lines, still]);
     if (force || key !== drawnKey) {
       drawnKey = key;
-      const patched = !force && drawnLines !== null && still === drawnStill && !g.layout.cells.includes(CELL_BRIDGE) && patch(g, drawnLines);
-      if (!patched) inner.innerHTML = drawTsunagi(g.layout, { ...look, lines: g.lines, flagged: shownFlags ?? [], blasted: shownBlast ?? [], done: g.solved, language });
+      const patched =
+        !force &&
+        drawnLines !== null &&
+        still === drawnStill &&
+        !g.layout.cells.includes(CELL_BRIDGE) &&
+        patch(g, drawnLines);
+      if (!patched)
+        inner.innerHTML = drawTsunagi(g.layout, {
+          ...look,
+          lines: g.lines,
+          flagged: shownFlags ?? [],
+          blasted: shownBlast ?? [],
+          done: g.solved,
+          language,
+        });
       drawnLines = g.lines;
       drawnStill = still;
     }
@@ -517,7 +664,11 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     if (svg === null) return null;
     const rect = svg.getBoundingClientRect();
     if (rect.width === 0) return null;
-    return cellAtPoint(geometry, ((clientX - rect.left) / rect.width) * geometry.side, ((clientY - rect.top) / rect.height) * geometry.side);
+    return cellAtPoint(
+      geometry,
+      ((clientX - rect.left) / rect.width) * geometry.side,
+      ((clientY - rect.top) / rect.height) * geometry.side,
+    );
   }
 
   function after(before: TsunagiGame): void {
@@ -576,7 +727,12 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     after(before);
     if (!stroked) return;
     tell("tsunagi-stroke", detail(), callbacks.onStroke);
-    if (game.exploded !== null) tell("tsunagi-explosion", detail({ explosion: { kind: game.exploded, cells: game.blasted ?? [] } }), callbacks.onExplosion);
+    if (game.exploded !== null)
+      tell(
+        "tsunagi-explosion",
+        detail({ explosion: { kind: game.exploded, cells: game.blasted ?? [] } }),
+        callbacks.onExplosion,
+      );
     if (game.solved && !solvedTold) {
       solvedTold = true;
       tell("tsunagi-solve", detail(), callbacks.onSolve);
@@ -609,29 +765,62 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     applyView();
   };
   const onKey = (event: KeyboardEvent): void => {
-    if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z") { event.preventDefault(); api.undo(); return; }
+    if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      api.undo();
+      return;
+    }
     if (event.target !== box || pointer !== null || event.ctrlKey || event.metaKey || event.altKey) return;
     const key = event.key.toLowerCase();
     if (key === "enter" || key === " ") {
       event.preventDefault();
       if (game.drawing !== null) finishStroke();
-      else { const before = game; game = pressGame(game, keyboardCell); after(before); paintKeyboard(); }
+      else {
+        const before = game;
+        game = pressGame(game, keyboardCell);
+        after(before);
+        paintKeyboard();
+      }
       return;
     }
     if (key === "escape" && game.drawing !== null) {
-      event.preventDefault(); const before = game;
-      game = { ...game, lines: game.before ?? game.lines, drawing: null, before: null }; after(before); paintKeyboard(); return;
+      event.preventDefault();
+      const before = game;
+      game = { ...game, lines: game.before ?? game.lines, drawing: null, before: null };
+      after(before);
+      paintKeyboard();
+      return;
     }
-    const move = ({ arrowup: [-1, 0], arrowright: [0, 1], arrowdown: [1, 0], arrowleft: [0, -1], ...(game.layout.hex ? { q: [1, -1], e: [-1, 1] } : {}) } as Record<string, number[]>)[key];
+    const move = (
+      {
+        arrowup: [-1, 0],
+        arrowright: [0, 1],
+        arrowdown: [1, 0],
+        arrowleft: [0, -1],
+        ...(game.layout.hex ? { q: [1, -1], e: [-1, 1] } : {}),
+      } as Record<string, number[]>
+    )[key];
     if (!move) return;
     event.preventDefault();
-    let row = Math.floor(keyboardCell / size) + move[0]; let col = keyboardCell % size + move[1];
-    if (game.layout.wrap) { row = (row + size) % size; col = (col + size) % size; }
+    let row = Math.floor(keyboardCell / size) + move[0];
+    let col = (keyboardCell % size) + move[1];
+    if (game.layout.wrap) {
+      row = (row + size) % size;
+      col = (col + size) % size;
+    }
     if (row < 0 || col < 0 || row >= size || col >= size) return;
-    const next = row * size + col; if (game.layout.cells[next] === CELL_BLOCKED) return;
-    if (game.drawing !== null) { const before = game; game = dragGame(game, next); if (game === before) return; keyboardCell = game.lines[game.drawing!]?.at(-1) ?? next; game = { ...game, reach: NO_REACH }; after(before); }
-    else keyboardCell = next;
-    paintKeyboard(); showKeyboardCell();
+    const next = row * size + col;
+    if (game.layout.cells[next] === CELL_BLOCKED) return;
+    if (game.drawing !== null) {
+      const before = game;
+      game = dragGame(game, next);
+      if (game === before) return;
+      keyboardCell = game.lines[game.drawing!]?.at(-1) ?? next;
+      game = { ...game, reach: NO_REACH };
+      after(before);
+    } else keyboardCell = next;
+    paintKeyboard();
+    showKeyboardCell();
   };
   box.addEventListener("pointerdown", onDown);
   box.addEventListener("pointermove", onMove);
@@ -639,28 +828,38 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
   box.addEventListener("pointercancel", lift);
   box.addEventListener("wheel", onWheel, { passive: false });
   host.addEventListener("keydown", onKey);
-  const resize = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
-    const width = box.getBoundingClientRect().width;
-    if (width === boxWidth) return;
-    boxWidth = width;
-    view = keptView(view, boxWidth);
-    applyView();
-  });
+  const resize =
+    typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(() => {
+          const width = box.getBoundingClientRect().width;
+          if (width === boxWidth) return;
+          boxWidth = width;
+          view = keptView(view, boxWidth);
+          applyView();
+        });
   resize?.observe(box);
-  const watching = typeof MutationObserver === "undefined" ? null : new MutationObserver(() => {
-    if (explicitLanguage !== undefined) return;
-    const next = tsunagiLanguageOf(host.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang);
-    if (next === language) return;
-    language = next;
-    renderChips();
-    render(true);
-  });
+  const watching =
+    typeof MutationObserver === "undefined"
+      ? null
+      : new MutationObserver(() => {
+          if (explicitLanguage !== undefined) return;
+          const next = tsunagiLanguageOf(host.closest("[lang]")?.getAttribute("lang") ?? document.documentElement.lang);
+          if (next === language) return;
+          language = next;
+          renderChips();
+          render(true);
+        });
   watching?.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 
   /** Room for every line of words this level can ever show, so nothing under the board moves as they come and go. */
   function reserve(next: TsunagiGame): void {
     // What Check says and what an explosion says can run to two lines on a phone; the stroke count is one.
-    const lines = 2 + (next.layout.strokes !== null ? 1 : 0) + (next.layout.explosions !== null ? 2 : 0) + (next.cheats || next.eased !== null ? 2 : 0);
+    const lines =
+      2 +
+      (next.layout.strokes !== null ? 1 : 0) +
+      (next.layout.explosions !== null ? 2 : 0) +
+      (next.cheats || next.eased !== null ? 2 : 0);
     messages.style.minHeight = `${(lines * 1.4 + 0.1).toFixed(1)}em`;
   }
 
@@ -686,7 +885,12 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     game: () => game,
     progress: () => tsunagiProgress(game),
     load: (next) => {
-      const made = newTsunagiGame(next.givens, next.size, { answer: next.answer, explosions, cheats, lines: next.lines });
+      const made = newTsunagiGame(next.givens, next.size, {
+        answer: next.answer,
+        explosions,
+        cheats,
+        lines: next.lines,
+      });
       if (made === null) return;
       givens = next.givens;
       size = next.size;

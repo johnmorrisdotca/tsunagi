@@ -16,12 +16,19 @@ test("a tag with a size and a level draws that level and plays it", async ({ pag
   expect(errors).toEqual([]);
 });
 
-test("a tag with its own layout and answer plays it, and fires change, stroke and solve with an answer the server accepts", async ({ page }) => {
+test("a tag with its own layout and answer plays it, and fires change, stroke and solve with an answer the server accepts", async ({
+  page,
+}) => {
   const level = levelOf(5, 1);
   await bare(page, `<tsunagi-board size="5" givens="${level.givens}" answer="${level.answer}"></tsunagi-board>`);
   await page.evaluate(() => {
     window.told = [];
-    for (const name of ["tsunagi-change", "tsunagi-stroke", "tsunagi-solve"]) document.querySelector("tsunagi-board").addEventListener(name, (event) => window.told.push([name, event.detail.answer, event.detail.helped, event.detail.progress.solved]));
+    for (const name of ["tsunagi-change", "tsunagi-stroke", "tsunagi-solve"])
+      document
+        .querySelector("tsunagi-board")
+        .addEventListener(name, (event) =>
+          window.told.push([name, event.detail.answer, event.detail.helped, event.detail.progress.solved]),
+        );
   });
   for (const line of level.lines) await dragCells(page, tag(page).locator("svg.tsunagi"), level.layout, line);
   const told = await page.evaluate(() => window.told);
@@ -35,10 +42,17 @@ test("a tag with its own layout and answer plays it, and fires change, stroke an
   expect(checkTsunagiAnswer(5, level.givens, solve[1]).ok).toBe(true);
 });
 
-test("changing an attribute changes the board at once: marks, fill, colour set, board, coordinates", async ({ page }) => {
+test("changing an attribute changes the board at once: marks, fill, colour set, board, coordinates", async ({
+  page,
+}) => {
   await bare(page, '<tsunagi-board size="5" level="1"></tsunagi-board>');
   const level = levelOf(5, 1);
-  await dragCells(page, tag(page).locator("svg.tsunagi"), level.layout, level.lines.find((line) => line.length >= 4));
+  await dragCells(
+    page,
+    tag(page).locator("svg.tsunagi"),
+    level.layout,
+    level.lines.find((line) => line.length >= 4),
+  );
   await expect(tag(page).locator(".tsu-bead").first()).toBeVisible();
   await tag(page).evaluate((element) => {
     element.setAttribute("marks", "numbers");
@@ -58,7 +72,10 @@ test("changing an attribute changes the board at once: marks, fill, colour set, 
 });
 
 test("controls off draws only the board; chips adds the level's difficulty and its challenges", async ({ page }) => {
-  await bare(page, '<tsunagi-board id="a" size="5" level="1" controls="off"></tsunagi-board><tsunagi-board id="b" size="5" level="15" chips></tsunagi-board>');
+  await bare(
+    page,
+    '<tsunagi-board id="a" size="5" level="1" controls="off"></tsunagi-board><tsunagi-board id="b" size="5" level="15" chips></tsunagi-board>',
+  );
   await expect(page.locator("#a button:visible")).toHaveCount(0);
   await expect(page.locator("#a .tsp-progress")).toHaveCount(0);
   await expect(page.locator("#b button[data-chip]").first()).toBeVisible();
@@ -74,7 +91,9 @@ test("cheats on a level offers Cheat, whose solve is told as helped", async ({ p
   const level = levelOf(4, 1);
   await page.evaluate(() => {
     window.solved = [];
-    document.querySelector("tsunagi-board").addEventListener("tsunagi-solve", (event) => window.solved.push([event.detail.helped, event.detail.answer]));
+    document
+      .querySelector("tsunagi-board")
+      .addEventListener("tsunagi-solve", (event) => window.solved.push([event.detail.helped, event.detail.answer]));
   });
   const cheat = tag(page).locator('[data-action="cheat"]');
   await expect(cheat).toBeVisible();
@@ -85,7 +104,9 @@ test("cheats on a level offers Cheat, whose solve is told as helped", async ({ p
   expect(checkTsunagiAnswer(4, level.givens, solved[0][1]).ok).toBe(true);
 });
 
-test("methods drive it, a kept game's progress is picked up again, and it speaks Japanese by its lang", async ({ page }) => {
+test("methods drive it, a kept game's progress is picked up again, and it speaks Japanese by its lang", async ({
+  page,
+}) => {
   await bare(page, '<tsunagi-board size="5" level="1" lang="ja"></tsunagi-board>');
   const level = levelOf(5, 1);
   await expect(tag(page).locator('[data-action="undo"]')).toHaveText("元に戻す");

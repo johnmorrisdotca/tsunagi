@@ -7,5 +7,14 @@
 export { ensureTsunagiPlayStyle, mountTsunagi } from "./mount.ts";
 export type { TsunagiEventDetail, TsunagiLook, TsunagiMount, TsunagiMountOptions } from "./mount.ts";
 export { TSUNAGI_PLAY_STYLE } from "./playStyle.ts";
-export { edgeNudge, keptView, TSUNAGI_EDGE, TSUNAGI_EDGE_STEP, TSUNAGI_FITTED, TSUNAGI_MOST_ZOOM, TSUNAGI_ZOOM_FROM, zoomedAbout } from "./viewport.ts";
+export {
+  edgeNudge,
+  keptView,
+  TSUNAGI_EDGE,
+  TSUNAGI_EDGE_STEP,
+  TSUNAGI_FITTED,
+  TSUNAGI_MOST_ZOOM,
+  TSUNAGI_ZOOM_FROM,
+  zoomedAbout,
+} from "./viewport.ts";
 export type { TsunagiView } from "./viewport.ts";

@@ -66,7 +66,9 @@ function readPool<T extends PoolBoard>(size: number, kind: string, jobs: number)
 
 /** A pool board's measures, as `measureLevel` would make them: the solve is already in the pool. */
 function measureOf(board: PoolBoard): LevelMeasure {
-  const lengths = [...new Set([...board.answer].filter((char) => PAIR_LETTERS.includes(char)))].map((letter) => [...board.answer].filter((char) => char === letter).length);
+  const lengths = [...new Set([...board.answer].filter((char) => PAIR_LETTERS.includes(char)))].map(
+    (letter) => [...board.answer].filter((char) => char === letter).length,
+  );
   const cells = board.layout.split("|")[0]!;
   return {
     pairs: board.pairs,
@@ -81,8 +83,14 @@ function measureOf(board: PoolBoard): LevelMeasure {
 
 /** The pool's boards, easiest first by the measured difficulty among them. */
 function byDifficulty<T extends PoolBoard>(boards: readonly T[], size: number): T[] {
-  const scores = difficultyScores(boards.map((board) => measureOf(board)), size);
-  return boards.map((board, at) => ({ board, score: scores[at]! })).sort((a, b) => a.score - b.score || (a.board.key < b.board.key ? -1 : 1)).map(({ board }) => board);
+  const scores = difficultyScores(
+    boards.map((board) => measureOf(board)),
+    size,
+  );
+  return boards
+    .map((board, at) => ({ board, score: scores[at]! }))
+    .sort((a, b) => a.score - b.score || (a.board.key < b.board.key ? -1 : 1))
+    .map(({ board }) => board);
 }
 
 function fileFor(size: number, levels: readonly Level[]): string {
@@ -104,7 +112,10 @@ function fileFor(size: number, levels: readonly Level[]): string {
   ].join("\n");
 }
 
-const asked = process.argv.slice(2).map(Number).filter((size) => POOL_JOBS[size] !== undefined);
+const asked = process.argv
+  .slice(2)
+  .map(Number)
+  .filter((size) => POOL_JOBS[size] !== undefined);
 const marks: Record<number, string> = { ...TSUNAGI_MARKS };
 const roles: Record<number, Record<number, TwistRole>> = { ...TSUNAGI_ROLES };
 for (const size of asked.length > 0 ? asked : Object.keys(POOL_JOBS).map(Number)) {
@@ -119,19 +130,34 @@ for (const size of asked.length > 0 ? asked : Object.keys(POOL_JOBS).map(Number)
   const order = orderByDifficulty(picked, size);
   const ordered = order.map((at) => picked[at]!);
   // The twist pools, easiest first within their kind, as `pools` in `tsunagi-twists.ts` makes them.
-  const pool = Object.fromEntries(KINDS.map((kind) => [kind, byDifficulty(readPool<PoolBoard & TwistCandidate>(size, kind, POOL_JOBS[size]!.twists), size) as TwistCandidate[]])) as Record<Kind, TwistCandidate[]>;
+  const pool = Object.fromEntries(
+    KINDS.map((kind) => [
+      kind,
+      byDifficulty(readPool<PoolBoard & TwistCandidate>(size, kind, POOL_JOBS[size]!.twists), size) as TwistCandidate[],
+    ]),
+  ) as Record<Kind, TwistCandidate[]>;
   const twisted = withTwists(size, ordered, new Set(), { tries: 0, longest: size * 3, budget: 15_000, pool });
   for (const each of twisted.placed) console.log(`  level ${each.level}: ${each.kind}`);
   if (twisted.kept.length > 0) console.log(`  blocks kept plain: ${twisted.kept.join(", ")}`);
   const levels = twisted.levels;
-  writeFileSync(`src/levels/size${size}.data.ts`, withLevelExamples(fileFor(size, levels), `@johnmorrisdotca/tsunagi/levels-${size}`));
-  const scores = difficultyScores(levels.map(([layout, answer]) => measureLevel(layout, answer, size)!), size);
+  writeFileSync(
+    `src/levels/size${size}.data.ts`,
+    withLevelExamples(fileFor(size, levels), `@johnmorrisdotca/tsunagi/levels-${size}`),
+  );
+  const scores = difficultyScores(
+    levels.map(([layout, answer]) => measureLevel(layout, answer, size)!),
+    size,
+  );
   marks[size] = scores.map((score) => String(Math.min(5, 1 + Math.floor(score / 20)))).join("");
   const layouts = levels.map(([layout]) => layout);
-  roles[size] = Object.fromEntries(layouts.flatMap((_, at) => {
-    const role = twistRole(layouts, at + 1);
-    return role === null ? [] : [[at + 1, role]];
-  }));
-  console.log(`${size}×${size}: ${levels.length} levels from a pool of ${plain.length}, ${Math.round((performance.now() - started) / 1000)} s`);
+  roles[size] = Object.fromEntries(
+    layouts.flatMap((_, at) => {
+      const role = twistRole(layouts, at + 1);
+      return role === null ? [] : [[at + 1, role]];
+    }),
+  );
+  console.log(
+    `${size}×${size}: ${levels.length} levels from a pool of ${plain.length}, ${Math.round((performance.now() - started) / 1000)} s`,
+  );
 }
 writeFileSync("src/levels/marks.data.ts", marksFile(marks, roles, { ...TSUNAGI_PORTAL_MARKS }));

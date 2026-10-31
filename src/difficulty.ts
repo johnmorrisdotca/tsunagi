@@ -123,7 +123,10 @@ export function forcedShare(code: string, size: number): number {
           done[pair] = true;
           break;
         }
-        const open = stepsOf === null ? around[at]!.filter((next) => owner[next] === -1).map((to) => ({ to, through: [] as readonly number[] })) : stepsOf[at]!.filter((step) => owner[step.to] === -1 && step.through.every((cell) => owner[cell] === -1));
+        const open =
+          stepsOf === null
+            ? around[at]!.filter((next) => owner[next] === -1).map((to) => ({ to, through: [] as readonly number[] }))
+            : stepsOf[at]!.filter((step) => owner[step.to] === -1 && step.through.every((cell) => owner[cell] === -1));
         if (open.length !== 1) continue;
         const [way] = open as [{ to: number; through: readonly number[] }];
         for (const cell of [...way.through, way.to]) owner[cell] = pair;
@@ -180,7 +183,12 @@ export function measureLevel(layout: string, answer: string, size: number): Leve
  * console.log(measureSolved(givens,answer,4,{nodes:1,branches:0}));
  * ```
  */
-export function measureSolved(layout: string, answer: string, size: number, solved: { nodes: number; branches: number }): LevelMeasure | null {
+export function measureSolved(
+  layout: string,
+  answer: string,
+  size: number,
+  solved: { nodes: number; branches: number },
+): LevelMeasure | null {
   const decoded = decodeLayout(layout, size);
   if (decoded === null) return null;
   const lengths = decoded.ends.map((_, pair) => [...answer].filter((char) => char === PAIR_LETTERS[pair]).length);
@@ -188,7 +196,9 @@ export function measureSolved(layout: string, answer: string, size: number, solv
     pairs: decoded.ends.length,
     turns: turnsIn(answer, decoded),
     longest: Math.max(...lengths),
-    empties: [...layoutCells(layout)].filter((char) => char === "." || (decoded.ends.length < CAPITAL_PAIRS && char >= "a" && char <= "z")).length,
+    empties: [...layoutCells(layout)].filter(
+      (char) => char === "." || (decoded.ends.length < CAPITAL_PAIRS && char >= "a" && char <= "z"),
+    ).length,
     forcedShare: forcedShare(layout, size),
     nodes: solved.nodes,
     branches: solved.branches,
@@ -228,7 +238,13 @@ export function difficultyScores(measures: readonly LevelMeasure[], size: number
   const longest = percentile((measure) => measure.longest);
   const w = DIFFICULTY_WEIGHTS;
   return measures.map((measure) =>
-    Math.round(100 * (w.corners * corners(measure) + w.guessing * guessing(measure) + w.notForced * notForced(measure) + w.longest * longest(measure))),
+    Math.round(
+      100 *
+        (w.corners * corners(measure) +
+          w.guessing * guessing(measure) +
+          w.notForced * notForced(measure) +
+          w.longest * longest(measure)),
+    ),
   );
 }
 

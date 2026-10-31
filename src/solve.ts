@@ -120,7 +120,14 @@ export type SolveCount = {
  */
 export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
   // For a big board, or one with portals, `budget` is a number of dead ends, not of positions.
-  if (layout.size >= SAT_FROM_SIZE || layout.portalPairs.length > 0) return countSolutionsSat(layout, limit, budget, null, layout.size >= SAT_BINARY_FROM_SIZE || layout.portalPairs.length > 0 ? "binary" : "one-hot");
+  if (layout.size >= SAT_FROM_SIZE || layout.portalPairs.length > 0)
+    return countSolutionsSat(
+      layout,
+      limit,
+      budget,
+      null,
+      layout.size >= SAT_BINARY_FROM_SIZE || layout.portalPairs.length > 0 ? "binary" : "one-hot",
+    );
   const { size, cells, ends } = layout;
   const total = size * size;
   const steps = stepTable(layout);
@@ -268,7 +275,8 @@ export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.PO
     for (let pair = 0; pair < pairs; pair += 1) {
       if (closed[pair] === 1) continue;
       let ways = 0;
-      for (const step of steps[head[pair]!]!) if (free(step, pair) && (mayTake(step.to, pair) || step.to === goal[pair])) ways += 1;
+      for (const step of steps[head[pair]!]!)
+        if (free(step, pair) && (mayTake(step.to, pair) || step.to === goal[pair])) ways += 1;
       if (ways < bestWays) {
         best = pair;
         bestWays = ways;
@@ -345,7 +353,13 @@ export function countSolutions(layout: LinkLayout, limit = 2, budget = Number.PO
  * console.log(countSolutionsOfLevel(layout,answer,2,20000).count);
  * ```
  */
-export function countSolutionsOfLevel(layout: LinkLayout, answer: string, limit = 2, budget = Number.POSITIVE_INFINITY): SolveCount {
-  if (layout.size < SAT_BINARY_FROM_SIZE && layout.portalPairs.length === 0) return countSolutions(layout, limit, budget);
+export function countSolutionsOfLevel(
+  layout: LinkLayout,
+  answer: string,
+  limit = 2,
+  budget = Number.POSITIVE_INFINITY,
+): SolveCount {
+  if (layout.size < SAT_BINARY_FROM_SIZE && layout.portalPairs.length === 0)
+    return countSolutions(layout, limit, budget);
   return countSolutionsSat(layout, limit, budget, linesOfAnswer(layout, answer), "binary");
 }

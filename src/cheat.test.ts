@@ -29,7 +29,11 @@ function sampleLevels() {
 
 describe("Cheat", () => {
   it("finds a board of every kind to cheat on", () => {
-    expect(sampleLevels().map(([kind]) => kind).sort()).toEqual(["bridges", "hexagon", "plain", "walls", "waypoints", "wrap"]);
+    expect(
+      sampleLevels()
+        .map(([kind]) => kind)
+        .sort(),
+    ).toEqual(["bridges", "hexagon", "plain", "walls", "waypoints", "wrap"]);
   });
 
   it("draws one line at a time, each the answer's, until the board is solved — on every kind of board", () => {

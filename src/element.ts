@@ -39,11 +39,15 @@ import { TSUNAGI_COLOUR_SET_NAMES, type TsunagiColourSetName } from "./colours.t
  * the methods `undo()`, `restart()`, `check()`, `cheat()` and `fit()`. Nothing in it can be selected, and its box
  * stays one steady square whatever is drawn.
  */
-const ElementBase: typeof HTMLElement = typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
+const ElementBase: typeof HTMLElement =
+  typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
 
-const isOn = (value: string | null): boolean => value !== null && !["false", "off", "0", "no"].includes(value.trim().toLowerCase());
-const offAlias = (value: string | null): string | null => value !== null && ["false", "no", "0"].includes(value.trim().toLowerCase()) ? "off" : value;
-const oneOf = <T extends string>(value: string | null, allowed: readonly T[]): T | undefined => (allowed.includes(value as T) ? (value as T) : undefined);
+const isOn = (value: string | null): boolean =>
+  value !== null && !["false", "off", "0", "no"].includes(value.trim().toLowerCase());
+const offAlias = (value: string | null): string | null =>
+  value !== null && ["false", "no", "0"].includes(value.trim().toLowerCase()) ? "off" : value;
+const oneOf = <T extends string>(value: string | null, allowed: readonly T[]): T | undefined =>
+  allowed.includes(value as T) ? (value as T) : undefined;
 
 /** Every mounted-board option, kept complete by TypeScript and checked by the builder.
  * @example
@@ -52,7 +56,29 @@ const oneOf = <T extends string>(value: string | null, allowed: readonly T[]): T
  * console.log(typeof TSUNAGI_EMBED_OPTION_KEYS); // object
  * ```
  */
-export const TSUNAGI_EMBED_OPTION_KEYS = Object.keys({ size: true, givens: true, answer: true, level: true, set: true, lines: true, explosions: true, cheats: true, controls: true, chips: true, zoom: true, language: true, marks: true, fill: true, colours: true, board: true, coordinates: true, onChange: true, onStroke: true, onExplosion: true, onSolve: true } satisfies Record<keyof TsunagiMountOptions, boolean>);
+export const TSUNAGI_EMBED_OPTION_KEYS = Object.keys({
+  size: true,
+  givens: true,
+  answer: true,
+  level: true,
+  set: true,
+  lines: true,
+  explosions: true,
+  cheats: true,
+  controls: true,
+  chips: true,
+  zoom: true,
+  language: true,
+  marks: true,
+  fill: true,
+  colours: true,
+  board: true,
+  coordinates: true,
+  onChange: true,
+  onStroke: true,
+  onExplosion: true,
+  onSolve: true,
+} satisfies Record<keyof TsunagiMountOptions, boolean>);
 /** Host callbacks and custom drawing palettes, which cannot be put in an attribute.
  * @example
  * ```ts
@@ -61,7 +87,10 @@ export const TSUNAGI_EMBED_OPTION_KEYS = Object.keys({ size: true, givens: true,
  * console.log(Object.keys(options).length); // 0
  * ```
  */
-export type TsunagiElementOptions = Pick<TsunagiMountOptions, "onChange" | "onStroke" | "onExplosion" | "onSolve"> & { colours?: readonly TsunagiColour[]; board?: TsunagiBoardLook };
+export type TsunagiElementOptions = Pick<TsunagiMountOptions, "onChange" | "onStroke" | "onExplosion" | "onSolve"> & {
+  colours?: readonly TsunagiColour[];
+  board?: TsunagiBoardLook;
+};
 
 /** Native custom element with reflected setup and presentation.
  * @example
@@ -71,7 +100,30 @@ export type TsunagiElementOptions = Pick<TsunagiMountOptions, "onChange" | "onSt
  * ```
  */
 export class TsunagiBoard extends ElementBase {
-  static observedAttributes = ["size", "level", "set", "givens", "answer", "marks", "fill", "colour-set", "board", "coordinates", "explosions", "cheats", "controls", "chips", "zoom", "lang", "progress", "grid", "daily", "theme", "width", "label"];
+  static observedAttributes = [
+    "size",
+    "level",
+    "set",
+    "givens",
+    "answer",
+    "marks",
+    "fill",
+    "colour-set",
+    "board",
+    "coordinates",
+    "explosions",
+    "cheats",
+    "controls",
+    "chips",
+    "zoom",
+    "lang",
+    "progress",
+    "grid",
+    "daily",
+    "theme",
+    "width",
+    "label",
+  ];
 
   #widthBefore: string | null = null;
   #widthOwned = false;
@@ -85,99 +137,226 @@ export class TsunagiBoard extends ElementBase {
     const width = Number(this.getAttribute("width"));
     const size = this.getAttribute("size");
     const displaySize = size === null && (this.hasAttribute("grid") || this.hasAttribute("daily")) ? "medium" : size;
-    const owned = (this.hasAttribute("width") && Number.isFinite(width) && width > 0) || (displaySize !== null && ["small", "medium", "large"].includes(displaySize));
-    if (owned && !this.#widthOwned) { this.#widthBefore = this.style.width; this.#widthOwned = true; }
-    if (this.hasAttribute("width") && Number.isFinite(width) && width > 0) this.style.width = `${Math.min(width, 2000)}px`;
-    else if (displaySize !== null && ["small", "medium", "large"].includes(displaySize)) this.style.width = `${{ small: 320, medium: 480, large: 640 }[displaySize as "small" | "medium" | "large"]}px`;
-    else if (this.#widthOwned) { this.style.width = this.#widthBefore ?? ""; this.#widthOwned = false; }
+    const owned =
+      (this.hasAttribute("width") && Number.isFinite(width) && width > 0) ||
+      (displaySize !== null && ["small", "medium", "large"].includes(displaySize));
+    if (owned && !this.#widthOwned) {
+      this.#widthBefore = this.style.width;
+      this.#widthOwned = true;
+    }
+    if (this.hasAttribute("width") && Number.isFinite(width) && width > 0)
+      this.style.width = `${Math.min(width, 2000)}px`;
+    else if (displaySize !== null && ["small", "medium", "large"].includes(displaySize))
+      this.style.width = `${{ small: 320, medium: 480, large: 640 }[displaySize as "small" | "medium" | "large"]}px`;
+    else if (this.#widthOwned) {
+      this.style.width = this.#widthBefore ?? "";
+      this.#widthOwned = false;
+    }
     this.style.maxWidth = "100%";
-    const theme = this.getAttribute("theme"); this.style.colorScheme = theme === "light" || theme === "dark" ? theme : "light dark";
+    const theme = this.getAttribute("theme");
+    this.style.colorScheme = theme === "light" || theme === "dark" ? theme : "light dark";
     const root = this.getRootNode();
-    const target: ParentNode = typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : this.ownerDocument.head;
+    const target: ParentNode =
+      typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : this.ownerDocument.head;
     if (target.querySelector("style[data-tsunagi-embed-style]") === null) {
-      const style = this.ownerDocument.createElement("style"); style.setAttribute("data-tsunagi-embed-style", "");
-      const rules = (theme: string) => [...TSUNAGI_PLAY_STYLE.matchAll(new RegExp(`:root\\[data-theme="${theme}"\\] ([^{]+)\\{([^}]+)\\}`, "g"))].map(match => `[data-tsunagi-embed][theme="${theme}"]${match[1].trim() === ".tsunagi-play" ? ".tsunagi-play" : ` ${match[1].trim()}`} {${match[2]}}`).join("\n");
-      const light = [...TSUNAGI_PLAY_STYLE.matchAll(/\.(tsunagi|tsunagi-play) \{([^}]+)\}/g)].filter(match => !match[2].includes("#ece8dc") && !match[2].includes("#171a18"));
-      style.textContent = `@media(prefers-color-scheme:dark){${rules("dark").replaceAll('[theme="dark"]', ':not([theme="light"]):not([theme="dark"])')}}\n${rules("dark")}\n${light.map(match => `[data-tsunagi-embed][theme="light"]${match[1] === "tsunagi-play" ? ".tsunagi-play" : " .tsunagi"} {${match[2]}}`).join("\n")}\n[data-tsunagi-embed][label]{outline-offset:2px}`;
+      const style = this.ownerDocument.createElement("style");
+      style.setAttribute("data-tsunagi-embed-style", "");
+      const rules = (theme: string) =>
+        [...TSUNAGI_PLAY_STYLE.matchAll(new RegExp(`:root\\[data-theme="${theme}"\\] ([^{]+)\\{([^}]+)\\}`, "g"))]
+          .map(
+            (match) =>
+              `[data-tsunagi-embed][theme="${theme}"]${match[1].trim() === ".tsunagi-play" ? ".tsunagi-play" : ` ${match[1].trim()}`} {${match[2]}}`,
+          )
+          .join("\n");
+      const light = [...TSUNAGI_PLAY_STYLE.matchAll(/\.(tsunagi|tsunagi-play) \{([^}]+)\}/g)].filter(
+        (match) => !match[2].includes("#ece8dc") && !match[2].includes("#171a18"),
+      );
+      style.textContent = `@media(prefers-color-scheme:dark){${rules("dark").replaceAll('[theme="dark"]', ':not([theme="light"]):not([theme="dark"])')}}\n${rules("dark")}\n${light.map((match) => `[data-tsunagi-embed][theme="light"]${match[1] === "tsunagi-play" ? ".tsunagi-play" : " .tsunagi"} {${match[2]}}`).join("\n")}\n[data-tsunagi-embed][label]{outline-offset:2px}`;
       target.append(style);
     }
-    if (this.hasAttribute("label")) { this.#labelBefore ??= { role: this.getAttribute("role"), label: this.getAttribute("aria-label") }; this.setAttribute("role", "group"); this.setAttribute("aria-label", this.getAttribute("label")!); }
-    else if (this.#labelBefore !== null) { for (const [name, value] of [["role", this.#labelBefore.role], ["aria-label", this.#labelBefore.label]]) { if (value === null) this.removeAttribute(name!); else this.setAttribute(name!, value); } this.#labelBefore = null; }
+    if (this.hasAttribute("label")) {
+      this.#labelBefore ??= { role: this.getAttribute("role"), label: this.getAttribute("aria-label") };
+      this.setAttribute("role", "group");
+      this.setAttribute("aria-label", this.getAttribute("label")!);
+    } else if (this.#labelBefore !== null) {
+      for (const [name, value] of [
+        ["role", this.#labelBefore.role],
+        ["aria-label", this.#labelBefore.label],
+      ]) {
+        if (value === null) this.removeAttribute(name!);
+        else this.setAttribute(name!, value);
+      }
+      this.#labelBefore = null;
+    }
   }
 
   #options: TsunagiElementOptions = {};
   /** Host callbacks and palettes; new callbacks do not restart the current game. */
-  get options(): TsunagiElementOptions { return this.#options; }
-  set options(value: TsunagiElementOptions) { this.#options = value ?? {}; if (this.isConnected) void this.#refresh(); }
+  get options(): TsunagiElementOptions {
+    return this.#options;
+  }
+  set options(value: TsunagiElementOptions) {
+    this.#options = value ?? {};
+    if (this.isConnected) void this.#refresh();
+  }
   #problem(message: string): void {
-    this.#mount?.destroy(); this.#mount = null; this.#levelKey = "";
-    const status = this.ownerDocument.createElement("p"); status.setAttribute("role", "status"); status.textContent = message; this.replaceChildren(status);
+    this.#mount?.destroy();
+    this.#mount = null;
+    this.#levelKey = "";
+    const status = this.ownerDocument.createElement("p");
+    status.setAttribute("role", "status");
+    status.textContent = message;
+    this.replaceChildren(status);
     this.dispatchEvent(new CustomEvent("tsunagi-error", { bubbles: true, composed: true, detail: { message } }));
   }
 
   /** The `size` attribute, reflected. */
-  get size(): string | null { return this.getAttribute("size"); }
-  set size(value: string | number | boolean | null | undefined) { this.#write("size", value); }
+  get size(): string | null {
+    return this.getAttribute("size");
+  }
+  set size(value: string | number | boolean | null | undefined) {
+    this.#write("size", value);
+  }
   /** The `level` attribute, reflected. */
-  get level(): string | null { return this.getAttribute("level"); }
-  set level(value: string | number | boolean | null | undefined) { this.#write("level", value); }
+  get level(): string | null {
+    return this.getAttribute("level");
+  }
+  set level(value: string | number | boolean | null | undefined) {
+    this.#write("level", value);
+  }
   /** The `set` attribute, reflected. */
-  get set(): string | null { return this.getAttribute("set"); }
-  set set(value: string | number | boolean | null | undefined) { this.#write("set", value); }
+  get set(): string | null {
+    return this.getAttribute("set");
+  }
+  set set(value: string | number | boolean | null | undefined) {
+    this.#write("set", value);
+  }
   /** The `givens` attribute, reflected. */
-  get givens(): string | null { return this.getAttribute("givens"); }
-  set givens(value: string | number | boolean | null | undefined) { this.#write("givens", value); }
+  get givens(): string | null {
+    return this.getAttribute("givens");
+  }
+  set givens(value: string | number | boolean | null | undefined) {
+    this.#write("givens", value);
+  }
   /** The `answer` attribute, reflected. */
-  get answer(): string | null { return this.getAttribute("answer"); }
-  set answer(value: string | number | boolean | null | undefined) { this.#write("answer", value); }
+  get answer(): string | null {
+    return this.getAttribute("answer");
+  }
+  set answer(value: string | number | boolean | null | undefined) {
+    this.#write("answer", value);
+  }
   /** The `marks` attribute, reflected. */
-  get marks(): string | null { return this.getAttribute("marks"); }
-  set marks(value: string | number | boolean | null | undefined) { this.#write("marks", value); }
+  get marks(): string | null {
+    return this.getAttribute("marks");
+  }
+  set marks(value: string | number | boolean | null | undefined) {
+    this.#write("marks", value);
+  }
   /** The `fill` attribute, reflected. */
-  get fill(): string | null { return this.getAttribute("fill"); }
-  set fill(value: string | number | boolean | null | undefined) { this.#write("fill", value); }
+  get fill(): string | null {
+    return this.getAttribute("fill");
+  }
+  set fill(value: string | number | boolean | null | undefined) {
+    this.#write("fill", value);
+  }
   /** The `colour-set` attribute, reflected. */
-  get "colour-set"(): string | null { return this.getAttribute("colour-set"); }
-  set "colour-set"(value: string | number | boolean | null | undefined) { this.#write("colour-set", value); }
+  get "colour-set"(): string | null {
+    return this.getAttribute("colour-set");
+  }
+  set "colour-set"(value: string | number | boolean | null | undefined) {
+    this.#write("colour-set", value);
+  }
   /** The `colour-set` attribute, reflected. */
-  get colourSet(): string | null { return this.getAttribute("colour-set"); }
-  set colourSet(value: string | number | boolean | null | undefined) { this.#write("colour-set", value); }
+  get colourSet(): string | null {
+    return this.getAttribute("colour-set");
+  }
+  set colourSet(value: string | number | boolean | null | undefined) {
+    this.#write("colour-set", value);
+  }
   /** The `board` attribute, reflected. */
-  get board(): string | null { return this.getAttribute("board"); }
-  set board(value: string | number | boolean | null | undefined) { this.#write("board", value); }
+  get board(): string | null {
+    return this.getAttribute("board");
+  }
+  set board(value: string | number | boolean | null | undefined) {
+    this.#write("board", value);
+  }
   /** The `coordinates` attribute, reflected. */
-  get coordinates(): string | null { return this.getAttribute("coordinates"); }
-  set coordinates(value: string | number | boolean | null | undefined) { this.#write("coordinates", value); }
+  get coordinates(): string | null {
+    return this.getAttribute("coordinates");
+  }
+  set coordinates(value: string | number | boolean | null | undefined) {
+    this.#write("coordinates", value);
+  }
   /** The `explosions` attribute, reflected. */
-  get explosions(): string | null { return this.getAttribute("explosions"); }
-  set explosions(value: string | number | boolean | null | undefined) { this.#write("explosions", value); }
+  get explosions(): string | null {
+    return this.getAttribute("explosions");
+  }
+  set explosions(value: string | number | boolean | null | undefined) {
+    this.#write("explosions", value);
+  }
   /** The `cheats` attribute, reflected. */
-  get cheats(): string | null { return this.getAttribute("cheats"); }
-  set cheats(value: string | number | boolean | null | undefined) { this.#write("cheats", value); }
+  get cheats(): string | null {
+    return this.getAttribute("cheats");
+  }
+  set cheats(value: string | number | boolean | null | undefined) {
+    this.#write("cheats", value);
+  }
   /** The `controls` attribute, reflected. */
-  get controls(): string | null { return this.getAttribute("controls"); }
-  set controls(value: string | number | boolean | null | undefined) { this.#write("controls", value); }
+  get controls(): string | null {
+    return this.getAttribute("controls");
+  }
+  set controls(value: string | number | boolean | null | undefined) {
+    this.#write("controls", value);
+  }
   /** The `chips` attribute, reflected. */
-  get chips(): string | null { return this.getAttribute("chips"); }
-  set chips(value: string | number | boolean | null | undefined) { this.#write("chips", value); }
+  get chips(): string | null {
+    return this.getAttribute("chips");
+  }
+  set chips(value: string | number | boolean | null | undefined) {
+    this.#write("chips", value);
+  }
   /** The `zoom` attribute, reflected. */
-  get zoom(): string | null { return this.getAttribute("zoom"); }
-  set zoom(value: string | number | boolean | null | undefined) { this.#write("zoom", value); }
+  get zoom(): string | null {
+    return this.getAttribute("zoom");
+  }
+  set zoom(value: string | number | boolean | null | undefined) {
+    this.#write("zoom", value);
+  }
   /** The `grid` attribute, reflected. */
-  get grid(): string | null { return this.getAttribute("grid"); }
-  set grid(value: string | number | boolean | null | undefined) { this.#write("grid", value); }
+  get grid(): string | null {
+    return this.getAttribute("grid");
+  }
+  set grid(value: string | number | boolean | null | undefined) {
+    this.#write("grid", value);
+  }
   /** The `daily` attribute, reflected. */
-  get daily(): string | null { return this.getAttribute("daily"); }
-  set daily(value: string | number | boolean | null | undefined) { this.#write("daily", value); }
+  get daily(): string | null {
+    return this.getAttribute("daily");
+  }
+  set daily(value: string | number | boolean | null | undefined) {
+    this.#write("daily", value);
+  }
   /** The `theme` attribute, reflected. */
-  get theme(): string | null { return this.getAttribute("theme"); }
-  set theme(value: string | number | boolean | null | undefined) { this.#write("theme", value); }
+  get theme(): string | null {
+    return this.getAttribute("theme");
+  }
+  set theme(value: string | number | boolean | null | undefined) {
+    this.#write("theme", value);
+  }
   /** The `width` attribute, reflected. */
-  get width(): string | null { return this.getAttribute("width"); }
-  set width(value: string | number | boolean | null | undefined) { this.#write("width", value); }
+  get width(): string | null {
+    return this.getAttribute("width");
+  }
+  set width(value: string | number | boolean | null | undefined) {
+    this.#write("width", value);
+  }
   /** The `label` attribute, reflected. */
-  get label(): string | null { return this.getAttribute("label"); }
-  set label(value: string | number | boolean | null | undefined) { this.#write("label", value); }
+  get label(): string | null {
+    return this.getAttribute("label");
+  }
+  set label(value: string | number | boolean | null | undefined) {
+    this.#write("label", value);
+  }
 
   #mount: TsunagiMount | null = null;
   #levelKey = "";
@@ -218,7 +397,9 @@ export class TsunagiBoard extends ElementBase {
   }
 
   /** A kept lines code to restore; the getter still reads live progress. */
-  set progress(value: string | null | undefined) { this.#write("progress", value); }
+  set progress(value: string | null | undefined) {
+    this.#write("progress", value);
+  }
 
   undo(): void {
     this.#mount?.undo();
@@ -244,23 +425,60 @@ export class TsunagiBoard extends ElementBase {
     if (!this.isConnected) return;
     this.#frame();
     const display = this.getAttribute("size");
-    const size = Number(this.getAttribute("grid") ?? (display !== null && !["small", "medium", "large"].includes(display) ? display : "7"));
+    const size = Number(
+      this.getAttribute("grid") ??
+        (display !== null && !["small", "medium", "large"].includes(display) ? display : "7"),
+    );
     let level = this.getAttribute("level") === null ? undefined : Number(this.getAttribute("level"));
     const set: TsunagiSet = this.getAttribute("set") === "portals" ? "portals" : "classic";
     let givens = this.getAttribute("givens") ?? undefined;
     let answer = this.getAttribute("answer") ?? undefined;
     let day: string | null;
-    try { day = givens === undefined ? embedDay(this.getAttribute("daily")) : null; } catch { this.#problem("Use a real UTC date written YYYY-MM-DD."); return; }
-    if (day === null) this.removeAttribute("data-day"); else this.setAttribute("data-day", day);
-    if (day !== null) level = set === "portals" ? TSUNAGI_PORTAL_COUNTS[size] === undefined ? undefined : dailySeed(day, `tsunagi/portals/${size}`) % TSUNAGI_PORTAL_COUNTS[size] + 1 : dailyTsunagiLevel(size, day) ?? undefined;
-    if (!Number.isInteger(size) || size < 2 || (givens === undefined && (set === "portals" ? TSUNAGI_PORTAL_COUNTS[size] : TSUNAGI_LEVEL_COUNTS[size]) === undefined)) { this.#problem("Choose a valid grid and level in this set."); return; }
+    try {
+      day = givens === undefined ? embedDay(this.getAttribute("daily")) : null;
+    } catch {
+      this.#problem("Use a real UTC date written YYYY-MM-DD.");
+      return;
+    }
+    if (day === null) this.removeAttribute("data-day");
+    else this.setAttribute("data-day", day);
+    if (day !== null)
+      level =
+        set === "portals"
+          ? TSUNAGI_PORTAL_COUNTS[size] === undefined
+            ? undefined
+            : (dailySeed(day, `tsunagi/portals/${size}`) % TSUNAGI_PORTAL_COUNTS[size]) + 1
+          : (dailyTsunagiLevel(size, day) ?? undefined);
+    if (
+      !Number.isInteger(size) ||
+      size < 2 ||
+      (givens === undefined &&
+        (set === "portals" ? TSUNAGI_PORTAL_COUNTS[size] : TSUNAGI_LEVEL_COUNTS[size]) === undefined)
+    ) {
+      this.#problem("Choose a valid grid and level in this set.");
+      return;
+    }
     const explosions = oneOf<TsunagiExplosionChoice>(offAlias(this.getAttribute("explosions")), ["on", "soft", "off"]);
     const cheats = isOn(this.getAttribute("cheats"));
-    const key = JSON.stringify([size, level, set, day, this.getAttribute("progress"), givens, answer, explosions, cheats, this.getAttribute("controls"), this.getAttribute("chips"), this.getAttribute("zoom")]);
+    const key = JSON.stringify([
+      size,
+      level,
+      set,
+      day,
+      this.getAttribute("progress"),
+      givens,
+      answer,
+      explosions,
+      cheats,
+      this.getAttribute("controls"),
+      this.getAttribute("chips"),
+      this.getAttribute("zoom"),
+    ]);
     const look = {
       marks: oneOf(this.getAttribute("marks"), ["colours", "numbers"] as const),
       fill: oneOf(this.getAttribute("fill"), ["marbles", "lines"] as const),
-      colours: this.#options.colours ?? oneOf<TsunagiColourSetName>(this.getAttribute("colour-set"), TSUNAGI_COLOUR_SET_NAMES),
+      colours:
+        this.#options.colours ?? oneOf<TsunagiColourSetName>(this.getAttribute("colour-set"), TSUNAGI_COLOUR_SET_NAMES),
       board: this.#options.board ?? oneOf<TsunagiBoardName>(this.getAttribute("board"), TSUNAGI_BOARD_NAMES),
       coordinates: isOn(this.getAttribute("coordinates")),
     };
@@ -274,7 +492,10 @@ export class TsunagiBoard extends ElementBase {
       const rows = await loadTsunagiLevels(size, set).catch(() => null);
       if (!this.isConnected || ask !== this.#asked) return;
       const row = rows?.[level - 1];
-      if (row === undefined) { this.#problem("Choose a valid grid and level in this set."); return; }
+      if (row === undefined) {
+        this.#problem("Choose a valid grid and level in this set.");
+        return;
+      }
       [givens, answer] = row;
     }
     if (givens === undefined || !this.isConnected || ask !== this.#asked) return;
@@ -305,7 +526,13 @@ export class TsunagiBoard extends ElementBase {
       onSolve: (detail) => this.#options.onSolve?.(detail),
     });
     this.#frame();
-    this.dispatchEvent(new CustomEvent("tsunagi-load", { bubbles: true, composed: true, detail: { grid: size, set, level: level ?? null, day } }));
+    this.dispatchEvent(
+      new CustomEvent("tsunagi-load", {
+        bubbles: true,
+        composed: true,
+        detail: { grid: size, set, level: level ?? null, day },
+      }),
+    );
   }
 }
 

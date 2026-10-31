@@ -36,7 +36,18 @@ const MEASURE_BUDGET = 15_000;
 const MOST_PAIRS = 16;
 const SEED = 20261001;
 
-export type PoolBoard = { layout: string; answer: string; pairs: number; nodes: number; branches: number; turns: number; forced: number; longest: number; key: string; job: number };
+export type PoolBoard = {
+  layout: string;
+  answer: string;
+  pairs: number;
+  nodes: number;
+  branches: number;
+  turns: number;
+  forced: number;
+  longest: number;
+  key: string;
+  job: number;
+};
 
 /** One job's boards. */
 export function runJob(size: number, job: number): PoolBoard[] {
@@ -44,7 +55,9 @@ export function runJob(size: number, job: number): PoolBoard[] {
   const out: PoolBoard[] = [];
   let looked = 0;
   while (looked < JOB_FILLINGS) {
-    const paths = randomFilling(size, random, size * 3, new Set(), false, false, { greed: GREEDS[job % GREEDS.length] });
+    const paths = randomFilling(size, random, size * 3, new Set(), false, false, {
+      greed: GREEDS[job % GREEDS.length],
+    });
     if (paths === null || paths.length > MOST_PAIRS) continue;
     looked += 1;
     const { layout, answer } = layoutOf(size, paths);
@@ -72,7 +85,11 @@ export function runJob(size: number, job: number): PoolBoard[] {
 }
 
 /** One job's twist boards of one kind, from a stream of its own. */
-export function runTwistJob(size: number, kind: Kind, job: number): (PoolBoard & { kind: Kind; bridges: number; walls: number; blocked: number })[] {
+export function runTwistJob(
+  size: number,
+  kind: Kind,
+  job: number,
+): (PoolBoard & { kind: Kind; bridges: number; walls: number; blocked: number })[] {
   const kinds = ["bridge", "bridges", "walls", "wallsAndBlocked", "bridgeAndWalls", "waypoints", "wrap", "hexagon"];
   const random = seededRandom(SEED + size * 1_000_003 + (kinds.indexOf(kind) + 1) * 7_919_999 + job);
   const found = new Map<string, PoolBoard & { kind: Kind; bridges: number; walls: number; blocked: number }>();
@@ -86,7 +103,11 @@ export function runTwistJob(size: number, kind: Kind, job: number): (PoolBoard &
 
 if (!isMainThread) {
   const { size, jobs, kind } = workerData as { size: number; jobs: number[]; kind: string };
-  for (const job of jobs) parentPort!.postMessage({ job, boards: kind === "plain" ? runJob(size, job) : runTwistJob(size, kind as Kind, job) });
+  for (const job of jobs)
+    parentPort!.postMessage({
+      job,
+      boards: kind === "plain" ? runJob(size, job) : runTwistJob(size, kind as Kind, job),
+    });
 } else if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const size = Number(process.argv[2]);
   const kind = process.argv[3]!;
@@ -95,23 +116,31 @@ if (!isMainThread) {
   mkdirSync("scripts/.tsunagi-pool", { recursive: true });
   const file = `scripts/.tsunagi-pool/size${size}.${kind}.jsonl`;
   const done = new Set<number>();
-  if (existsSync(file)) for (const line of readFileSync(file, "utf8").split("\n")) if (line !== "") done.add((JSON.parse(line) as PoolBoard).job);
+  if (existsSync(file))
+    for (const line of readFileSync(file, "utf8").split("\n"))
+      if (line !== "") done.add((JSON.parse(line) as PoolBoard).job);
   // A job with no board leaves no line, so a done list is kept beside the file.
   const doneFile = `scripts/.tsunagi-pool/size${size}.${kind}.done`;
-  if (existsSync(doneFile)) for (const each of readFileSync(doneFile, "utf8").split("\n")) if (each !== "") done.add(Number(each));
+  if (existsSync(doneFile))
+    for (const each of readFileSync(doneFile, "utf8").split("\n")) if (each !== "") done.add(Number(each));
   const todo = Array.from({ length: count }, (_, at) => first + at).filter((job) => !done.has(job));
   const workers = Math.max(1, Math.min(todo.length, cpus().length - 2));
   const started = Date.now();
   let finished = 0;
   let boards = 0;
   for (let w = 0; w < workers; w += 1) {
-    const worker = new Worker(fileURLToPath(import.meta.url), { workerData: { size, kind, jobs: todo.filter((_, at) => at % workers === w) } });
+    const worker = new Worker(fileURLToPath(import.meta.url), {
+      workerData: { size, kind, jobs: todo.filter((_, at) => at % workers === w) },
+    });
     worker.on("message", ({ job, boards: found }: { job: number; boards: PoolBoard[] }) => {
       for (const board of found) appendFileSync(file, JSON.stringify(board) + "\n");
       appendFileSync(doneFile, `${job}\n`);
       finished += 1;
       boards += found.length;
-      if (finished % 10 === 0 || finished === todo.length) console.log(`${size}×${size} ${kind}: ${finished}/${todo.length} jobs, ${boards} boards, ${Math.round((Date.now() - started) / 1000)} s`);
+      if (finished % 10 === 0 || finished === todo.length)
+        console.log(
+          `${size}×${size} ${kind}: ${finished}/${todo.length} jobs, ${boards} boards, ${Math.round((Date.now() - started) / 1000)} s`,
+        );
     });
   }
 }

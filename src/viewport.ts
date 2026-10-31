@@ -119,7 +119,11 @@ export function zoomedAbout(view: TsunagiView, factor: number, px: number, py: n
  * console.log(edgeNudge(5,100,{left:0,top:0,right:640,bottom:480}));
  * ```
  */
-export function edgeNudge(x: number, y: number, box: { left: number; top: number; right: number; bottom: number }): { dx: number; dy: number } {
+export function edgeNudge(
+  x: number,
+  y: number,
+  box: { left: number; top: number; right: number; bottom: number },
+): { dx: number; dy: number } {
   const dx = x - box.left < TSUNAGI_EDGE ? TSUNAGI_EDGE_STEP : box.right - x < TSUNAGI_EDGE ? -TSUNAGI_EDGE_STEP : 0;
   const dy = y - box.top < TSUNAGI_EDGE ? TSUNAGI_EDGE_STEP : box.bottom - y < TSUNAGI_EDGE ? -TSUNAGI_EDGE_STEP : 0;
   return { dx, dy };

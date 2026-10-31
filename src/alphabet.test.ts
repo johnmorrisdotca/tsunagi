@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { checkTsunagiAnswer } from "./check.ts";
-import { CAPITAL_PAIRS, CELL_EMPTY, decodeLayout, encodeAnswer, encodeLayout, PAIR_LETTERS, stoneLetters, WAYPOINT_LETTERS } from "./code.ts";
+import {
+  CAPITAL_PAIRS,
+  CELL_EMPTY,
+  decodeLayout,
+  encodeAnswer,
+  encodeLayout,
+  PAIR_LETTERS,
+  stoneLetters,
+  WAYPOINT_LETTERS,
+} from "./code.ts";
 import { relettered, symmetryKey } from "./generate.ts";
 import { challengesOf } from "./ladder.ts";
 import { linesOfAnswer } from "./lines.ts";
@@ -48,11 +57,16 @@ describe("the characters a pair is named by", () => {
     const cells = new Array<number>(100).fill(CELL_EMPTY);
     for (let pair = 0; pair < 36; pair += 1) cells[2 * pair] = cells[2 * pair + 1] = pair;
     expect(encodeLayout(cells, [], { waypoints: new Map([[90, 0]]) })).toContain("?");
-    expect(challengesOf(`${[...Array(36).keys()].map((pair) => PAIR_LETTERS[pair]!.repeat(2)).join("")}a.`.padEnd(100, "."))).not.toContain("waypoints");
+    expect(
+      challengesOf(`${[...Array(36).keys()].map((pair) => PAIR_LETTERS[pair]!.repeat(2)).join("")}a.`.padEnd(100, ".")),
+    ).not.toContain("waypoints");
   });
 
   it("reletter in reading order, a board of dozens of pairs as any other", () => {
-    const code = [...PAIR_LETTERS].slice(0, 50).map((letter) => letter + letter).join("");
+    const code = [...PAIR_LETTERS]
+      .slice(0, 50)
+      .map((letter) => letter + letter)
+      .join("");
     expect(relettered(code)).toBe(code);
     const shuffled = [...code].reverse().join("");
     // Reversed, the letters are named from their first stone again: the same board, the same spelling.
@@ -69,6 +83,13 @@ describe("the characters a pair is named by", () => {
     const lines = linesOfAnswer(layout, code)!;
     expect(lines).toHaveLength(50);
     expect(lines[40]).toEqual([80, 81]);
-    expect(encodeAnswer(lines.flatMap((line, pair) => line.map((cell) => [cell, pair] as const)).sort((a, b) => a[0] - b[0]).map(([, pair]) => pair))).toBe(code);
+    expect(
+      encodeAnswer(
+        lines
+          .flatMap((line, pair) => line.map((cell) => [cell, pair] as const))
+          .sort((a, b) => a[0] - b[0])
+          .map(([, pair]) => pair),
+      ),
+    ).toBe(code);
   });
 });

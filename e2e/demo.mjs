@@ -11,16 +11,26 @@ import { tsunagiGeometry } from "../dist/draw-entry.js";
 import { loadEveryTsunagiLevel, tsunagiLevelsOf, TSUNAGI_SIZES } from "../dist/levels.js";
 
 const site = join(dirname(fileURLToPath(import.meta.url)), "..", "site");
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml" };
+const TYPES = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+};
 
 /** Serve `site/` to a page at http://tsunagi.test/. */
 export async function serve(page) {
-  if (!existsSync(join(site, "index.html"))) throw new Error("site/ is not built: run `pnpm site` first (`pnpm test:demo` does)");
+  if (!existsSync(join(site, "index.html")))
+    throw new Error("site/ is not built: run `pnpm site` first (`pnpm test:demo` does)");
   await page.route("http://tsunagi.test/**", (route) => {
     const { pathname } = new URL(route.request().url());
     const file = join(site, pathname.endsWith("/") ? `${pathname}index.html` : pathname);
     if (!existsSync(file)) return route.fulfill({ status: 404, body: "" });
-    return route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" });
+    return route.fulfill({
+      body: readFileSync(file),
+      contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream",
+    });
   });
 }
 
@@ -49,7 +59,10 @@ export async function bare(page, html, { lang = "en" } = {}) {
   const errors = listen(page);
   await serve(page);
   await page.route("http://tsunagi.test/bare.html", (route) =>
-    route.fulfill({ contentType: "text/html", body: `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:12px;background:#2f5d4a;color:#fff;font-family:system-ui}</style></head><body>${html}<script type="module">import "./dist/element-define.js";</script></body></html>` }),
+    route.fulfill({
+      contentType: "text/html",
+      body: `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:12px;background:#2f5d4a;color:#fff;font-family:system-ui}</style></head><body>${html}<script type="module">import "./dist/element-define.js";</script></body></html>`,
+    }),
   );
   await page.goto("http://tsunagi.test/bare.html");
   await page.waitForFunction(() => customElements.get("tsunagi-board") !== undefined);
@@ -68,7 +81,9 @@ export function levelOf(size, level) {
 /** The first level, at any size, whose challenges (and code, and layout) satisfy `want`. */
 export function findLevel(want, { sizes = TSUNAGI_SIZES } = {}) {
   for (const size of sizes) {
-    const at = tsunagiLevelsOf(size).findIndex(([givens]) => want(challengesOf(givens), givens, decodeLayout(givens, size)));
+    const at = tsunagiLevelsOf(size).findIndex(([givens]) =>
+      want(challengesOf(givens), givens, decodeLayout(givens, size)),
+    );
     if (at >= 0) return levelOf(size, at + 1);
   }
   throw new Error("no such level");
@@ -100,7 +115,10 @@ export async function dragCells(page, svg, layout, cells, { lift = true } = {}) 
       // Out through the edge the line leaves by: the ghost of the far cell, one cell beyond it.
       const start = await cellPoint(svg, layout, from);
       const unit = Math.abs((await cellPoint(svg, layout, 1)).x - (await cellPoint(svg, layout, 0)).x);
-      point = { x: start.x - (Math.abs(across) > 1 ? Math.sign(across) * unit : 0), y: start.y - (Math.abs(down) > 1 ? Math.sign(down) * unit : 0) };
+      point = {
+        x: start.x - (Math.abs(across) > 1 ? Math.sign(across) * unit : 0),
+        y: start.y - (Math.abs(down) > 1 ? Math.sign(down) * unit : 0),
+      };
     }
     // On a board that wraps one move straight to the ghost, so no cell between is passed through on the way.
     await page.mouse.move(point.x, point.y, { steps: layout.wrap ? 1 : 4 });

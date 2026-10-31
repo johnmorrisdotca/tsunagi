@@ -155,7 +155,9 @@ export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): 
   const bits = Math.max(1, Math.ceil(Math.log2(Math.max(2, pairs))));
   // A cell a line stands on has a pair; a portal cell has one too, the pair of the line that goes through it.
   const coloured = (at: number) => standable(at) || layout.portals.has(at);
-  for (let at = 0; at < total; at += 1) if (coloured(at)) colourVar[at] = Int32Array.from({ length: colours === "binary" ? bits : pairs }, () => sat.newVar());
+  for (let at = 0; at < total; at += 1)
+    if (coloured(at))
+      colourVar[at] = Int32Array.from({ length: colours === "binary" ? bits : pairs }, () => sat.newVar());
 
   /** Cell `at` is of pair `pair`. */
   const named = (at: number, pair: number) => {
@@ -182,7 +184,8 @@ export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): 
       for (let a = 0; a < pairs; a += 1) for (let b = a + 1; b < pairs; b += 1) sat.addClause([-own[a]!, -own[b]!]);
     } else {
       // A number the board has no pair for is no pair.
-      for (let code = pairs; code < 2 ** bits; code += 1) sat.addClause(Array.from(own, (variable, bit) => ((code >> bit) & 1 ? -variable : variable)));
+      for (let code = pairs; code < 2 ** bits; code += 1)
+        sat.addClause(Array.from(own, (variable, bit) => ((code >> bit) & 1 ? -variable : variable)));
     }
     if (!standable(at)) continue;
     const given = cells[at]! >= 0 ? cells[at]! : (layout.waypoints.get(at) ?? -1);
@@ -222,7 +225,8 @@ export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): 
   layout.portalPairs.forEach(([p, q], index) => {
     const through = edgeVar.filter((_, e) => via[e] === index);
     sat.addClause([...through]);
-    for (let a = 0; a < through.length; a += 1) for (let b = a + 1; b < through.length; b += 1) sat.addClause([-through[a]!, -through[b]!]);
+    for (let a = 0; a < through.length; a += 1)
+      for (let b = a + 1; b < through.length; b += 1) sat.addClause([-through[a]!, -through[b]!]);
     for (let e = 0; e < edges; e += 1) {
       if (via[e] !== index) continue;
       sameIf(edgeVar[e]!, eu[e]!, p);
@@ -240,7 +244,12 @@ export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): 
   if (!layout.hex && !layout.wrap) {
     for (let at = 0; at < total; at += 1) {
       if (at % size === size - 1 || at + size >= total) continue;
-      const square = [between(at, at + 1), between(at + 1, at + size + 1), between(at + size, at + size + 1), between(at, at + size)];
+      const square = [
+        between(at, at + 1),
+        between(at + 1, at + size + 1),
+        between(at + size, at + size + 1),
+        between(at, at + size),
+      ];
       if (square.every((e) => e !== undefined)) sat.addClause(square.map((e) => -edgeVar[e!]!));
     }
   }
@@ -270,7 +279,13 @@ export function edgeModel(layout: LinkLayout, colours: SatColours = "one-hot"): 
  * console.log(countSolutionsSat(layout,2,20000).count);
  * ```
  */
-export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number.POSITIVE_INFINITY, guide: readonly (readonly number[])[] | null = null, colours: SatColours = "one-hot"): SolveCount {
+export function countSolutionsSat(
+  layout: LinkLayout,
+  limit = 2,
+  budget = Number.POSITIVE_INFINITY,
+  guide: readonly (readonly number[])[] | null = null,
+  colours: SatColours = "one-hot",
+): SolveCount {
   const { cells, ends } = layout;
   const result: SolveCount = { count: 0, nodes: 0, branches: 0, solution: null, solutions: [], gaveUp: false };
   const model = edgeModel(layout, colours);
@@ -350,9 +365,17 @@ export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number
       let previous = -1;
       for (;;) {
         reached[here] = 1;
-        const e = next[here]!.find((each) => (eu[each] === here ? ev[each]! : eu[each]!) !== previous && reached[eu[each] === here ? ev[each]! : eu[each]!] === 0);
+        const e = next[here]!.find(
+          (each) =>
+            (eu[each] === here ? ev[each]! : eu[each]!) !== previous &&
+            reached[eu[each] === here ? ev[each]! : eu[each]!] === 0,
+        );
         if (e === undefined) {
-          const closing = next[here]!.find((each) => (eu[each] === here ? ev[each]! : eu[each]!) === at && (eu[each] === here ? ev[each]! : eu[each]!) !== previous);
+          const closing = next[here]!.find(
+            (each) =>
+              (eu[each] === here ? ev[each]! : eu[each]!) === at &&
+              (eu[each] === here ? ev[each]! : eu[each]!) !== previous,
+          );
           if (closing !== undefined) ring.push(closing);
           break;
         }
@@ -367,7 +390,8 @@ export function countSolutionsSat(layout: LinkLayout, limit = 2, budget = Number
       continue;
     }
     // A portal's cells are the pair of the line that goes through it.
-    for (const e of taken) if (via[e]! !== -1) for (const cell of layout.portalPairs[via[e]!]!) owner[cell] = owner[eu[e]!]!;
+    for (const e of taken)
+      if (via[e]! !== -1) for (const cell of layout.portalPairs[via[e]!]!) owner[cell] = owner[eu[e]!]!;
     result.count += 1;
     const answer = Array.from(owner, (owned, at) => (cells[at] === CELL_BRIDGE ? CELL_BRIDGE : owned));
     if (result.solution === null) result.solution = answer;
