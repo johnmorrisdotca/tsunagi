@@ -1,7 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
-
-import { loadEveryTsunagiLevel, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
 import { TSUNAGI_RENUMBERED } from "./levels/renumbered.data.ts";
+import { loadEveryTsunagiLevel, TSUNAGI_LEVEL_COUNTS, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
 import { renumberedRecord } from "./renumber.ts";
 
 /**

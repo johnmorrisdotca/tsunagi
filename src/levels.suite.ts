@@ -2,11 +2,11 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { checkTsunagiAnswer } from "./check.ts";
 import { decodeLayout, encodeAnswer, hexNeighboursOf, neighboursOf } from "./code.ts";
-import { difficultyScores, measureSolved, type LevelMeasure } from "./difficulty.ts";
+import { difficultyScores, type LevelMeasure, measureSolved } from "./difficulty.ts";
 import { symmetryKey } from "./generate.ts";
 import { isTwist } from "./ladder.ts";
-import { TSUNAGI_LEVEL_COUNTS, loadTsunagiLevels, tsunagiBand, tsunagiLevelOf, tsunagiLevelsOf } from "./levels.ts";
 import { TSUNAGI_MARKS } from "./levels/marks.data.ts";
+import { loadTsunagiLevels, TSUNAGI_LEVEL_COUNTS, tsunagiBand, tsunagiLevelOf, tsunagiLevelsOf } from "./levels.ts";
 import { countSolutionsOfLevel, type SolveCount } from "./solve.ts";
 
 /**
@@ -88,9 +88,9 @@ export function levelSuite(size: number): void {
         size,
       );
       const byBlock = new Map<number, number[]>();
-      plain.forEach((at, index) =>
-        byBlock.set(Math.floor(at / 16), [...(byBlock.get(Math.floor(at / 16)) ?? []), scores[index]!]),
-      );
+      plain.forEach((at, index) => {
+        byBlock.set(Math.floor(at / 16), [...(byBlock.get(Math.floor(at / 16)) ?? []), scores[index]!]);
+      });
       const means = [...byBlock.values()].map((each) => each.reduce((sum, score) => sum + score, 0) / each.length);
       for (let block = 1; block < means.length; block += 1)
         expect(means[block]!, `block ${block + 1}`).toBeGreaterThanOrEqual(means[block - 1]!);

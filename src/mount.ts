@@ -1,10 +1,7 @@
 import type { TsunagiBoardLook, TsunagiBoardName } from "./boards.ts";
+import { CELL_BLOCKED, CELL_BRIDGE } from "./code.ts";
 import type { TsunagiColour, TsunagiColourSetName, TsunagiFill, TsunagiMarks } from "./colours.ts";
-import { CELL_BRIDGE, CELL_BLOCKED } from "./code.ts";
-import type { TsunagiSet } from "./levelCounts.ts";
-import { answerOf, encodeLines, NO_REACH, type Lines } from "./lines.ts";
 import { drawTsunagi, drawTsunagiPair } from "./draw.ts";
-import { cellAtPoint, tsunagiGeometry, type TsunagiGeometry } from "./geometry.ts";
 import {
   cheatGame,
   checkGame,
@@ -14,18 +11,21 @@ import {
   newTsunagiGame,
   pressGame,
   restartGame,
-  tsunagiProgress,
-  undoGame,
   type TsunagiExplosionChoice,
   type TsunagiGame,
   type TsunagiHelp,
   type TsunagiProgress,
+  tsunagiProgress,
+  undoGame,
 } from "./game.ts";
+import { cellAtPoint, type TsunagiGeometry, tsunagiGeometry } from "./geometry.ts";
 import { challengesOf, tsunagiMarks, tsunagiRole } from "./ladder.ts";
 import type { Challenge } from "./ladder.types.ts";
+import type { TsunagiSet } from "./levelCounts.ts";
+import { answerOf, encodeLines, type Lines, NO_REACH } from "./lines.ts";
 import { TSUNAGI_PLAY_STYLE } from "./playStyle.ts";
-import { tsunagiLanguageOf, tsunagiSay, type TsunagiLanguage } from "./strings.ts";
-import { edgeNudge, keptView, TSUNAGI_FITTED, TSUNAGI_ZOOM_FROM, zoomedAbout, type TsunagiView } from "./viewport.ts";
+import { type TsunagiLanguage, tsunagiLanguageOf, tsunagiSay } from "./strings.ts";
+import { edgeNudge, keptView, TSUNAGI_FITTED, TSUNAGI_ZOOM_FROM, type TsunagiView, zoomedAbout } from "./viewport.ts";
 
 /**
  * A PLAYABLE TSUNAGI BOARD IN ANY PAGE: `mountTsunagi(host, options)` draws a
@@ -655,8 +655,16 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     window.clearTimeout(blastTimer);
     shownFlags = game.flagged;
     shownBlast = game.blasted;
-    if (shownFlags !== null) flagTimer = window.setTimeout(() => ((shownFlags = null), render()), FLASH_MS);
-    if (shownBlast !== null) blastTimer = window.setTimeout(() => ((shownBlast = null), render()), BLAST_MS);
+    if (shownFlags !== null)
+      flagTimer = window.setTimeout(() => {
+        shownFlags = null;
+        render();
+      }, FLASH_MS);
+    if (shownBlast !== null)
+      blastTimer = window.setTimeout(() => {
+        shownBlast = null;
+        render();
+      }, BLAST_MS);
   }
 
   function pointAt(clientX: number, clientY: number): number | null {

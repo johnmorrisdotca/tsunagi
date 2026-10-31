@@ -1,9 +1,10 @@
 /** Documentation comments shared by the level-data writers; level values and order are never changed. */
+
+import { log } from "node:console";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import process from "node:process";
-import { log } from "node:console";
+import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 const descriptions: Readonly<Record<string, string>> = {
@@ -28,7 +29,7 @@ export function withLevelExamples(text: string, entry: string): string {
     const name = declaration.name.text;
     const doc = node.jsDoc?.at(-1);
     if (doc && text.slice(doc.pos, doc.end).includes("@example")) continue;
-    let comment = doc ? text.slice(doc.pos, doc.end).replace(/\s*\*\/$/, "") : "/** " + descriptions[name] + "\n *";
+    let comment = doc ? text.slice(doc.pos, doc.end).replace(/\s*\*\/$/, "") : `/** ${descriptions[name]}\n *`;
     if (!doc && !descriptions[name]) throw new Error(`Missing level description: ${name}`);
     const value = /^TSUNAGI_\d+$/.test(name)
       ? `${name}.length, ${name}[0][0]`
@@ -38,16 +39,17 @@ export function withLevelExamples(text: string, entry: string): string {
     const example = ["", "@example", "```ts", `import { ${name} } from "${entry}";`, `console.log(${value});`, "```"]
       .map((line) => (line ? ` * ${line}` : " *"))
       .join("\n");
-    comment += "\n" + example + "\n */";
+    comment += `\n${example}\n */`;
     edits.push({
       start: doc?.pos ?? node.getStart(source),
       end: doc?.end ?? node.getStart(source),
       text: comment + (doc ? "" : "\n"),
     });
   }
+  let written = text;
   for (const edit of edits.sort((a, b) => b.start - a.start))
-    text = text.slice(0, edit.start) + edit.text + text.slice(edit.end);
-  return text;
+    written = written.slice(0, edit.start) + edit.text + written.slice(edit.end);
+  return written;
 }
 
 // Refresh comments from the same writer used by full generation, without regenerating or reordering puzzles.

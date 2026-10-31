@@ -19,18 +19,18 @@
  *
  * Nothing from 4×4 to 15×15 is touched: no level, no answer, no number.
  */
-import { withLevelExamples } from "./tsunagi-level-docs.ts";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { PAIR_LETTERS } from "../src/code.ts";
-import { difficultyScores, measureLevel, orderByDifficulty, type LevelMeasure } from "../src/difficulty.ts";
-import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
+import { difficultyScores, type LevelMeasure, measureLevel, orderByDifficulty } from "../src/difficulty.ts";
 import { twistRole } from "../src/ladder.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
+import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
 import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import { marksFile } from "./tsunagi-marks-file.ts";
-import { explosive } from "./tsunagi-twists.ts";
 import type { ReducedPoolBoard } from "./tsunagi-reduce-pool.ts";
+import { explosive } from "./tsunagi-twists.ts";
 
 /** Levels a big size has: four blocks of sixteen. */
 const WANTED = 64;
@@ -151,7 +151,9 @@ for (const size of asked.length > 0 ? asked : SIZES) {
     size,
   ).map((at) => [plain[at]!.layout, plain[at]!.answer] as const);
   const levels: Level[] = Array.from({ length: WANTED }, () => ["", ""] as Level);
-  plainSlots.forEach((slot, index) => (levels[slot] = plainOrdered[index]!));
+  plainSlots.forEach((slot, index) => {
+    levels[slot] = plainOrdered[index]!;
+  });
   for (const [slot, level] of placed) levels[slot] = level;
   // The last block's twist is an explosion on the board the slot has: a boom a clean solve meets once, then a blast.
   for (const [offset, role] of [

@@ -1,9 +1,8 @@
 // The twists a level can have, as the demo draws and plays them: a hexagon, a wrap, explosions, a stroke limit, Cheat,
 // and a big board looked at through its zoom pad. At a phone's width and a desk's, nothing scrolls sideways.
 import { expect, test } from "@playwright/test";
-
-import { at, board, cellPoint, dragCells, findLevel, noSidewaysScroll, open, solveByDragging } from "./demo.mjs";
 import { inHex } from "../dist/index.js";
+import { at, board, cellPoint, dragCells, findLevel, noSidewaysScroll, open, solveByDragging } from "./demo.mjs";
 
 const levelUrl = (level, more = "") => `?size=${level.size}&level=${level.level}${more}`;
 

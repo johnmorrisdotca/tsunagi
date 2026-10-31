@@ -1,22 +1,21 @@
 import { describe, expect, it } from "vitest";
-
-import { checkTsunagiAnswer } from "./check.ts";
 import { cheatLine } from "./cheat.ts";
+import { checkTsunagiAnswer } from "./check.ts";
 import {
   CELL_BLOCKED,
   CELL_EMPTY,
   decodeLayout,
   encodeAnswer,
   encodeLayout,
-  portalExit,
   type LinkLayout,
+  portalExit,
 } from "./code.ts";
 import { forcedShare } from "./difficulty.ts";
 import { drawTsunagi } from "./draw.ts";
 import { explosionAfter } from "./explosions.ts";
-import { CELL, lineRuns, PORTAL_STUB, tsunagiGeometry } from "./geometry.ts";
 import { dragGame, liftGame, newTsunagiGame, pressGame } from "./game.ts";
 import { relettered, symmetryKey, transformed } from "./generate.ts";
+import { CELL, lineRuns, PORTAL_STUB, tsunagiGeometry } from "./geometry.ts";
 import { challengesOf } from "./ladder.ts";
 import {
   allJoined,
@@ -25,11 +24,11 @@ import {
   dragFinger,
   encodeLines,
   joined,
+  type Lines,
   linesOfAnswer,
   NO_REACH,
   noLines,
   pressAt,
-  type Lines,
 } from "./lines.ts";
 import { seededRandom } from "./random.ts";
 import { reducedCandidate, withPortals } from "./reduce.ts";
@@ -218,7 +217,10 @@ describe("the solver and the check, against a plain search", () => {
         );
         return;
       }
-      if (at === ends[pair]![1]) return go(pair + 1, ends[pair + 1]?.[0] ?? 0);
+      if (at === ends[pair]![1]) {
+        go(pair + 1, ends[pair + 1]?.[0] ?? 0);
+        return;
+      }
       for (const step of steps[at]!) {
         const target = step.to === ends[pair]![1];
         if (!(target || owner[step.to] === -1) || !step.through.every((cell) => owner[cell] === -1)) continue;

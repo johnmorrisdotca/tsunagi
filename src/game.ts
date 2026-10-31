@@ -1,5 +1,5 @@
-import { decodeLayout, type LinkLayout } from "./code.ts";
 import { cheatLine } from "./cheat.ts";
+import { decodeLayout, type LinkLayout } from "./code.ts";
 import { explosionAfter, explosionsAsChosen, strokesToExplosion } from "./explosions.ts";
 import {
   allJoined,
@@ -7,14 +7,14 @@ import {
   dragFinger,
   filled,
   joined,
+  type Lines,
   letGo,
   linesOfAnswer,
   NO_REACH,
   noLines,
   pressAt,
-  unjoinedPairs,
-  type Lines,
   type Reach,
+  unjoinedPairs,
 } from "./lines.ts";
 
 /**

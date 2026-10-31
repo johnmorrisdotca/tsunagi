@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { difficultyScores, forcedShare, measureLevel, type LevelMeasure } from "./difficulty.ts";
+import { difficultyScores, forcedShare, type LevelMeasure, measureLevel } from "./difficulty.ts";
 import { loadEveryTsunagiLevel, tsunagiLevelsOf } from "./levels.ts";
 
 /**

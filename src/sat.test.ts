@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { Sat } from "./sat.ts";
 import { seededRandom } from "./random.ts";
+import { Sat } from "./sat.ts";
 
 /** Every way the variables 1..n can be set, checked against clauses: the slow, certain answer a solver is held to. */
 function bruteForce(n: number, clauses: readonly (readonly number[])[]): number {

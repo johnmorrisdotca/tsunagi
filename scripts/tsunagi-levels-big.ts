@@ -23,18 +23,18 @@
  *
  * Nothing from 4×4 to 12×12 is touched: no level, no answer, no number.
  */
-import { withLevelExamples } from "./tsunagi-level-docs.ts";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { PAIR_LETTERS } from "../src/code.ts";
-import { difficultyScores, measureLevel, orderByDifficulty, type LevelMeasure } from "../src/difficulty.ts";
+import { difficultyScores, type LevelMeasure, measureLevel, orderByDifficulty } from "../src/difficulty.ts";
 import { twistRole } from "../src/ladder.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
 import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
-import { marksFile } from "./tsunagi-marks-file.ts";
 import type { TwistCandidate } from "../src/twists.ts";
-import { KINDS, withTwists, type Kind } from "./tsunagi-twists.ts";
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
+import { marksFile } from "./tsunagi-marks-file.ts";
 import type { PoolBoard } from "./tsunagi-pool.ts";
+import { KINDS, type Kind, withTwists } from "./tsunagi-twists.ts";
 
 /** Levels a size has: eight blocks of sixteen, as 12×12 has. */
 const WANTED = 128;

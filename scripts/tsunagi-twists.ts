@@ -34,22 +34,23 @@
  * already holds its planned lesson keeps it, so running this again moves
  * nothing. Levels 1 to 14 of every block are never touched.
  */
+
+import { decodeLayout, stepBetween, wrappedStep } from "../src/code.ts";
 import { orderByDifficulty } from "../src/difficulty.ts";
+import { type FillingStyle, symmetryKey } from "../src/generate.ts";
+import { type Challenge, challengesOf, isTwist } from "../src/ladder.ts";
+import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
+import { seededRandom } from "../src/random.ts";
+import { sparseCandidate } from "../src/sparse.ts";
 import {
   bridgeAndWallCandidate,
   bridgeCandidate,
   hexCandidate,
+  type TwistCandidate,
   wallCandidate,
   waypointCandidate,
   wrapCandidate,
-  type TwistCandidate,
 } from "../src/twists.ts";
-import { type FillingStyle, symmetryKey } from "../src/generate.ts";
-import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
-import { challengesOf, isTwist, type Challenge } from "../src/ladder.ts";
-import { decodeLayout, stepBetween, wrappedStep } from "../src/code.ts";
-import { sparseCandidate } from "../src/sparse.ts";
-import { seededRandom } from "../src/random.ts";
 
 type Level = readonly [string, string];
 

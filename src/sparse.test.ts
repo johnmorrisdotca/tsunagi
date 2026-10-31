@@ -3,9 +3,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { decodeLayout, sparseMost, stepBetween, wrappedStep } from "./code.ts";
 import { challengesOf, tsunagiRole } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
+import { seededRandom } from "./random.ts";
 import { countSolutions } from "./solve.ts";
 import { sparseCandidate } from "./sparse.ts";
-import { seededRandom } from "./random.ts";
 
 /**
  * HARDER WITHOUT NEW RULES: sparse boards (few, long lines) and a stroke

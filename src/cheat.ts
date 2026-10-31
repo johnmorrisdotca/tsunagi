@@ -1,5 +1,5 @@
 import { CELL_BRIDGE, type LinkLayout } from "./code.ts";
-import { joined, letGo, withoutPortalTail, type Lines } from "./lines.ts";
+import { joined, type Lines, letGo, withoutPortalTail } from "./lines.ts";
 
 /**
  * CHEAT: one unfinished line drawn for the player, correctly. John,
@@ -44,7 +44,9 @@ export function cheatLine(layout: LinkLayout, lines: Lines, answer: Lines): { li
   const across = (line: readonly number[], at: number) =>
     Math.abs(line[at]! - line[at - 1]!) === 1 || Math.abs(line[at + 1]! - line[at]!) === 1;
   const claimed = new Map<number, boolean | null>();
-  drawn.forEach((cell, at) => claimed.set(cell, layout.cells[cell] === CELL_BRIDGE ? across(drawn, at) : null));
+  drawn.forEach((cell, at) => {
+    claimed.set(cell, layout.cells[cell] === CELL_BRIDGE ? across(drawn, at) : null);
+  });
   const next = lines.map((line, each) => {
     if (each === pair) return [...drawn];
     const clash = line.findIndex((cell, at) => {

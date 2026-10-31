@@ -1,7 +1,7 @@
 // The demo, played as a person plays it: lines dragged from a marble to its partner by mouse and by touch, shortened,
 // cleared, undone, checked and solved. What the page shows is held to what the package says of the same level.
 import { expect, test } from "@playwright/test";
-
+import { checkTsunagiAnswer, dailyTsunagiLevel } from "../dist/index.js";
 import {
   at,
   board,
@@ -13,7 +13,6 @@ import {
   open,
   solveByDragging,
 } from "./demo.mjs";
-import { checkTsunagiAnswer, dailyTsunagiLevel } from "../dist/index.js";
 
 test("a first visit draws the level the address names, with a marble at each end of every pair", async ({ page }) => {
   const errors = await open(page, "?size=5&level=1");

@@ -4,14 +4,14 @@ import {
   CELL_EMPTY,
   decodeLayout,
   encodeAnswer,
+  type LinkLayout,
   layoutNeighbours,
   PAIR_LETTERS,
   portalsAreAmbiguous,
   stepBetween,
   wrappedStep,
-  type LinkLayout,
 } from "./code.ts";
-import { layoutOf, randomFilling, symmetryKey, turnsIn, type FillingStyle, type LinkCandidate } from "./generate.ts";
+import { type FillingStyle, type LinkCandidate, layoutOf, randomFilling, symmetryKey, turnsIn } from "./generate.ts";
 import type { Random } from "./random.ts";
 import { countSolutionsOfLevel } from "./solve.ts";
 import { countSolutionsSat } from "./solveSat.ts";

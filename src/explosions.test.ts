@@ -62,34 +62,36 @@ describe("an explosion", () => {
 
   it("goes off only on every n-th stroke, and never on a board without them", () => {
     const layout = board("|boom3");
-    expect(explosionAfter(layout, CELLS + "|boom3", drawn, 1)).toBeNull();
-    expect(explosionAfter(layout, CELLS + "|boom3", drawn, 2)).toBeNull();
-    expect(explosionAfter(layout, CELLS + "|boom3", drawn, 3)).not.toBeNull();
-    expect(explosionAfter(layout, CELLS + "|boom3", drawn, 6)).not.toBeNull();
+    expect(explosionAfter(layout, `${CELLS}|boom3`, drawn, 1)).toBeNull();
+    expect(explosionAfter(layout, `${CELLS}|boom3`, drawn, 2)).toBeNull();
+    expect(explosionAfter(layout, `${CELLS}|boom3`, drawn, 3)).not.toBeNull();
+    expect(explosionAfter(layout, `${CELLS}|boom3`, drawn, 6)).not.toBeNull();
     expect(explosionAfter(board(""), CELLS, drawn, 3)).toBeNull();
   });
 
   it("with nothing drawn, breaks nothing", () => {
-    expect(explosionAfter(board("|boom3"), CELLS + "|boom3", [[], [], []], 3)).toBeNull();
+    expect(explosionAfter(board("|boom3"), `${CELLS}|boom3`, [[], [], []], 3)).toBeNull();
   });
 
   it("boom: cuts one drawn line back to half, and leaves the others and its input alone", () => {
     const layout = board("|boom3");
     const before = JSON.stringify(drawn);
-    const blown = explosionAfter(layout, CELLS + "|boom3", drawn, 3)!;
+    const blown = explosionAfter(layout, `${CELLS}|boom3`, drawn, 3)!;
     expect(blown.hit).toHaveLength(1);
     const pair = blown.hit[0]!;
     expect(blown.lines[pair]).toEqual(
       drawn[pair]!.length / 2 >= 2 ? drawn[pair]!.slice(0, Math.floor(drawn[pair]!.length / 2)) : [],
     );
-    blown.lines.forEach((line, other) => other !== pair && expect(line).toEqual(drawn[other]));
+    blown.lines.forEach((line, other) => {
+      other !== pair && expect(line).toEqual(drawn[other]);
+    });
     expect(blown.cells.every((cell) => drawn[pair]!.includes(cell) && !blown.lines[pair]!.includes(cell))).toBe(true);
     expect(JSON.stringify(drawn)).toBe(before);
   });
 
   it("blast: wipes one line and cuts a line beside it back to half", () => {
     const layout = board("|blast3");
-    const blown = explosionAfter(layout, CELLS + "|blast3", drawn, 3)!;
+    const blown = explosionAfter(layout, `${CELLS}|blast3`, drawn, 3)!;
     expect(blown.hit).toHaveLength(2);
     const [wiped, beside] = blown.hit as [number, number];
     expect(blown.lines[wiped]).toEqual([]);
@@ -100,7 +102,7 @@ describe("an explosion", () => {
 
   it("chooses the same line for the same board and strokes, and not always the same one", () => {
     const layout = board("|boom1");
-    const code = CELLS + "|boom1";
+    const code = `${CELLS}|boom1`;
     expect(explosionAfter(layout, code, drawn, 5)).toEqual(explosionAfter(layout, code, drawn, 5));
     const chosen = new Set(Array.from({ length: 30 }, (_, at) => explosionAfter(layout, code, drawn, at + 1)!.hit[0]));
     expect(chosen.size).toBe(3);

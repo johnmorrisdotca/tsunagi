@@ -7,26 +7,27 @@
  * (`@johnmorrisdotca/tsunagi/levels-7`) or all through
  * `@johnmorrisdotca/tsunagi/levels`.
  */
+
+export * from "./cheat.ts";
+export * from "./check.ts";
 export * from "./code.ts";
-export * from "./lines.ts";
-export * from "./steps.ts";
-export * from "./solve.ts";
-export * from "./solveSat.ts";
-export * from "./generate.ts";
-export * from "./reduce.ts";
-export * from "./sparse.ts";
-export * from "./twists.ts";
+export * from "./daily.ts";
 export * from "./difficulty.ts";
 export * from "./explosions.ts";
-export * from "./renumber.ts";
+export * from "./game.ts";
+export * from "./generate.ts";
 export * from "./ladder.ts";
 export type * from "./ladder.types.ts";
 export * from "./levelBlocks.ts";
 export * from "./levelCounts.ts";
-export * from "./daily.ts";
-export * from "./check.ts";
-export * from "./cheat.ts";
-export { seededRandom, shuffled } from "./random.ts";
+export * from "./lines.ts";
 export type { Random } from "./random.ts";
+export { seededRandom, shuffled } from "./random.ts";
+export * from "./reduce.ts";
+export * from "./renumber.ts";
+export * from "./solve.ts";
+export * from "./solveSat.ts";
+export * from "./sparse.ts";
+export * from "./steps.ts";
+export * from "./twists.ts";
 export { VERSION } from "./version.ts";
-export * from "./game.ts";

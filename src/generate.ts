@@ -9,19 +9,19 @@ import {
   encodeLayout,
   encodePortals,
   hexNeighbourTable,
+  LINK_HEX,
+  LINK_WALLS,
+  type LinkLayout,
   layoutCells,
   layoutNeighbours,
   layoutStep,
-  type LinkLayout,
-  LINK_HEX,
-  LINK_WALLS,
   neighbourTable,
   stoneLetters,
   tailWord,
 } from "./code.ts";
+import type { Random } from "./random.ts";
 import { countSolutions } from "./solve.ts";
 import { stepTable } from "./steps.ts";
-import type { Random } from "./random.ts";
 
 /**
  * MAKING TSUNAGI LEVELS: the way John described it on 2026-09-26 — fill

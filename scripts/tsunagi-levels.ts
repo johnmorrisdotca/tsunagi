@@ -42,18 +42,19 @@
  * with play, read from production first), and the difficulty marks every level
  * shows (`levels/marks.data.ts`).
  */
-import { withLevelExamples } from "./tsunagi-level-docs.ts";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
-import { candidate, repairedCandidate, symmetryKey, type LinkCandidate } from "../src/generate.ts";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { difficultyScores, measureLevel, orderByDifficulty } from "../src/difficulty.ts";
-import { withTwists } from "./tsunagi-twists.ts";
+
+import { candidate, type LinkCandidate, repairedCandidate, symmetryKey } from "../src/generate.ts";
 import { twistRole } from "../src/ladder.ts";
-import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
-import { marksFile } from "./tsunagi-marks-file.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
-import { seededRandom } from "../src/random.ts";
 import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
+import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { seededRandom } from "../src/random.ts";
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
+import { marksFile } from "./tsunagi-marks-file.ts";
+import { withTwists } from "./tsunagi-twists.ts";
 
 /** Levels a size aims for: sixteen blocks of sixteen. */
 /**
@@ -199,10 +200,10 @@ function migrationFor(
     "-- its board (givens), so only its band moves.",
     'CREATE TEMP TABLE "tsunagi_renumber" ("size" INTEGER NOT NULL, "from" INTEGER NOT NULL, "to" INTEGER NOT NULL, "band" TEXT NOT NULL) ON COMMIT DROP;',
     'INSERT INTO "tsunagi_renumber" ("size", "from", "to", "band") VALUES',
-    values(moved.map((move) => `(${move.size}, ${move.from}, ${move.to}, '${move.band}')`)) + ";",
+    `${values(moved.map((move) => `(${move.size}, ${move.from}, ${move.to}, '${move.band}')`))};`,
     'CREATE TEMP TABLE "tsunagi_band" ("size" INTEGER NOT NULL, "layout" TEXT NOT NULL, "band" TEXT NOT NULL) ON COMMIT DROP;',
     'INSERT INTO "tsunagi_band" ("size", "layout", "band") VALUES',
-    values(bands.map((row) => `(${row.size}, '${row.layout}', '${row.band}')`)) + ";",
+    `${values(bands.map((row) => `(${row.size}, '${row.layout}', '${row.band}')`))};`,
     "",
     "-- Through negative numbers first, so no row lands on another's key on the way.",
     'UPDATE "PuzzleRun" AS r SET "seed" = -m."to", "level" = m."band" FROM "tsunagi_renumber" AS m WHERE r."kind" = \'tsunagi\' AND r."size" = m."size" AND r."seed" = m."from";',
@@ -238,7 +239,7 @@ for (const each of keepList.split(",").filter(Boolean)) {
 const growList = args.includes("--grow") ? (args[args.indexOf("--grow") + 1] ?? "") : "";
 const growing = new Set(growList.split(",").filter(Boolean).map(Number));
 const asked = args
-  .filter((arg, at) => !["--keep", "--migration", "--grow"].includes(args[at - 1] ?? ""))
+  .filter((_arg, at) => !["--keep", "--migration", "--grow"].includes(args[at - 1] ?? ""))
   .map(Number)
   .filter((size) => PLAN[size] !== undefined);
 // A run over some sizes keeps the marks and roles of the rest as they were.
@@ -275,10 +276,12 @@ for (const size of asked.length > 0 ? asked : Object.keys(PLAN).map(Number)) {
   // Where each board that was already here went: its old number is its place in `now`, its new one its place in `order`.
   const to = now.map((_, from) => order.indexOf(from) + 1);
   moves[size] = to;
-  to.forEach((level, from) =>
-    moved.push({ size, from: from + 1, to: level, layout: now[from]![0], band: bandOf(level, levels.length) }),
-  );
-  levels.forEach(([layout], at) => bands.push({ size, layout, band: bandOf(at + 1, levels.length) }));
+  to.forEach((level, from) => {
+    moved.push({ size, from: from + 1, to: level, layout: now[from]![0], band: bandOf(level, levels.length) });
+  });
+  levels.forEach(([layout], at) => {
+    bands.push({ size, layout, band: bandOf(at + 1, levels.length) });
+  });
   const stayed = to.filter((level, from) => level === from + 1).length;
   console.log(
     `${size}×${size}: ${levels.length} levels (${levels.length - now.length} new), ${now.length - stayed} of ${now.length} old ones moved, ${Math.round((performance.now() - started) / 1000)} s`,

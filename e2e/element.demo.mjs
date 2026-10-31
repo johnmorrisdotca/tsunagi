@@ -1,9 +1,8 @@
 // The `<tsunagi-board>` element on a page holding nothing else: a level by size and number, a layout of its own,
 // every attribute, the events it fires and the way a page drives it.
 import { expect, test } from "@playwright/test";
-
-import { bare, dragCells, levelOf } from "./demo.mjs";
 import { checkTsunagiAnswer } from "../dist/index.js";
+import { bare, dragCells, levelOf } from "./demo.mjs";
 
 const tag = (page) => page.locator("tsunagi-board");
 
@@ -124,7 +123,7 @@ test("methods drive it, a kept game's progress is picked up again, and it speaks
       element.setAttribute("level", "1");
       return true;
     },
-    { code: "*" + ".".repeat(24) },
+    { code: `*${".".repeat(24)}` },
   );
   expect(kept).toBe(true);
 });

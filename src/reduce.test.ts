@@ -4,7 +4,7 @@ import { checkTsunagiAnswer } from "./check.ts";
 import { CELL_BLOCKED, decodeLayout } from "./code.ts";
 import { challengesOf } from "./ladder.ts";
 import { seededRandom } from "./random.ts";
-import { MOST_PAIRS, reducedCandidate, type ReduceOptions } from "./reduce.ts";
+import { MOST_PAIRS, type ReduceOptions, reducedCandidate } from "./reduce.ts";
 import { countSolutions, countSolutionsOfLevel } from "./solve.ts";
 
 /**

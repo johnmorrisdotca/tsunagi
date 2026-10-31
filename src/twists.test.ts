@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { checkTsunagiAnswer } from "./check.ts";
 import { CELL_BRIDGE, decodeLayout, encodeLayout, stepBetween, wrappedStep } from "./code.ts";
+import { relettered, transformed } from "./generate.ts";
 import { isTwist } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
 import {
@@ -10,15 +11,14 @@ import {
   decodeLines,
   dragTo,
   encodeLines,
+  type Lines,
   letGo,
   linesOfAnswer,
   noLines,
   overBridge,
   pressAt,
-  type Lines,
 } from "./lines.ts";
 import { countSolutions } from "./solve.ts";
-import { relettered, transformed } from "./generate.ts";
 
 /**
  * BRIDGES AND WALLS, EVERYWHERE A LINE IS READ. Every twist level the site

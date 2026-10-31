@@ -5,10 +5,11 @@
  * (`@johnmorrisdotca/tsunagi/draw`), so a server that only checks an answer
  * never loads any of it.
  */
-export * from "./draw.ts";
-export * from "./colours.ts";
+
 export * from "./boards.ts";
+export * from "./colours.ts";
+export * from "./draw.ts";
 export * from "./geometry.ts";
-export { TSUNAGI_STYLE } from "./style.ts";
-export { TSUNAGI_STRINGS, tsunagiLanguageOf, tsunagiSay } from "./strings.ts";
 export type { TsunagiLanguage } from "./strings.ts";
+export { TSUNAGI_STRINGS, tsunagiLanguageOf, tsunagiSay } from "./strings.ts";
+export { TSUNAGI_STYLE } from "./style.ts";

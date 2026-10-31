@@ -5,7 +5,7 @@ import { decodeLayout } from "./code.ts";
 import { explosionsAsChosen } from "./explosions.ts";
 import { challengesOf } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
-import { allJoined, answerOf, joined, linesOfAnswer, noLines, type Lines } from "./lines.ts";
+import { allJoined, answerOf, joined, type Lines, linesOfAnswer, noLines } from "./lines.ts";
 
 /**
  * CHEAT, and explosions as the player chose them: the two ways a Tsunagi

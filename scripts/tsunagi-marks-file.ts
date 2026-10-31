@@ -1,5 +1,5 @@
-import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import type { TwistRole } from "../src/ladder.types.ts";
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 
 /**
  * The text of `src/levels/marks.data.ts`, which every level script writes: each level's

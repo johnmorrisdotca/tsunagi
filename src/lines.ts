@@ -5,11 +5,11 @@ import {
   edgeOpen,
   encodeAnswer,
   hexNeighboursOf,
+  type LinkLayout,
   layoutStep,
   PAIR_LETTERS,
   portalExit,
   wrappedStep,
-  type LinkLayout,
 } from "./code.ts";
 import { stepTable } from "./steps.ts";
 
@@ -96,7 +96,11 @@ export function ownersOf(layout: LinkLayout, lines: Lines): number[] {
   const owners = layout.cells.map((cell) =>
     cell === CELL_BLOCKED || cell === CELL_BRIDGE ? cell : cell >= 0 ? cell : CELL_EMPTY,
   );
-  lines.forEach((line, pair) => line.forEach((cell) => owners[cell] !== CELL_BRIDGE && (owners[cell] = pair)));
+  lines.forEach((line, pair) => {
+    line.forEach((cell) => {
+      if (owners[cell] !== CELL_BRIDGE) owners[cell] = pair;
+    });
+  });
   return owners;
 }
 
@@ -278,7 +282,9 @@ export function filled(layout: LinkLayout, lines: Lines): { done: number; of: nu
   const open = layout.cells.filter((cell) => cell !== CELL_BLOCKED && cell !== CELL_BRIDGE).length;
   const bridges = layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
   const covered = new Set(lines.flat().filter((cell) => layout.cells[cell] !== CELL_BRIDGE));
-  layout.cells.forEach((cell, at) => cell >= 0 && covered.add(at));
+  layout.cells.forEach((cell, at) => {
+    cell >= 0 && covered.add(at);
+  });
   const over = bridges.reduce((sum, bridge) => {
     const ways = overBridge(lines, bridge);
     return sum + (ways.across === -1 ? 0 : 1) + (ways.down === -1 ? 0 : 1);

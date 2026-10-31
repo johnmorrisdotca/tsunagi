@@ -1,4 +1,4 @@
-import { CELL_BRIDGE, layoutNeighbours, type LinkLayout } from "./code.ts";
+import { CELL_BRIDGE, type LinkLayout, layoutNeighbours } from "./code.ts";
 import type { Lines } from "./lines.ts";
 
 /**

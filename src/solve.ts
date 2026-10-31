@@ -1,7 +1,7 @@
 import { CELL_EMPTY, type LinkLayout } from "./code.ts";
 import { linesOfAnswer } from "./lines.ts";
 import { countSolutionsSat } from "./solveSat.ts";
-import { bridgesOf, stepTable, type Step } from "./steps.ts";
+import { bridgesOf, type Step, stepTable } from "./steps.ts";
 
 /**
  * From which side of the board a layout is counted by `solveSat.ts` rather than

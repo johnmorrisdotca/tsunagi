@@ -1,10 +1,9 @@
-import { FAMILY, familyRepo } from "../scripts/family-template.mjs";
 // The documents and the demo, held to the source. Plain JavaScript, so that reading files needs no Node types.
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import process from "node:process";
-
 import { describe, expect, it } from "vitest";
+import { FAMILY, familyRepo } from "../scripts/family-template.mjs";
 
 import { TSUNAGI_BOARD_NAMES } from "./boards.ts";
 import { PAIR_LETTERS } from "./code.ts";
@@ -121,7 +120,7 @@ describe("the README's promises", () => {
 
   it("gives each size's number of levels as the code has it, and the total the first lines name", () => {
     const cells = rows(section("Levels"))
-      .flatMap((row) => row)
+      .flat()
       .filter((cell) => /^\d+×\d+$/.test(cell) || /^\d+$/.test(cell));
     const table = {};
     for (let at = 0; at < cells.length; at += 2) table[Number.parseInt(cells[at], 10)] = Number(cells[at + 1]);

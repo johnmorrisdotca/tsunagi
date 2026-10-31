@@ -1,4 +1,4 @@
-import { inHex, stepBetween, type LinkLayout } from "./code.ts";
+import { inHex, type LinkLayout, stepBetween } from "./code.ts";
 
 /**
  * WHERE EVERYTHING IS ON A DRAWN BOARD, in the drawing's own units: a square

@@ -15,9 +15,9 @@ import {
   pressGame,
   restartGame,
   strongestTsunagiHelp,
+  type TsunagiGame,
   tsunagiProgress,
   undoGame,
-  type TsunagiGame,
 } from "./game.ts";
 import { challengesOf } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";

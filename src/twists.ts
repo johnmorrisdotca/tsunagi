@@ -1,8 +1,8 @@
-import { decodeLayout, edgeKey, encodeAnswer, inHex, stepBetween, type LinkLayout } from "./code.ts";
-import { type FillingStyle, layoutOf, randomFilling, symmetryKey, turnsIn, type LinkCandidate } from "./generate.ts";
+import { decodeLayout, edgeKey, encodeAnswer, inHex, type LinkLayout, stepBetween } from "./code.ts";
+import { type FillingStyle, type LinkCandidate, layoutOf, randomFilling, symmetryKey, turnsIn } from "./generate.ts";
+import type { Random } from "./random.ts";
 import { countSolutions } from "./solve.ts";
 import { stepTable } from "./steps.ts";
-import type { Random } from "./random.ts";
 
 /**
  * MAKING TSUNAGI'S TWISTS, on a desk: boards with bridges, and boards with

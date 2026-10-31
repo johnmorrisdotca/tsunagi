@@ -17,12 +17,12 @@ import { fileURLToPath } from "node:url";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 
 import { decodeLayout } from "../src/code.ts";
-import { layoutOf, randomFilling, symmetryKey, turnsIn } from "../src/generate.ts";
 import { forcedShare } from "../src/difficulty.ts";
+import { layoutOf, randomFilling, symmetryKey, turnsIn } from "../src/generate.ts";
 import { seededRandom } from "../src/random.ts";
-import { candidateOf, type Kind } from "./tsunagi-twists.ts";
 import { countSolutions } from "../src/solve.ts";
 import { countSolutionsSat } from "../src/solveSat.ts";
+import { candidateOf, type Kind } from "./tsunagi-twists.ts";
 
 /** Fillings with at most sixteen lines a job looks at. */
 export const JOB_FILLINGS = 10;
@@ -133,7 +133,7 @@ if (!isMainThread) {
       workerData: { size, kind, jobs: todo.filter((_, at) => at % workers === w) },
     });
     worker.on("message", ({ job, boards: found }: { job: number; boards: PoolBoard[] }) => {
-      for (const board of found) appendFileSync(file, JSON.stringify(board) + "\n");
+      for (const board of found) appendFileSync(file, `${JSON.stringify(board)}\n`);
       appendFileSync(doneFile, `${job}\n`);
       finished += 1;
       boards += found.length;

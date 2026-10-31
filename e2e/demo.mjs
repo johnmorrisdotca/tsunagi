@@ -5,10 +5,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { expect } from "@playwright/test";
-
-import { challengesOf, decodeLayout, linesOfAnswer } from "../dist/index.js";
 import { tsunagiGeometry } from "../dist/draw-entry.js";
-import { loadEveryTsunagiLevel, tsunagiLevelsOf, TSUNAGI_SIZES } from "../dist/levels.js";
+import { challengesOf, decodeLayout, linesOfAnswer } from "../dist/index.js";
+import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "../dist/levels.js";
 
 const site = join(dirname(fileURLToPath(import.meta.url)), "..", "site");
 const TYPES = {

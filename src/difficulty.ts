@@ -1,7 +1,7 @@
-import { decodeLayout, layoutCells, CAPITAL_PAIRS, layoutNeighbours, PAIR_LETTERS, stoneLetters } from "./code.ts";
+import { CAPITAL_PAIRS, decodeLayout, layoutCells, layoutNeighbours, PAIR_LETTERS, stoneLetters } from "./code.ts";
 import { turnsIn } from "./generate.ts";
-import { stepTable } from "./steps.ts";
 import { countSolutionsOfLevel } from "./solve.ts";
+import { stepTable } from "./steps.ts";
 
 /**
  * HOW HARD A TSUNAGI LEVEL IS, MEASURED. John, 2026-09-26, on 4×4 level 10 —

@@ -7,7 +7,7 @@ import {
   LINK_BRIDGE,
   PAIR_LETTERS,
 } from "./code.ts";
-import { bridgesOf, stepTable, type Step } from "./steps.ts";
+import { bridgesOf, type Step, stepTable } from "./steps.ts";
 
 /**
  * Whether an answer joins a Tsunagi layout: the check a page makes to say

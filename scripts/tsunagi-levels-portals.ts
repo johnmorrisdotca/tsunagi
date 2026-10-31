@@ -13,14 +13,14 @@
  * (`difficulty.ts`), orders the block by it, and writes `src/levels/portals.data.ts` and the
  * portal levels' marks in `src/levels/marks.data.ts`. Nothing of the first set is touched.
  */
-import { withLevelExamples } from "./tsunagi-level-docs.ts";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { PAIR_LETTERS } from "../src/code.ts";
-import { difficultyScores, measureLevel, orderByDifficulty, type LevelMeasure } from "../src/difficulty.ts";
+import { difficultyScores, type LevelMeasure, measureLevel, orderByDifficulty } from "../src/difficulty.ts";
 import { TSUNAGI_BLOCK } from "../src/levelBlocks.ts";
 import { TSUNAGI_PORTAL_COUNTS, TSUNAGI_PORTAL_SIZES } from "../src/levelCounts.ts";
 import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "../src/levels/marks.data.ts";
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 import { marksFile } from "./tsunagi-marks-file.ts";
 import type { ReducedPoolBoard } from "./tsunagi-reduce-pool.ts";
 

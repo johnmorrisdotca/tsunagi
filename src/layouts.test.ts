@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { TSUNAGI_PORTAL_SIZES, TSUNAGI_SIZES } from "./levelCounts.ts";
-import { loadTsunagiLevels } from "./levels.ts";
 import { TSUNAGI_LAYOUTS, TSUNAGI_PORTAL_LAYOUTS } from "./levels/layouts.data.ts";
+import { loadTsunagiLevels } from "./levels.ts";
 
 describe("the layouts on their own (`@johnmorrisdotca/tsunagi/layouts`)", () => {
   it("are the first string of every level of every size, in order, and nothing else (node scripts/tsunagi-layouts.ts writes them)", async () => {

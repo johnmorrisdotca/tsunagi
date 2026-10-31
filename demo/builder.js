@@ -1,11 +1,12 @@
-import { VERSION } from "./dist/index.js";
-import { TsunagiBoard, TSUNAGI_EMBED_OPTION_KEYS } from "./dist/element.js";
-import { TSUNAGI_SIZES, TSUNAGI_LEVEL_COUNTS, TSUNAGI_PORTAL_COUNTS } from "./dist/levels.js";
 import { TSUNAGI_BOARD_NAMES } from "./dist/boards.js";
 import { TSUNAGI_COLOUR_SET_NAMES } from "./dist/colours.js";
+import { TSUNAGI_EMBED_OPTION_KEYS, TsunagiBoard } from "./dist/element.js";
 import { embedDay } from "./dist/embed-day.js";
+import { VERSION } from "./dist/index.js";
+import { TSUNAGI_LEVEL_COUNTS, TSUNAGI_PORTAL_COUNTS, TSUNAGI_SIZES } from "./dist/levels.js";
 import "./dist/element-define.js";
-import { familyEmbedBuilder, FAMILY_EMBED_BUILDER_WORDS } from "./family-embed-builder.js";
+import { FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder } from "./family-embed-builder.js";
+
 const words = {
   en: {
     ...FAMILY_EMBED_BUILDER_WORDS.en,

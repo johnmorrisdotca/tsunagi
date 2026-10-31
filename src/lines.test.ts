@@ -11,12 +11,12 @@ import {
   dragTo,
   encodeLines,
   joined,
+  type Lines,
   letGo,
   linesOfAnswer,
   noLines,
   pressAt,
   unjoinedPairs,
-  type Lines,
 } from "./lines.ts";
 
 /**

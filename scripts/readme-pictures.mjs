@@ -4,10 +4,10 @@
 // opened by its address (size, level, set and look), a finished board is a level kept as solved, a half-drawn one is drawn with the
 // mouse along the level's answer, and motion is reduced. It waits on the board's own svg and on the page's own `data-joined`.
 // Output: docs/images/<subject>-<desk|phone>-<light|dark>.webp.
-import { decodeLayout, linesOfAnswer } from "../dist/index.js";
+
 import { tsunagiGeometry } from "../dist/draw-entry.js";
-import { loadEveryTsunagiLevel, tsunagiLevelsOf, loadTsunagiLevels } from "../dist/levels.js";
-import { challengesOf } from "../dist/index.js";
+import { challengesOf, decodeLayout, linesOfAnswer } from "../dist/index.js";
+import { loadEveryTsunagiLevel, loadTsunagiLevels, tsunagiLevelsOf } from "../dist/levels.js";
 
 import { takePictures } from "./readme-pictures-lib.mjs";
 

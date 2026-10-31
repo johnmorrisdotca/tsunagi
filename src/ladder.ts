@@ -1,15 +1,15 @@
 import {
   CAPITAL_PAIRS,
   inHex,
-  layoutCells,
-  stoneLetters,
   LINK_BLOCKED,
   LINK_BRIDGE,
   LINK_WALLS,
+  layoutCells,
+  stoneLetters,
   tailWord,
 } from "./code.ts";
-import { TSUNAGI_BLOCK } from "./levelBlocks.ts";
 import type { Challenge, TwistRole } from "./ladder.types.ts";
+import { TSUNAGI_BLOCK } from "./levelBlocks.ts";
 import type { TsunagiSet } from "./levelCounts.ts";
 import { TSUNAGI_MARKS, TSUNAGI_PORTAL_MARKS, TSUNAGI_ROLES } from "./levels/marks.data.ts";
 

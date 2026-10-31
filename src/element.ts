@@ -1,17 +1,17 @@
-import { embedDay, dailySeed } from "./embed-day.ts";
-import { dailyTsunagiLevel } from "./daily.ts";
-import { TSUNAGI_PORTAL_COUNTS, TSUNAGI_LEVEL_COUNTS } from "./levelCounts.ts";
-import { TSUNAGI_PLAY_STYLE } from "./playStyle.ts";
 import type { TsunagiBoardLook } from "./boards.ts";
-import type { TsunagiColour } from "./colours.ts";
-import { decodeLayout } from "./code.ts";
-import { decodeLines } from "./lines.ts";
-import { loadTsunagiLevels } from "./levels.ts";
-import type { TsunagiSet } from "./levelCounts.ts";
-import { mountTsunagi, type TsunagiMount, type TsunagiMountOptions } from "./mount.ts";
-import type { TsunagiExplosionChoice, TsunagiGame, TsunagiProgress } from "./game.ts";
 import { TSUNAGI_BOARD_NAMES, type TsunagiBoardName } from "./boards.ts";
+import { decodeLayout } from "./code.ts";
+import type { TsunagiColour } from "./colours.ts";
 import { TSUNAGI_COLOUR_SET_NAMES, type TsunagiColourSetName } from "./colours.ts";
+import { dailyTsunagiLevel } from "./daily.ts";
+import { dailySeed, embedDay } from "./embed-day.ts";
+import type { TsunagiExplosionChoice, TsunagiGame, TsunagiProgress } from "./game.ts";
+import type { TsunagiSet } from "./levelCounts.ts";
+import { TSUNAGI_LEVEL_COUNTS, TSUNAGI_PORTAL_COUNTS } from "./levelCounts.ts";
+import { loadTsunagiLevels } from "./levels.ts";
+import { decodeLines } from "./lines.ts";
+import { mountTsunagi, type TsunagiMount, type TsunagiMountOptions } from "./mount.ts";
+import { TSUNAGI_PLAY_STYLE } from "./playStyle.ts";
 
 /**
  * THE `<tsunagi-board>` ELEMENT: a playable Tsunagi board in a tag, with no
@@ -364,7 +364,7 @@ export class TsunagiBoard extends ElementBase {
   #queued = false;
 
   connectedCallback(): void {
-    this.#refresh();
+    void this.#refresh();
   }
 
   disconnectedCallback(): void {
@@ -487,7 +487,8 @@ export class TsunagiBoard extends ElementBase {
       this.#mount.set({ ...look, language });
       return;
     }
-    const ask = (this.#asked += 1);
+    this.#asked += 1;
+    const ask = this.#asked;
     if (givens === undefined && level !== undefined) {
       const rows = await loadTsunagiLevels(size, set).catch(() => null);
       if (!this.isConnected || ask !== this.#asked) return;

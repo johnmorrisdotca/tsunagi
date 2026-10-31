@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { decodeLayout, encodeAnswer, layoutCells } from "./code.ts";
 import { layoutOf, randomFilling } from "./generate.ts";
+import { TSUNAGI_6 } from "./levels/size6.data.ts";
+import { TSUNAGI_7 } from "./levels/size7.data.ts";
+import { TSUNAGI_8 } from "./levels/size8.data.ts";
 import { linesOfAnswer } from "./lines.ts";
 import { seededRandom } from "./random.ts";
 import { countSolutions } from "./solve.ts";
 import { countSolutionsSat } from "./solveSat.ts";
-import { TSUNAGI_6 } from "./levels/size6.data.ts";
-import { TSUNAGI_7 } from "./levels/size7.data.ts";
-import { TSUNAGI_8 } from "./levels/size8.data.ts";
 
 /**
  * THE SAT COUNT AGAINST THE SEARCH THAT PROVED THE FIRST TWELVE SIZES: the same

@@ -11,9 +11,8 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { chromium, devices } from "@playwright/test";
-
-import { loadTsunagiLevels } from "../dist/levels.js";
 import { decodeLayout, linesOfAnswer } from "../dist/index.js";
+import { loadTsunagiLevels } from "../dist/levels.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const size = Number(process.argv[2] ?? 30);
@@ -92,7 +91,7 @@ const result = await page.evaluate(
     const painted = [];
     for (const line of lines.slice(0, lineCount)) {
       fire("pointerdown", line[0]);
-      if (mount.game().drawing === null) throw new Error("the press drew nothing: " + JSON.stringify(point(line[0])));
+      if (mount.game().drawing === null) throw new Error(`the press drew nothing: ${JSON.stringify(point(line[0]))}`);
       for (const cell of line.slice(1)) {
         const start = performance.now();
         fire("pointermove", cell);

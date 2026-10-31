@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { TSUNAGI_BOARDS, TSUNAGI_BOARD_NAMES } from "./boards.ts";
+import { TSUNAGI_BOARD_NAMES, TSUNAGI_BOARDS } from "./boards.ts";
 import { decodeLayout, inHex } from "./code.ts";
 import { colourOfPair, hsl, TSUNAGI_COLOUR_SET_NAMES, TSUNAGI_COLOUR_SETS, tsunagiColourSet } from "./colours.ts";
 import { drawTsunagi, drawTsunagiCode, drawTsunagiMarble, drawTsunagiPair } from "./draw.ts";
-import { cellAtPoint, CELL, tsunagiGeometry } from "./geometry.ts";
+import { CELL, cellAtPoint, tsunagiGeometry } from "./geometry.ts";
 import { challengesOf } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
 import { linesOfAnswer, ownersOf } from "./lines.ts";

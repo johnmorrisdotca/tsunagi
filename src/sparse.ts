@@ -1,7 +1,7 @@
 import { decodeLayout, encodeAnswer, neighbourTable, sparseMost } from "./code.ts";
-import { layoutOf, randomFilling, symmetryKey, turnsIn, type LinkCandidate } from "./generate.ts";
-import { countSolutions } from "./solve.ts";
+import { type LinkCandidate, layoutOf, randomFilling, symmetryKey, turnsIn } from "./generate.ts";
 import type { Random } from "./random.ts";
+import { countSolutions } from "./solve.ts";
 
 /**
  * SPARSE BOARDS: the same size, fewer and longer lines. John, 2026-09-26: a

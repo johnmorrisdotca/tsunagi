@@ -2,6 +2,16 @@
 // `mountTsunagi` (the drawing, the drag, Undo, Check, Cheat, the zoom), with every option the package has on a
 // settings panel, a preview of the level's block, kept on this device between visits, and spoken in the language
 // the header's chooser picks. The page itself only chooses a level, keeps what was solved and hands the settings on.
+
+import {
+  colourOfPair,
+  drawTsunagi,
+  hsl,
+  TSUNAGI_BOARD_NAMES,
+  TSUNAGI_BOARDS,
+  TSUNAGI_COLOUR_SET_NAMES,
+  TSUNAGI_COLOUR_SETS,
+} from "./dist/draw-entry.js";
 import {
   blockOf,
   blockRange,
@@ -15,17 +25,8 @@ import {
   TSUNAGI_PORTAL_SIZES,
   TSUNAGI_SIZES,
 } from "./dist/index.js";
-import {
-  TSUNAGI_BOARDS,
-  TSUNAGI_BOARD_NAMES,
-  TSUNAGI_COLOUR_SET_NAMES,
-  TSUNAGI_COLOUR_SETS,
-  colourOfPair,
-  drawTsunagi,
-  hsl,
-} from "./dist/draw-entry.js";
-import { mountTsunagi } from "./dist/play-entry.js";
 import { loadTsunagiLevels } from "./dist/levels.js";
+import { mountTsunagi } from "./dist/play-entry.js";
 
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
 const WORDS = {
@@ -180,8 +181,8 @@ let size = sizesOf().includes(Number(params.get("size")))
     ? kept.size
     : 5;
 let solved = kept.solved ?? {};
-let helped = kept.helped ?? {};
-let progress = kept.progress ?? {};
+const helped = kept.helped ?? {};
+const progress = kept.progress ?? {};
 let level = 1;
 let levels = [];
 let mount = null;

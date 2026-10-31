@@ -2,22 +2,22 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { checkTsunagiAnswer } from "./check.ts";
 import { decodeLayout, encodeAnswer, hexNeighboursOf, neighboursOf } from "./code.ts";
-import { difficultyScores, measureSolved, type LevelMeasure } from "./difficulty.ts";
+import { difficultyScores, type LevelMeasure, measureSolved } from "./difficulty.ts";
 import { symmetryKey } from "./generate.ts";
 import { challengesOf } from "./ladder.ts";
 import {
+  isTsunagiLevel,
   levelCountOf,
+  levelSeed,
+  openTsunagiLevels,
+  setOfSeed,
   TSUNAGI_PORTAL_COUNTS,
   TSUNAGI_PORTAL_SEED,
   TSUNAGI_PORTAL_SIZES,
-  levelSeed,
-  setOfSeed,
-  isTsunagiLevel,
-  openTsunagiLevels,
   tsunagiBand,
 } from "./levelCounts.ts";
-import { loadTsunagiLevels, tsunagiLevelOf, tsunagiLevelsOf } from "./levels.ts";
 import { TSUNAGI_PORTAL_MARKS } from "./levels/marks.data.ts";
+import { loadTsunagiLevels, tsunagiLevelOf, tsunagiLevelsOf } from "./levels.ts";
 import { countSolutionsOfLevel, type SolveCount } from "./solve.ts";
 
 /**

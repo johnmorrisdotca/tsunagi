@@ -1,10 +1,9 @@
 // The levels with portals, played in the demo: chosen from the set row, drawn with their rings, solved by a finger that
 // goes into one ring while the line comes out of the other, and the link between a ring and its partner shown.
 import { expect, test } from "@playwright/test";
-
-import { at, board, cellPoint, noSidewaysScroll, open } from "./demo.mjs";
 import { decodeLayout, linesOfAnswer } from "../dist/index.js";
 import { loadTsunagiLevels, tsunagiLevelsOf } from "../dist/levels.js";
+import { at, board, cellPoint, noSidewaysScroll, open } from "./demo.mjs";
 
 await loadTsunagiLevels(6, "portals");
 await loadTsunagiLevels(7, "portals");

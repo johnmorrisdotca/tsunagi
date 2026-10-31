@@ -21,7 +21,7 @@ import { isMainThread, parentPort, Worker, workerData } from "node:worker_thread
 
 import { forcedShare } from "../src/difficulty.ts";
 import { seededRandom } from "../src/random.ts";
-import { reducedCandidate, type ReduceOptions } from "../src/reduce.ts";
+import { type ReduceOptions, reducedCandidate } from "../src/reduce.ts";
 import type { PoolBoard } from "./tsunagi-pool.ts";
 
 /** How eagerly a job's lines take their tightest way on (`FillingStyle`): the way they always did, and four steps toward always. Greedier lines are longer and wind round the board's edge in a spiral; the lower greeds wander. A job's is `GREEDS[⌊job / 5⌋ mod 5]`, so that it is not tied to the budget. */
@@ -118,7 +118,7 @@ if (!isMainThread) {
       workerData: { size, kind, jobs: todo.filter((_, at) => at % workers === w) },
     });
     worker.on("message", ({ job, boards: found }: { job: number; boards: ReducedPoolBoard[] }) => {
-      for (const board of found) appendFileSync(file, JSON.stringify(board) + "\n");
+      for (const board of found) appendFileSync(file, `${JSON.stringify(board)}\n`);
       appendFileSync(doneFile, `${job}\n`);
       finished += 1;
       boards += found.length;

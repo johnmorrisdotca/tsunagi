@@ -9,11 +9,11 @@
  * fails when it is not what the level files say, so it is run after any script that
  * writes one of them.
  */
-import { withLevelExamples } from "./tsunagi-level-docs.ts";
-import { writeFileSync } from "node:fs";
 
+import { writeFileSync } from "node:fs";
 import { TSUNAGI_PORTAL_SIZES, TSUNAGI_SIZES } from "../src/levelCounts.ts";
 import { loadTsunagiLevels } from "../src/levels.ts";
+import { withLevelExamples } from "./tsunagi-level-docs.ts";
 
 const classic: Record<number, string[]> = {};
 for (const size of TSUNAGI_SIZES) classic[size] = (await loadTsunagiLevels(size)).map(([layout]) => layout);

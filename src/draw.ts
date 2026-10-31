@@ -1,32 +1,32 @@
 import { TSUNAGI_BOARDS, type TsunagiBoardLook, type TsunagiBoardName } from "./boards.ts";
+import { CELL_BLOCKED, CELL_BRIDGE, decodeLayout, type LinkLayout } from "./code.ts";
 import {
-  colourOfPair,
   beadShades,
+  colourOfPair,
   hsl,
   lineColour,
   marbleShades,
   portalMark,
   TSUNAGI_PORTAL_COLOURS,
-  tsunagiColourSet,
-  washColour,
   type TsunagiColour,
   type TsunagiColourSetName,
   type TsunagiFill,
   type TsunagiMarks,
+  tsunagiColourSet,
+  washColour,
 } from "./colours.ts";
-import { CELL_BLOCKED, CELL_BRIDGE, decodeLayout, type LinkLayout } from "./code.ts";
 import {
   CELL,
-  hexagonPoints,
   HEX_RADIUS,
+  hexagonPoints,
   lineRuns,
   round,
-  tsunagiGeometry,
   type TsunagiGeometry,
   type TsunagiPoint,
+  tsunagiGeometry,
 } from "./geometry.ts";
-import { noLines, overBridge, ownersOf, type Lines } from "./lines.ts";
-import { tsunagiSay, type TsunagiLanguage } from "./strings.ts";
+import { type Lines, noLines, overBridge, ownersOf } from "./lines.ts";
+import { type TsunagiLanguage, tsunagiSay } from "./strings.ts";
 import { TSUNAGI_STYLE } from "./style.ts";
 
 /**
@@ -89,7 +89,7 @@ export type TsunagiDrawOptions = {
   id?: string;
 };
 
-const escape = (text: string): string =>
+const escapeXml = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 /** FNV-1a, as a short base-36 string: the same drawing always gets the same ids. */
@@ -153,7 +153,7 @@ function marbleSvg(
   const flag = flagged
     ? `<circle class="tsu-flag" data-pair="${pair}" cx="${round(x)}" cy="${round(y)}" r="${MARBLE + 4}" stroke="${lineColour(colourOfPair(colours, pair), marks)}"/>`
     : "";
-  return `<g class="tsu-marble" data-pair="${pair}" data-cell="${cell}" role="img" aria-label="${escape(label)}">${flag}${shadow}${ball}${number}</g>`;
+  return `<g class="tsu-marble" data-pair="${pair}" data-cell="${cell}" role="img" aria-label="${escapeXml(label)}">${flag}${shadow}${ball}${number}</g>`;
 }
 
 /** A pair's line as SVG text: a group of its runs, or nothing for a pair with no line drawn. */
@@ -183,7 +183,7 @@ function portalSvg(geometry: TsunagiGeometry, a: number, b: number, index: numbe
   const bow = { x: (from.x + to.x) / 2 + (from.y - to.y) * 0.12, y: (from.y + to.y) / 2 + (to.x - from.x) * 0.12 };
   const link = `<path class="tsu-portal-link" d="M${round(from.x)} ${round(from.y)}Q${round(bow.x)} ${round(bow.y)} ${round(to.x)} ${round(to.y)}" stroke="${colour}"/>`;
   const ring = (cell: number, at: TsunagiPoint) =>
-    `<g class="tsu-portal-end" data-cell="${cell}"><circle cx="${round(at.x)}" cy="${round(at.y)}" r="40" fill="${colour}" fill-opacity=".14" stroke="${colour}" stroke-width="7"/><circle cx="${round(at.x)}" cy="${round(at.y)}" r="28" fill="none" stroke="${colour}" stroke-width="3" stroke-dasharray="4 6" stroke-linecap="round"/><text class="tsu-glyph" x="${round(at.x)}" y="${round(at.y)}" dy=".35em" fill="${colour}" font-size="${mark.length > 1 ? 28 : 38}">${escape(mark)}</text></g>`;
+    `<g class="tsu-portal-end" data-cell="${cell}"><circle cx="${round(at.x)}" cy="${round(at.y)}" r="40" fill="${colour}" fill-opacity=".14" stroke="${colour}" stroke-width="7"/><circle cx="${round(at.x)}" cy="${round(at.y)}" r="28" fill="none" stroke="${colour}" stroke-width="3" stroke-dasharray="4 6" stroke-linecap="round"/><text class="tsu-glyph" x="${round(at.x)}" y="${round(at.y)}" dy=".35em" fill="${colour}" font-size="${mark.length > 1 ? 28 : 38}">${escapeXml(mark)}</text></g>`;
   const label = tsunagiSay(language, "portal", {
     n: index + 1,
     mark,
@@ -192,7 +192,7 @@ function portalSvg(geometry: TsunagiGeometry, a: number, b: number, index: numbe
     row2: Math.floor(b / geometry.size) + 1,
     col2: (b % geometry.size) + 1,
   });
-  return `<g class="tsu-portal" data-portal="${index}" data-cells="${a},${b}" role="img" aria-label="${escape(label)}">${link}${ring(a, from)}${ring(b, to)}</g>`;
+  return `<g class="tsu-portal" data-portal="${index}" data-cells="${a},${b}" role="img" aria-label="${escapeXml(label)}">${link}${ring(a, from)}${ring(b, to)}</g>`;
 }
 
 function beadSvg(geometry: TsunagiGeometry, cell: number, pair: number): string {
@@ -391,7 +391,9 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
     `<g class="tsu-beads">${beads.map((each, pair) => `<g data-pair="${pair}">${each.join("")}</g>`).join("")}</g>`,
   );
   // Portals: two rings alike, with a faint link between them that shows where the pointer is over one.
-  layout.portalPairs.forEach(([a, b], index) => parts.push(portalSvg(geometry, a, b, index, language)));
+  layout.portalPairs.forEach(([a, b], index) => {
+    parts.push(portalSvg(geometry, a, b, index, language));
+  });
   layout.ends.forEach((ends, pair) => {
     for (const at of ends)
       parts.push(marbleSvg(layout, geometry, at, pair, marks, colours, language, flagged.has(pair)));
@@ -448,7 +450,7 @@ export function drawTsunagi(layout: LinkLayout, options: TsunagiDrawOptions = {}
       ? ""
       : ` style="${boardStyle(boardName === "custom" ? (options.board as TsunagiBoardLook) : TSUNAGI_BOARDS[boardName as TsunagiBoardName])}"`,
   ].join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 ${round(side)} ${round(side)}" role="group" aria-label="${escape(label)}" data-size="${size}" data-marks="${marks}" data-fill="${fill}" data-board="${boardName}" data-solved="${solved}"${flags}>${body.replaceAll("__ID__", id)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 ${round(side)} ${round(side)}" role="group" aria-label="${escapeXml(label)}" data-size="${size}" data-marks="${marks}" data-fill="${fill}" data-board="${boardName}" data-solved="${solved}"${flags}>${body.replaceAll("__ID__", id)}</svg>`;
 }
 
 /** A level's layout code drawn, or an empty string for a code that is no layout at that size.
@@ -502,7 +504,7 @@ export function drawTsunagiMarble(
       ? `<text class="tsu-num" x="50" y="50" dy=".35em" fill="${shades.ink}" ${numberType(pair + 1, 74)}>${pair + 1}</text>`
       : "";
   const label = options.label ?? `marble ${pair + 1}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 100 100" role="img" aria-label="${escape(label)}">${options.style === true ? `<style>${TSUNAGI_STYLE}</style>` : ""}<defs><radialGradient id="${id}" cx=".35" cy=".3" r=".955">${stops(shades)}</radialGradient></defs><circle cx="50" cy="53" r="37" fill="#000" opacity=".32"/><circle cx="50" cy="50" r="37" fill="url(#${id})"/>${number}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="tsunagi" viewBox="0 0 100 100" role="img" aria-label="${escapeXml(label)}">${options.style === true ? `<style>${TSUNAGI_STYLE}</style>` : ""}<defs><radialGradient id="${id}" cx=".35" cy=".3" r=".955">${stops(shades)}</radialGradient></defs><circle cx="50" cy="53" r="37" fill="#000" opacity=".32"/><circle cx="50" cy="50" r="37" fill="url(#${id})"/>${number}</svg>`;
 }
 
 /**
