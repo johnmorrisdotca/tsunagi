@@ -16,6 +16,20 @@ console.log(svg.startsWith("<svg"));
 
 The drawing entry returns SVG strings with named palettes/boards, colour or number marks, marbles or lines, coordinates and native highlights. Geometry maps cells to points and pointer positions back to cells; cellAtPoint null means outside playable geometry.
 
+## Lay it on a board of your own
+
+```ts
+import {TSUNAGI_4} from "@johnmorrisdotca/tsunagi/levels-4";
+import {decodeLayout} from "@johnmorrisdotca/tsunagi";
+import {cellAtPoint,tsunagiDrawing,tsunagiGeometry} from "@johnmorrisdotca/tsunagi/draw";
+const layout = decodeLayout(TSUNAGI_4[0][0],4)!;
+const drawing = tsunagiDrawing(layout,{surface:true});
+const geometry = tsunagiGeometry(layout,{surface:true});
+console.log(drawing.attributes.viewBox,cellAtPoint(geometry,50,50));
+```
+
+`surface: true` leaves out the frame, the paper and the coordinates, so the drawing's box is exactly the cells. `tsunagiDrawing` is the same drawing as `drawTsunagi` in keyed groups, so a framework writes only the groups a move changed, and `cellAtPoint` finds the cell under a finger by the arithmetic that placed it.
+
 ## Mount a playable board
 
 ```ts no-run

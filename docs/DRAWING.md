@@ -24,3 +24,7 @@ thousands of elements of a 30×30 board (`mountTsunagi` does this; on a phone wi
 slowed four times, a move on a full 30×30 board took a median 2.7 ms to handle, where redrawing the
 whole drawing took 18.2). A board with bridges is redrawn whole, since a bridge's deck and the lines
 under it depend on every line.
+
+`tsunagiDrawing(layout, options)` is the same drawing in those groups, for a page kept in a framework's own tree: `{ attributes, variables, pieces }`, where a piece is a `<g>` with its `attributes` and either its SVG text (`html`) or more `pieces`, and a `key` that holds from one drawing to the next. `drawTsunagi` is it written out as one string. In React, a piece is `<g {...attributes} dangerouslySetInnerHTML={{ __html: html }} />`, and React writes that text only when it has changed, so a move on a 30×30 board writes one or two pairs' groups, as `mountTsunagi` does by hand. The drawing's parts keep their classes and data attributes, so a page's tests find them there.
+
+`surface: true` draws only the playing surface, for a page with a board of its own: no frame, paper or coordinates, a cell exactly 100 across from the box's corner, and the ring of ghosts where a board wraps. Pass it to `tsunagiGeometry` too, so `cellAtPoint` reads the same box.

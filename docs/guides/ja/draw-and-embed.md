@@ -16,6 +16,20 @@ console.log(svg.startsWith("<svg"));
 
 描画用エントリーはSVG文字列を返します。配色、盤、色か番号、丸か線、座標、強調表示を選べます。位置の関数はマスと点を変換し、盤外ではnullになります。
 
+## 自前の盤の上に重ねる
+
+```ts
+import {TSUNAGI_4} from "@johnmorrisdotca/tsunagi/levels-4";
+import {decodeLayout} from "@johnmorrisdotca/tsunagi";
+import {cellAtPoint,tsunagiDrawing,tsunagiGeometry} from "@johnmorrisdotca/tsunagi/draw";
+const layout = decodeLayout(TSUNAGI_4[0][0],4)!;
+const drawing = tsunagiDrawing(layout,{surface:true});
+const geometry = tsunagiGeometry(layout,{surface:true});
+console.log(drawing.attributes.viewBox,cellAtPoint(geometry,50,50));
+```
+
+`surface: true` を指定すると、枠・紙・座標を描かず、図の範囲がちょうどマス目だけになります。`tsunagiDrawing` は `drawTsunagi` と同じ図を、キー付きのグループに分けて返すので、フレームワークは一手で変わったグループだけを書き換えられます。`cellAtPoint` は、図を配置したのと同じ計算で、指の下のマスを求めます。
+
 ## 遊べる盤を置く
 
 ```ts no-run

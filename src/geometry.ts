@@ -113,7 +113,12 @@ export type TsunagiGeometry = {
  * console.log(value);
  * ```
  */
-export type GeometryOptions = { coordinates?: boolean; ghosts?: boolean };
+export type GeometryOptions = {
+  coordinates?: boolean;
+  ghosts?: boolean;
+  /** Only the playing surface: no frame and no coordinates, so the drawing's box is exactly the cells. */
+  surface?: boolean;
+};
 
 /** The geometry of a layout's drawing. `coordinates` leaves room for row numbers and column letters (not on a board that wraps or a hexagon); `ghosts` false leaves out the ring of a board that wraps.
  *
@@ -134,8 +139,9 @@ export type GeometryOptions = { coordinates?: boolean; ghosts?: boolean };
 export function tsunagiGeometry(layout: LinkLayout, options: GeometryOptions = {}): TsunagiGeometry {
   const { size, hex } = layout;
   const ring = layout.wrap && !hex && options.ghosts !== false ? 1 : 0;
-  const coordinates = options.coordinates === true && !layout.wrap && !hex;
-  const room = FRAME + (coordinates ? COORDINATE_ROOM : 0);
+  const surface = options.surface === true;
+  const coordinates = options.coordinates === true && !layout.wrap && !hex && !surface;
+  const room = surface ? 0 : FRAME + (coordinates ? COORDINATE_ROOM : 0);
   const onBoard = (cell: number): boolean => !hex || inHex(size, cell);
   if (!hex) {
     const origin = room + ring * CELL;

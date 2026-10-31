@@ -7,6 +7,12 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+### Added
+
+- `surface: true` draws only the playing surface, for a page with a board of its own: no frame, paper or coordinates, and the drawing's box is exactly the cells. `tsunagiGeometry` and `drawTsunagiPair` take it too.
+- `tsunagiDrawing(layout, options)` is the same drawing as `drawTsunagi` in groups with keys that hold from one drawing to the next, so a page kept in a framework's own tree writes only the groups a move changed. `drawTsunagi` is now that written out, so the two cannot differ.
+- `linked` shows a portal's link from the page, and `largestNumber` holds a number to a size in the drawing's units.
+
 ## [1.7.1] - 2026-10-31
 
 ### Changed

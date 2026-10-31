@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TSUNAGI_BOARD_NAMES, TSUNAGI_BOARDS } from "./boards.ts";
 import { decodeLayout, inHex } from "./code.ts";
 import { colourOfPair, hsl, TSUNAGI_COLOUR_SET_NAMES, TSUNAGI_COLOUR_SETS, tsunagiColourSet } from "./colours.ts";
-import { drawTsunagi, drawTsunagiCode, drawTsunagiMarble, drawTsunagiPair } from "./draw.ts";
+import { drawTsunagi, drawTsunagiCode, drawTsunagiMarble, drawTsunagiPair, tsunagiDrawing } from "./draw.ts";
 import { CELL, cellAtPoint, tsunagiGeometry } from "./geometry.ts";
 import { challengesOf } from "./ladder.ts";
 import { loadEveryTsunagiLevel, TSUNAGI_SIZES, tsunagiLevelsOf } from "./levels.ts";
@@ -313,5 +313,85 @@ describe("one pair's part of a drawing", () => {
     // The ghosts are the last thing in the drawing: every ghost bead in it is some pair's.
     const ghosts = whole.slice(whole.indexOf('<g class="tsu-ghosts"'), whole.indexOf("</svg>"));
     expect(ghostBeads.reduce((sum, each) => sum + each, 0)).toBe(count(ghosts, 'class="tsu-bead"'));
+  });
+});
+
+describe("a page with a board of its own", () => {
+  it("draws only the surface: no frame, no paper, no coordinates, and the box is exactly the cells", () => {
+    const svg = drawTsunagi(plainLayout, { surface: true, coordinates: true, board: "wood" });
+    expect(svg).toContain('data-surface="true"');
+    expect(count(svg, 'class="tsu-frame"')).toBe(0);
+    expect(count(svg, 'class="tsu-paper"')).toBe(0);
+    expect(count(svg, 'class="tsu-coordinate"')).toBe(0);
+    expect(svg).toContain(`viewBox="0 0 ${plain.size * CELL} ${plain.size * CELL}"`);
+    const geometry = tsunagiGeometry(plainLayout, { surface: true });
+    expect(geometry.centre(0)).toEqual({ x: CELL / 2, y: CELL / 2 });
+    expect(cellAtPoint(geometry, 0, 0)).toBe(0);
+    expect(cellAtPoint(geometry, -1, 0)).toBeNull();
+    expect(cellAtPoint(geometry, geometry.side - 1, geometry.side - 1)).toBe(plain.size * plain.size - 1);
+  });
+
+  it("keeps the ring of ghosts on a board that wraps, its cells still a whole number of the box", () => {
+    const wrapped = find((g) => g.includes("wrap"));
+    const layout = decodeLayout(wrapped.givens, wrapped.size)!;
+    const geometry = tsunagiGeometry(layout, { surface: true });
+    expect(geometry.side).toBe((wrapped.size + 2) * CELL);
+    expect(geometry.centre(0)).toEqual({ x: CELL * 1.5, y: CELL * 1.5 });
+    expect(cellAtPoint(geometry, CELL / 2, CELL * 1.5)).toBe(wrapped.size - 1);
+    expect(drawTsunagi(layout, { surface: true })).toContain('class="tsu-ghosts"');
+  });
+
+  it("fills its box with a hexagon, whose every cell is found again by the arithmetic that placed it", () => {
+    const shaped = find((g) => g.includes("hex"));
+    const layout = decodeLayout(shaped.givens, shaped.size)!;
+    const geometry = tsunagiGeometry(layout, { surface: true });
+    for (let at = 0; at < shaped.size * shaped.size; at += 1) {
+      if (!geometry.onBoard(at)) continue;
+      const { x, y } = geometry.centre(at);
+      expect(x).toBeGreaterThan(0);
+      expect(y).toBeGreaterThan(0);
+      expect(x).toBeLessThan(geometry.side);
+      expect(y).toBeLessThan(geometry.side);
+      expect(cellAtPoint(geometry, x, y)).toBe(at);
+    }
+  });
+
+  it("hands over the same drawing in pieces, one group a pair for what a finger changes", () => {
+    const options = { lines: solved, id: "same", surface: true } as const;
+    const drawing = tsunagiDrawing(plainLayout, options);
+    const inner = drawTsunagi(plainLayout, options);
+    expect(inner).toContain(`viewBox="${drawing.attributes.viewBox}"`);
+    const named = (key: string) => drawing.pieces.find((piece) => piece.key === key)!;
+    expect(named("washes").pieces).toHaveLength(plainLayout.ends.length);
+    expect(named("beads").pieces).toHaveLength(plainLayout.ends.length);
+    expect(named("lines").pieces).toHaveLength(plainLayout.ends.length);
+    expect(JSON.stringify(drawing.pieces)).not.toContain("__ID__");
+    // One line changed: every other pair's pieces are the same text, so a page writes only that pair's.
+    const shorter = solved.map((line, pair) => (pair === 0 ? line.slice(0, 2) : line));
+    const after = tsunagiDrawing(plainLayout, { ...options, lines: shorter });
+    const changed = (key: string) =>
+      after.pieces
+        .find((piece) => piece.key === key)!
+        .pieces!.filter((piece, at) => JSON.stringify(piece) !== JSON.stringify(named(key).pieces![at]))
+        .map((piece) => piece.key);
+    expect(changed("lines")).toEqual(["line-0"]);
+    expect(changed("beads")).toEqual(["beads-0"]);
+    expect(changed("washes")).toEqual(["washes-0"]);
+    const stillTheSame = ["gradients", "ground", "rules", "marbles"];
+    for (const key of stillTheSame) expect(after.pieces.find((piece) => piece.key === key)).toEqual(named(key));
+  });
+
+  it("shows a portal's link when told to, for a page with something over the drawing", () => {
+    const portal = find((g) => g.includes("portals"));
+    const layout = decodeLayout(portal.givens, portal.size)!;
+    expect(drawTsunagi(layout)).not.toContain('data-linked="true"');
+    expect(count(drawTsunagi(layout, { linked: 0 }), 'data-linked="true"')).toBe(1);
+  });
+
+  it("holds a number to the largest asked for, and otherwise sizes it from its marble", () => {
+    const sizes = (svg: string) =>
+      [...svg.matchAll(/class="tsu-num"[^>]*font-size="([\d.]+)"/g)].map((hit) => Number(hit[1]));
+    expect(Math.max(...sizes(drawTsunagi(plainLayout, { marks: "numbers" })))).toBeGreaterThan(30);
+    expect(Math.max(...sizes(drawTsunagi(plainLayout, { marks: "numbers", largestNumber: 20 })))).toBe(20);
   });
 });

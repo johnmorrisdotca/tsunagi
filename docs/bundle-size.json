@@ -6,20 +6,20 @@
       "gzip": 22581
     },
     "./draw": {
-      "minified": 37949,
-      "gzip": 13709
+      "minified": 39416,
+      "gzip": 14355
     },
     "./play": {
-      "minified": 85839,
-      "gzip": 25148
+      "minified": 87277,
+      "gzip": 25740
     },
     "./element": {
-      "minified": 785968,
-      "gzip": 252275
+      "minified": 787447,
+      "gzip": 252879
     },
     "./element/define": {
-      "minified": 785973,
-      "gzip": 252277
+      "minified": 787452,
+      "gzip": 252881
     },
     "./levels": {
       "minified": 689774,
