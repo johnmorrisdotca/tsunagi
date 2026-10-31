@@ -61,7 +61,11 @@ export function shuffled<T>(items: readonly T[], random: Random): T[] {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i -= 1) {
     const j = Math.floor(random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
+    const left = out[i];
+    const right = out[j];
+    if (left === undefined || right === undefined) continue;
+    out[i] = right;
+    out[j] = left;
   }
   return out;
 }

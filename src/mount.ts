@@ -808,10 +808,12 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
         ...(game.layout.hex ? { q: [1, -1], e: [-1, 1] } : {}),
       } as Record<string, number[]>
     )[key];
-    if (!move) return;
+    const dRow = move?.[0];
+    const dCol = move?.[1];
+    if (dRow === undefined || dCol === undefined) return;
     event.preventDefault();
-    let row = Math.floor(keyboardCell / size) + move[0];
-    let col = (keyboardCell % size) + move[1];
+    let row = Math.floor(keyboardCell / size) + dRow;
+    let col = (keyboardCell % size) + dCol;
     if (game.layout.wrap) {
       row = (row + size) % size;
       col = (col + size) % size;

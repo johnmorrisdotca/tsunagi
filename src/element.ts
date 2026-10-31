@@ -161,17 +161,23 @@ export class TsunagiBoard extends ElementBase {
     if (target.querySelector("style[data-tsunagi-embed-style]") === null) {
       const style = this.ownerDocument.createElement("style");
       style.setAttribute("data-tsunagi-embed-style", "");
+      const taken = (match: RegExpMatchArray, index: number): string => {
+        const value = match[index];
+        if (value === undefined) throw new Error("A style rule is missing a part.");
+        return value;
+      };
       const rules = (theme: string) =>
         [...TSUNAGI_PLAY_STYLE.matchAll(new RegExp(`:root\\[data-theme="${theme}"\\] ([^{]+)\\{([^}]+)\\}`, "g"))]
-          .map(
-            (match) =>
-              `[data-tsunagi-embed][theme="${theme}"]${match[1].trim() === ".tsunagi-play" ? ".tsunagi-play" : ` ${match[1].trim()}`} {${match[2]}}`,
-          )
+          .map((match) => {
+            const selector = taken(match, 1).trim();
+            return `[data-tsunagi-embed][theme="${theme}"]${selector === ".tsunagi-play" ? ".tsunagi-play" : ` ${selector}`} {${taken(match, 2)}}`;
+          })
           .join("\n");
-      const light = [...TSUNAGI_PLAY_STYLE.matchAll(/\.(tsunagi|tsunagi-play) \{([^}]+)\}/g)].filter(
-        (match) => !match[2].includes("#ece8dc") && !match[2].includes("#171a18"),
-      );
-      style.textContent = `@media(prefers-color-scheme:dark){${rules("dark").replaceAll('[theme="dark"]', ':not([theme="light"]):not([theme="dark"])')}}\n${rules("dark")}\n${light.map((match) => `[data-tsunagi-embed][theme="light"]${match[1] === "tsunagi-play" ? ".tsunagi-play" : " .tsunagi"} {${match[2]}}`).join("\n")}\n[data-tsunagi-embed][label]{outline-offset:2px}`;
+      const light = [...TSUNAGI_PLAY_STYLE.matchAll(/\.(tsunagi|tsunagi-play) \{([^}]+)\}/g)].filter((match) => {
+        const body = taken(match, 2);
+        return !body.includes("#ece8dc") && !body.includes("#171a18");
+      });
+      style.textContent = `@media(prefers-color-scheme:dark){${rules("dark").replaceAll('[theme="dark"]', ':not([theme="light"]):not([theme="dark"])')}}\n${rules("dark")}\n${light.map((match) => `[data-tsunagi-embed][theme="light"]${taken(match, 1) === "tsunagi-play" ? ".tsunagi-play" : " .tsunagi"} {${taken(match, 2)}}`).join("\n")}\n[data-tsunagi-embed][label]{outline-offset:2px}`;
       target.append(style);
     }
     if (this.hasAttribute("label")) {
@@ -179,12 +185,13 @@ export class TsunagiBoard extends ElementBase {
       this.setAttribute("role", "group");
       this.setAttribute("aria-label", this.getAttribute("label")!);
     } else if (this.#labelBefore !== null) {
-      for (const [name, value] of [
+      const restore: [string, string | null][] = [
         ["role", this.#labelBefore.role],
         ["aria-label", this.#labelBefore.label],
-      ]) {
-        if (value === null) this.removeAttribute(name!);
-        else this.setAttribute(name!, value);
+      ];
+      for (const [name, value] of restore) {
+        if (value === null) this.removeAttribute(name);
+        else this.setAttribute(name, value);
       }
       this.#labelBefore = null;
     }
