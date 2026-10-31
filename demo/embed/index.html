@@ -13,6 +13,8 @@ const asked=Number(query.get("grid")??query.get("size"));const grid=Number.isInt
 let day=null;try{day=embedDay(query.get("daily"));if(day!==null)board.setAttribute("daily",query.get("daily"));}catch{}
 const requested=Number(query.get("level"));const level=Number.isInteger(requested)&&requested>=1&&requested<=counts[grid]?requested:1;board.setAttribute("level",String(level));
 for(const[name,values]of Object.entries({size:["small","medium","large"],theme:["auto","light","dark"],lang:["en","ja"],marks:["colours","numbers"],fill:["marbles","lines"],board:TSUNAGI_BOARD_NAMES,"colour-set":TSUNAGI_COLOUR_SET_NAMES,zoom:["auto","on","off","false","no","0"],explosions:["on","soft","off","false","no","0"]}))if(values.includes(query.get(name)))board.setAttribute(name,query.get(name));
+// The family calls it the cloth: a page may say cloth= for the same board, and an explicit board= wins.
+if(!query.has("board")&&TSUNAGI_BOARD_NAMES.includes(query.get("cloth")))board.setAttribute("board",query.get("cloth"));
 for(const name of["coordinates","cheats","controls","chips"]){const value=query.get(name)?.trim().toLowerCase();if(value!==undefined&&["","on","true","1","off","false","no","0"].includes(value))board.setAttribute(name,value);}
 const width=Number(query.get("width"));if(query.has("width")&&Number.isFinite(width)&&width>=200&&width<=2000)board.setAttribute("width",String(width));if(query.has("label")&&query.get("label").length<=200)board.setAttribute("label",query.get("label"));if(query.get("lang")==="ja")document.documentElement.lang="ja";
 const given=query.get("givens");let givens=given&&given.length<=3000&&decodeLayout(given,grid)?given:null;

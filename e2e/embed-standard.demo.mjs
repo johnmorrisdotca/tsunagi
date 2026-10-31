@@ -186,3 +186,18 @@ test("keyboard changes forward JSON-safe native detail and copied frames fit a n
     ),
   ).toBe(true);
 });
+
+test("the header's patches lay the board in that cloth, and the embed takes cloth= as board=", async ({ page }) => {
+  await serve(page);
+  await page.goto("http://tsunagi.test/?lang=en");
+  await page.locator('button[data-cloth="red"]').click();
+  await expect
+    .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("tsunagi.page") ?? "{}").look?.board ?? null))
+    .toBe("red");
+  await page.goto("http://tsunagi.test/embed/?cloth=blue&set=classic&grid=5");
+  await expect(page.locator("tsunagi-board")).toHaveAttribute("board", "blue");
+  await page.goto("http://tsunagi.test/embed/?cloth=blue&board=wood&set=classic&grid=5");
+  await expect(page.locator("tsunagi-board")).toHaveAttribute("board", "wood");
+  await page.goto("http://tsunagi.test/embed/?cloth=plaid&set=classic&grid=5");
+  await expect(page.locator("tsunagi-board")).not.toHaveAttribute("board", /./);
+});

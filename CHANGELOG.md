@@ -7,6 +7,10 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+### Added
+
+- The demo's header patches lay the board in the family's cloths, and the embed takes `cloth=` for the same choice as `board=`; a `board=` in the address wins. The demo keeps its place when the language changes.
+
 ## [1.7.1] - 2026-10-31
 
 ### Changed

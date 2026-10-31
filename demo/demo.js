@@ -457,6 +457,11 @@ void choose(size, null).then(() => {
   host.dataset.ready = "true";
 });
 
+// The header's patches are the family's cloth, and a Tsunagi board's cloth is its `board`: pressing a patch lays the board
+// in that cloth, and the Board row below still offers paper. `?cloth=` in the address does the same.
+document.addEventListener("family-cloth", (event) => change({ board: event.detail.cloth }));
+if (!params.has("board") && TSUNAGI_BOARD_NAMES.includes(params.get("cloth"))) change({ board: params.get("cloth") });
+
 function docsLink() {
   document
     .querySelector('[data-say="pageDocs"]')
