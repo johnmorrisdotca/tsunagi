@@ -332,6 +332,9 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
 
   function render(force = false): void {
     const g = game;
+    // A square box for every whole board; a board with a shape is as big as it is, so nothing of it is cut off.
+    const shape = geometry.width === geometry.height ? "" : `${geometry.width} / ${geometry.height}`;
+    if (box.style.aspectRatio !== shape) box.style.aspectRatio = shape;
     const over = g.solved || tsunagiProgress(g).outOfStrokes;
     const still = JSON.stringify([
       shownFlags,
@@ -420,7 +423,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     event.preventDefault();
     const rect = box.getBoundingClientRect();
     const factor = Math.exp(-event.deltaY * (event.ctrlKey ? 0.01 : 0.002));
-    view = zoomedAbout(view, factor, event.clientX - rect.left, event.clientY - rect.top, rect.width);
+    view = zoomedAbout(view, factor, event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height);
     chrome.applyView();
   };
   box.addEventListener("wheel", onWheel, { passive: false });
@@ -428,10 +431,10 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
     typeof ResizeObserver === "undefined"
       ? null
       : new ResizeObserver(() => {
-          const width = box.getBoundingClientRect().width;
+          const { width, height } = box.getBoundingClientRect();
           if (width === boxWidth) return;
           boxWidth = width;
-          view = keptView(view, boxWidth);
+          view = keptView(view, boxWidth, height);
           chrome.applyView();
         });
   const watching =
@@ -560,6 +563,7 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       view = next;
     },
     boxWidth: () => boxWidth,
+    boxHeight: () => box.getBoundingClientRect().height,
     zooming,
     say,
     language: () => language,

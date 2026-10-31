@@ -2,24 +2,24 @@
   "measured": "esbuild 0.28.2, bundled, minified, ES2020, gzip level 9",
   "entries": {
     ".": {
-      "minified": 75376,
-      "gzip": 22581
+      "minified": 80485,
+      "gzip": 24283
     },
     "./draw": {
-      "minified": 39416,
-      "gzip": 14355
+      "minified": 41336,
+      "gzip": 15069
     },
     "./play": {
-      "minified": 87277,
-      "gzip": 25740
+      "minified": 89528,
+      "gzip": 26567
     },
     "./element": {
-      "minified": 787447,
-      "gzip": 252879
+      "minified": 789698,
+      "gzip": 253760
     },
     "./element/define": {
-      "minified": 787452,
-      "gzip": 252881
+      "minified": 789703,
+      "gzip": 253770
     },
     "./levels": {
       "minified": 689774,

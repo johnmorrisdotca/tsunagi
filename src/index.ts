@@ -8,6 +8,7 @@
  * `@johnmorrisdotca/tsunagi/levels`.
  */
 
+export * from "./board.ts";
 export * from "./cheat.ts";
 export * from "./check.ts";
 export * from "./code.ts";
@@ -16,6 +17,7 @@ export * from "./difficulty.ts";
 export * from "./explosions.ts";
 export * from "./game.ts";
 export * from "./generate.ts";
+export * from "./generator.ts";
 export * from "./ladder.ts";
 export type * from "./ladder.types.ts";
 export * from "./levelBlocks.ts";

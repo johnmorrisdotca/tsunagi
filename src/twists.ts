@@ -95,8 +95,35 @@ function bridgedFilling(
   style: FillingStyle = {},
 ): { paths: number[][]; bridges: Set<number> } | null {
   const filling = randomFilling(size, random, longest, new Set(), false, false, style);
-  if (filling === null) return null;
-  let paths = filling.map((path) => [...path]);
+  return filling === null ? null : withBridges(size, filling, random, want);
+}
+
+/**
+ * Lines that fill a board with `want` bridges made in them: where a line runs straight through a cell away from the edge
+ * and two other lines each end on the cells either side of it the other way, those two are joined into one line over
+ * the cell, which becomes a bridge. Null where they offer no place for them.
+ *
+ * @param size - The number of cells on each side of the board.
+ * @param lines - The lines that fill the board.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param want - The requested number of bridges.
+ * @returns The lines and the bridges, or null.
+ * @example
+ * ```ts no-run
+ * import { randomFilling, seededRandom, withBridges } from "@johnmorrisdotca/tsunagi";
+ *
+ * const random = seededRandom(42);
+ * const lines = randomFilling(6,random,12);
+ * console.log(lines === null ? null : withBridges(6,lines,random,1));
+ * ```
+ */
+export function withBridges(
+  size: number,
+  lines: readonly number[][],
+  random: Random,
+  want: number,
+): { paths: number[][]; bridges: Set<number> } | null {
+  let paths = lines.map((path) => [...path]);
   const bridges = new Set<number>();
   for (let made = 0; made < want; made += 1) {
     const places: { cell: number; ends: [number, number]; by: number }[] = [];

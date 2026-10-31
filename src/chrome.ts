@@ -47,6 +47,7 @@ type TsunagiChromeInput = {
   view: () => TsunagiView;
   setView: (view: TsunagiView) => void;
   boxWidth: () => number;
+  boxHeight: () => number;
   zooming: () => boolean;
   say: (key: string, values?: Record<string, string | number>) => string;
   language: () => TsunagiLanguage;
@@ -111,8 +112,14 @@ export function createTsunagiChrome(input: TsunagiChromeInput): TsunagiChrome {
   const cheatButton = button("cheat", () => input.cheat(), controls);
   const padButtons: Record<string, HTMLButtonElement> = {};
   const padMoves: Record<string, (view: TsunagiView, width: number) => TsunagiView> = {
-    out: (view, width) => zoomedAbout(view, 1 / 1.5, width / 2, width / 2, width),
-    in: (view, width) => zoomedAbout(view, 1.5, width / 2, width / 2, width),
+    out: (view, width) => {
+      const tall = input.boxHeight();
+      return zoomedAbout(view, 1 / 1.5, width / 2, tall / 2, width, tall);
+    },
+    in: (view, width) => {
+      const tall = input.boxHeight();
+      return zoomedAbout(view, 1.5, width / 2, tall / 2, width, tall);
+    },
     left: (view, width) => ({ ...view, x: view.x + Math.round(width / 4) }),
     up: (view, width) => ({ ...view, y: view.y + Math.round(width / 4) }),
     down: (view, width) => ({ ...view, y: view.y - Math.round(width / 4) }),
@@ -146,7 +153,7 @@ export function createTsunagiChrome(input: TsunagiChromeInput): TsunagiChrome {
     padButtons.in!.disabled = view.zoom >= 3;
   }
   function changeView(next: (view: TsunagiView, width: number) => TsunagiView): void {
-    input.setView(keptView(next(input.view(), input.boxWidth()), input.boxWidth()));
+    input.setView(keptView(next(input.view(), input.boxWidth()), input.boxWidth(), input.boxHeight()));
     applyView();
   }
 

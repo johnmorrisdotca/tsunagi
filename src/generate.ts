@@ -101,6 +101,7 @@ export type LinkExtras = {
   waypoints?: ReadonlySet<number>;
   wrap?: boolean;
   hex?: boolean;
+  shape?: boolean;
   sparse?: boolean;
   portals?: readonly (readonly [number, number])[];
 };
@@ -218,8 +219,28 @@ export function randomFilling(
   return paths;
 }
 
-/** Joins a short run of cells onto the end of a line beside it, keeping every line clear of itself. */
-function absorb(run: number[], paths: number[][], owner: Int16Array, around: number[][]): boolean {
+/** Joins a short run of cells onto the end of a line beside it, keeping every line clear of itself.
+ *
+ * @param run - The short run of cells.
+ * @param paths - The lines so far, one of which may take it.
+ * @param owner - Which line owns each cell.
+ * @param around - What is beside each cell.
+ * @returns Whether a line took it.
+ * @example
+ * ```ts
+ * import { absorb } from "@johnmorrisdotca/tsunagi";
+ *
+ * const owner = new Int16Array(4).fill(-1);
+ * owner[0] = owner[1] = owner[2] = 0;
+ * console.log(absorb([3],[[0,1,2]],owner,[[1],[0,2],[1,3],[2]]));
+ * ```
+ */
+export function absorb(
+  run: number[],
+  paths: number[][],
+  owner: Int16Array,
+  around: readonly (readonly number[])[],
+): boolean {
   const orders = run.length === 1 ? [run] : [run, [...run].reverse()];
   for (const order of orders) {
     for (let id = 0; id < paths.length; id += 1) {
@@ -295,6 +316,7 @@ export function layoutOf(
       waypoints,
       wrap: extras.wrap,
       hex: extras.hex,
+      shape: extras.shape,
       sparse: extras.sparse,
       portals: extras.portals,
     }),

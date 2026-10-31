@@ -26,6 +26,17 @@ console.log(level?.layout ?? "No proved candidate in this attempt");
 
 Generators return null when the requested attempt cannot produce and prove its candidate. Repaired/reduced candidates, sparse boards and twist-specific generators have their own constraints and budgets. Host loops should bound retries; increasing a budget can consume substantial work.
 
+## Generate for any board
+
+```ts
+import {generateTsunagi,oblongBoard,seededRandom,tallHexagonBoard} from "@johnmorrisdotca/tsunagi";
+const wide = generateTsunagi(oblongBoard(9,13),seededRandom(42),{waypoints:1});
+const tall = generateTsunagi(tallHexagonBoard(4,4),seededRandom(42));
+console.log(wide?.pairs,tall?.pairs);
+```
+
+generateTsunagi works on a board as a graph, so a square from 3×3 up, an oblong, a hexagon of any radius, a honeycomb a little taller than wide, a board whose edges join and a board of any outline are one piece of code, with warps, bridges and waypoints planted on what it fills. It returns null, never an unproved board. A board that is not a whole square is written as a square with what is off it `#` and the word `shape`, so decodeLayout takes the longer side as its size.
+
 ## Preserve fixed levels
 
 A new candidate is not a published fixed level. Use the existing generation workflow to change collections and preserve their proofs, order and migrations.

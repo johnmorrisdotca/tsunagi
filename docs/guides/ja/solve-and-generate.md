@@ -26,6 +26,17 @@ console.log(level?.layout ?? "No proved candidate in this attempt");
 
 生成できない、または証明できない試行はnullです。修復、削減、少ない線、特殊ルールにはそれぞれ制約があります。ホストで再試行にも上限を置きます。
 
+## どんな盤でも生成する
+
+```ts
+import {generateTsunagi,oblongBoard,seededRandom,tallHexagonBoard} from "@johnmorrisdotca/tsunagi";
+const wide = generateTsunagi(oblongBoard(9,13),seededRandom(42),{waypoints:1});
+const tall = generateTsunagi(tallHexagonBoard(4,4),seededRandom(42));
+console.log(wide?.pairs,tall?.pairs);
+```
+
+generateTsunagiは盤をグラフとして扱うので、3×3以上の正方形、長方形、任意の半径の六角形、幅より少し縦に長いハニカム、端がつながる盤、自由な形の盤を、すべて同じコードで作れます。ワープ、橋、通過点は、埋めた線の上に置きます。証明できない盤は返さず、nullを返します。正方形全体を使わない盤は、盤外のマスを `#` とし `shape` を付けた正方形として書くので、decodeLayoutには長い辺をsizeとして渡します。
+
 ## 収録問題を保つ
 
 新しい候補は収録された固定問題ではありません。変更には既存の生成手順を使い、証明、順番、移行を保ちます。

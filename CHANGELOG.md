@@ -12,6 +12,9 @@ board and its answer, so a solve kept by any version is still the same solve.
 - `surface: true` draws only the playing surface, for a page with a board of its own: no frame, paper or coordinates, and the drawing's box is exactly the cells. `tsunagiGeometry` and `drawTsunagiPair` take it too.
 - `tsunagiDrawing(layout, options)` is the same drawing as `drawTsunagi` in groups with keys that hold from one drawing to the next, so a page kept in a framework's own tree writes only the groups a move changed. `drawTsunagi` is now that written out, so the two cannot differ.
 - `linked` shows a portal's link from the page, and `largestNumber` holds a number to a size in the drawing's units.
+- `generateTsunagi(board, random, options)` is one generator for every board: `squareBoard` from 3×3 up, `oblongBoard`, `hexagonBoard` at any radius, `tallHexagonBoard` (a honeycomb a little taller than it is wide), `shapedBoard` (any outline) and boards whose edges join, with warps, bridges and waypoints planted on what it fills. Each board is filled by one winding path cut as it grows, proved by `countSolutions` and `checkTsunagiAnswer`, and a second answer is mended by adding a pair. A 15×15 board takes well under a second. `windingLines` is the filling on its own.
+- A layout may say `shape`: each `#` that reaches its square's edge through other `#` cells is off the board. `onTheBoard` and `offBoardCells` say which cells those are, and `tsunagiGeometry` (`width`, `height`, `first`, `cols`, `rows`), `drawTsunagi` and `mountTsunagi` draw and play a board as big as it is. No code written before shapes changes.
+- `withBridges` plants bridges on any lines, and `absorb` is exported for a filling of your own.
 
 ## [1.7.1] - 2026-10-31
 

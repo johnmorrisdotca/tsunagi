@@ -21,6 +21,8 @@ src/
 ├── sat.ts            a small SAT solver: clause learning, restarts, clauses added between solves
 ├── generate.ts       new boards from a seed: lines laid at random, cut back to their ends
 ├── reduce.ts         big boards made by taking clues away, with portals, wrap, waypoints and blocked cells
+├── board.ts          a board as a graph, for the generator: squares, oblongs, honeycombs, any outline
+├── generator.ts      one generator for every board: one winding path cut into lines, proved, mended
 ├── twists.ts         boards with a twist: walls, bridges, waypoints, wrap, hexagons (portals are `reduce.ts`'s)
 ├── sparse.ts         sparse boards: few marbles and long lines
 ├── explosions.ts     explosions that break a line, and a limit on strokes
@@ -37,7 +39,8 @@ src/
 ├── levels.suite.ts   the proof each size's levels test runs: one answer, the one stored
 ├── random.ts         the seeded random numbers every board is made from
 ├── draw-entry.ts     the "/draw" entry: the drawing, its colours and boards, and where everything sits
-├── draw.ts           a board as SVG text: marbles, lines, walls, bridges under and over, wrap, hexagons
+├── drawing.ts        a board as keyed groups of SVG: marbles, lines, walls, bridges under and over, wrap, hexagons
+├── draw.ts           that drawing as one string, one pair's parts, one marble
 ├── geometry.ts       where every cell is in the drawing, and which cell a point is over
 ├── colours.ts        the colour sets, and how a colour is shaded for a marble, a line and a wash
 ├── boards.ts         the boards a drawing sits on: paper, wood and four felts, or a look of your own

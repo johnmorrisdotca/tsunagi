@@ -43,6 +43,13 @@
  * A portal is an empty cell: never a stone, a waypoint, a bridge or blocked, never
  * beside another portal, and a board with portals has no bridges and is no hexagon.
  *
+ * A SHAPE (`shape`, after `hex`) says the board is not the whole of its square: every
+ * `#` that reaches the square's edge through other `#` cells is off the board, not
+ * drawn and not a cell at all, and a `#` inside is still a blocked cell. So a board of
+ * 9 by 13 is a square of side 13 with its last four columns off, and a hexagon a few
+ * rows taller than it is wide is a `hex` with `shape`; nothing that reads a board has
+ * to know the square was ever bigger, and no code written before shapes changes.
+ *
  * `sparse` says the board has few, long lines — at most `sparseMost` — and is
  * refused on a board with more; `strokes<N>` (last of all) gives the player N
  * strokes to solve it in, every lift that changed the board spending one.
@@ -211,6 +218,8 @@ export type LinkLayout = {
   portals: ReadonlyMap<number, number>;
   /** Whether the board is a hexagon of hexagons: six neighbours a cell, the square's corners off the board. */
   hex: boolean;
+  /** The cells of its square that are off the board, on a board with a `shape`: not drawn, and not cells at all. Empty or left out for a whole square, and for a plain hexagon, whose corners `inHex` says. */
+  off?: ReadonlySet<number>;
   /** Whether the board is sparse: few, long lines, at most `sparseMost` of them. */
   sparse: boolean;
   /** How many strokes the player has to solve it in, or null for no limit. */
@@ -225,7 +234,7 @@ export type LinkLayout = {
  * `boom<N>` (a line cut back every N strokes) or `blast<N>` (a line wiped and
  * its neighbour cut).
  */
-const TAIL_ORDER = ["hex", "sparse", "wrap", "portals", "explosion", "strokes"] as const;
+const TAIL_ORDER = ["hex", "shape", "sparse", "wrap", "portals", "explosion", "strokes"] as const;
 
 /** Which of the tail's words a segment is, and what it says; null for none of them (the walls list).
  *
@@ -245,6 +254,7 @@ export function tailWord(
   if (segment.startsWith(LINK_PORTALS) && /^portals\d+-\d+(,\d+-\d+)*$/.test(segment))
     return { word: "portals", list: segment.slice(LINK_PORTALS.length) };
   if (segment === LINK_HEX) return { word: "hex" };
+  if (segment === LINK_SHAPE) return { word: "shape" };
   if (segment === LINK_SPARSE) return { word: "sparse" };
   const limit = /^strokes([1-9][0-9]?)$/.exec(segment);
   if (limit !== null) return { word: "strokes", every: Number(limit[1]) };
@@ -272,6 +282,71 @@ export const LINK_WRAP = "wrap";
  * ```
  */
 export const LINK_PORTALS = "portals";
+
+/** The segment after the cells that says the `#` cells reaching the square's edge are off the board.
+ *
+ * @example
+ * ```ts
+ * import { LINK_SHAPE } from "@johnmorrisdotca/tsunagi";
+ * console.log(LINK_SHAPE);
+ * ```
+ */
+export const LINK_SHAPE = "shape";
+
+/**
+ * The cells of a square that are off the board on a board with a `shape`: every `#` that reaches the square's edge
+ * through other `#` cells, by a square's four steps or a honeycomb's six.
+ *
+ * @param grid - The cells of the layout, one character each.
+ * @param size - The number of cells on each side of the board.
+ * @param hex - Whether to use hexagonal neighbours.
+ * @returns The cells of the square that are off the board.
+ * @example
+ * ```ts
+ * import { offBoardCells } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log([...offBoardCells("A.#A.#####",3,false)]);
+ * ```
+ */
+export function offBoardCells(grid: string, size: number, hex: boolean): Set<number> {
+  const off = new Set<number>();
+  const waiting: number[] = [];
+  const visit = (at: number): void => {
+    if (grid[at] === LINK_BLOCKED && !off.has(at)) {
+      off.add(at);
+      waiting.push(at);
+    }
+  };
+  for (let at = 0; at < size; at += 1) {
+    visit(at);
+    visit(size * size - 1 - at);
+    visit(at * size);
+    visit(at * size + size - 1);
+  }
+  while (waiting.length > 0) {
+    const at = waiting.pop()!;
+    for (const next of hex ? hexNeighboursOf(size, at) : neighboursOf(size, at)) visit(next);
+  }
+  return off;
+}
+
+/** Whether a cell is on the board: every cell of a whole square, the hexagon's own of a plain hexagon, and those a shape keeps.
+ *
+ * @param layout - The decoded native board and its rule settings.
+ * @param at - The zero-based cell index.
+ * @returns Whether the cell is on the board.
+ * @example
+ * ```ts
+ * import { TSUNAGI_4 } from "@johnmorrisdotca/tsunagi/levels-4";
+ * import { decodeLayout, onTheBoard } from "@johnmorrisdotca/tsunagi";
+ *
+ * console.log(onTheBoard(decodeLayout(TSUNAGI_4[0][0],4)!,0));
+ * ```
+ */
+export function onTheBoard(layout: LinkLayout, at: number): boolean {
+  if (layout.off !== undefined && layout.off.size > 0) return !layout.off.has(at);
+  return !layout.hex || inHex(layout.size, at);
+}
 
 /** The segment after the cells that makes a board a hexagon of hexagons.
  *
@@ -385,6 +460,7 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
   let wrap = false;
   let explosions: LinkLayout["explosions"] = null;
   let hex = false;
+  let shape = false;
   let sparse = false;
   let portalList: string | null = null;
   let strokes: number | null = null;
@@ -401,6 +477,7 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     rank = place;
     if (word.word === "wrap") wrap = true;
     else if (word.word === "hex") hex = true;
+    else if (word.word === "shape") shape = true;
     else if (word.word === "sparse") sparse = true;
     else if (word.word === "portals") portalList = word.list!;
     else if (word.word === "strokes") strokes = word.every!;
@@ -442,11 +519,17 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
   if ([...marked.values()].some((pair) => pair >= seen.length)) return null;
   const walls = wallList === null ? new Set<string>() : readWalls(wallList, size);
   if (walls === null) return null;
-  // A hexagon: an odd side, `#` exactly outside it, and none of the square's twists.
+  // A hexagon: none of the square's twists; an odd side and `#` exactly outside it, unless a shape says otherwise.
   if (hex) {
-    if (size % 2 === 0 || size < 5 || wrap || walls.size > 0 || cells.includes(CELL_BRIDGE)) return null;
-    for (let at = 0; at < cells.length; at += 1) if (!inHex(size, at) && cells[at] !== CELL_BLOCKED) return null;
+    if (wrap || walls.size > 0 || cells.includes(CELL_BRIDGE)) return null;
+    if (!shape) {
+      if (size % 2 === 0 || size < 5) return null;
+      for (let at = 0; at < cells.length; at += 1) if (!inHex(size, at) && cells[at] !== CELL_BLOCKED) return null;
+    }
   }
+  // A shape's edges are its own, so they do not join; and nothing stands off the board but what makes it so.
+  const off = shape ? offBoardCells(grid, size, hex) : undefined;
+  if (shape && wrap) return null;
   // Portals: empty cells away from every other portal, on a square board with no bridges.
   const portalPairs = portalList === null ? [] : readPortals(portalList, size, wrap);
   if (portalPairs === null) return null;
@@ -469,7 +552,7 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     const col = at % size;
     if (row === 0 || col === 0 || row === size - 1 || col === size - 1) return null;
     for (const beside of neighboursOf(size, at))
-      if (cells[beside] === CELL_BRIDGE || walls.has(edgeKey(at, beside))) return null;
+      if (cells[beside] === CELL_BRIDGE || walls.has(edgeKey(at, beside)) || off?.has(beside)) return null;
   }
   const layout: LinkLayout = {
     size,
@@ -484,6 +567,7 @@ export function decodeLayout(code: string, size: number): LinkLayout | null {
     sparse,
     strokes,
     explosions,
+    ...(off === undefined ? {} : { off }),
   };
   // Two cells joined two ways (beside each other and through a portal, or through two portals) could not be told apart in an answer.
   if (portalPairs.length > 0 && portalsAreAmbiguous(layout)) return null;
@@ -658,6 +742,7 @@ export function encodeLayout(
     waypoints?: ReadonlyMap<number, number>;
     wrap?: boolean;
     hex?: boolean;
+    shape?: boolean;
     sparse?: boolean;
     portals?: Iterable<readonly [number, number]>;
     strokes?: number | null;
@@ -686,6 +771,7 @@ export function encodeLayout(
   const portalList = encodePortals(more.portals ?? []);
   const words = [
     more.hex === true ? LINK_HEX : "",
+    more.shape === true ? LINK_SHAPE : "",
     more.sparse === true ? LINK_SPARSE : "",
     more.wrap === true ? LINK_WRAP : "",
     portalList,

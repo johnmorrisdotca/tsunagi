@@ -97,7 +97,7 @@ export function attachTsunagiKeyboard(input: TsunagiKeyboardInput): TsunagiKeybo
           ? rect.bottom - margin - at.y
           : 0;
     if (dx || dy) {
-      input.setView(keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width));
+      input.setView(keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width, rect.height));
       input.applyView();
     }
   }

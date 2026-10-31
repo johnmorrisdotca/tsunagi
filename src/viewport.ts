@@ -71,6 +71,7 @@ export const TSUNAGI_FITTED: TsunagiView = { zoom: 1, x: 0, y: 0 };
  *
  * @param view - The current zoom and pixel translation.
  * @param box - The available square view size or edge bounds.
+ * @param tall - The view's height, where a board with a shape does not fill a square; left out, the same as `box`.
  * @returns A view kept inside the board: never a gap between the board's edge and the box's. `box` is the box's width in pixels.
  * @example
  * ```ts
@@ -79,10 +80,13 @@ export const TSUNAGI_FITTED: TsunagiView = { zoom: 1, x: 0, y: 0 };
  * console.log(keptView({zoom:1,x:0,y:0},640));
  * ```
  */
-export function keptView(view: TsunagiView, box: number): TsunagiView {
+export function keptView(view: TsunagiView, box: number, tall = box): TsunagiView {
   const zoom = Math.min(TSUNAGI_MOST_ZOOM, Math.max(1, view.zoom));
-  const least = box - box * zoom;
-  return { zoom, x: Math.min(0, Math.max(least, view.x)), y: Math.min(0, Math.max(least, view.y)) };
+  return {
+    zoom,
+    x: Math.min(0, Math.max(box - box * zoom, view.x)),
+    y: Math.min(0, Math.max(tall - tall * zoom, view.y)),
+  };
 }
 
 /** A view zoomed by `factor` about the point (px, py) of the box, which stays over the same spot of the board.
@@ -92,6 +96,7 @@ export function keptView(view: TsunagiView, box: number): TsunagiView {
  * @param px - The horizontal pointer position in pixels.
  * @param py - The vertical pointer position in pixels.
  * @param box - The available square view size or edge bounds.
+ * @param tall - The view's height, where a board with a shape does not fill a square; left out, the same as `box`.
  * @returns A view zoomed by `factor` about the point (px, py) of the box, which stays over the same spot of the board.
  * @example
  * ```ts
@@ -100,10 +105,17 @@ export function keptView(view: TsunagiView, box: number): TsunagiView {
  * console.log(zoomedAbout({zoom:1,x:0,y:0},1.2,320,240,640));
  * ```
  */
-export function zoomedAbout(view: TsunagiView, factor: number, px: number, py: number, box: number): TsunagiView {
+export function zoomedAbout(
+  view: TsunagiView,
+  factor: number,
+  px: number,
+  py: number,
+  box: number,
+  tall = box,
+): TsunagiView {
   const zoom = Math.min(TSUNAGI_MOST_ZOOM, Math.max(1, view.zoom * factor));
   const scale = zoom / view.zoom;
-  return keptView({ zoom, x: px - (px - view.x) * scale, y: py - (py - view.y) * scale }, box);
+  return keptView({ zoom, x: px - (px - view.x) * scale, y: py - (py - view.y) * scale }, box, tall);
 }
 
 /** How far to move a zoomed view in a frame, for a finger at (x, y) in a box: toward the edge it is near, or not at all.

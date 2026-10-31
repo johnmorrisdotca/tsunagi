@@ -44,8 +44,8 @@ export function attachTsunagiPointer(input: TsunagiPointerInput): TsunagiPointer
     const geometry = input.geometry();
     return cellAtPoint(
       geometry,
-      ((clientX - rect.left) / rect.width) * geometry.side,
-      ((clientY - rect.top) / rect.height) * geometry.side,
+      ((clientX - rect.left) / rect.width) * geometry.width,
+      ((clientY - rect.top) / rect.height) * geometry.height,
     );
   }
 
@@ -79,7 +79,7 @@ export function attachTsunagiPointer(input: TsunagiPointerInput): TsunagiPointer
     const { dx, dy } = edgeNudge(pointer.x, pointer.y, rect);
     if (dx !== 0 || dy !== 0) {
       const view = input.view();
-      input.setView(keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width));
+      input.setView(keptView({ ...view, x: view.x + dx, y: view.y + dy }, rect.width, rect.height));
       input.applyView();
       drag(pointer.x, pointer.y);
     }

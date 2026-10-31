@@ -45,3 +45,62 @@ budget of 200,000, about five minutes, and one attempt in three or four yields a
 fewer. The pools the fixed levels were chosen from took roughly an hour and a half of a twenty-core desk
 for 30×30 and under an hour for the other two sizes together.
 
+## One generator for every board
+
+`generateTsunagi(board, random, options)` makes one level for any board, proved to have exactly one answer, or says it found none (`null`). It is the same code for every board, because it works on a board as a graph (`board.ts`):
+
+```ts
+import { generateTsunagi, seededRandom, squareBoard } from "@johnmorrisdotca/tsunagi";
+
+const level = generateTsunagi(squareBoard(15), seededRandom(42), { warps: 2 });
+console.log(level?.pairs);
+```
+
+| Board | Made by |
+| --- | --- |
+| a square, 3×3 up, its edges joined if `wrap`, with any `blocked` cells | `squareBoard(side, { wrap, blocked })` |
+| wider or taller than it is square | `oblongBoard(wide, tall)` |
+| a hexagon of any radius | `hexagonBoard(radius)` |
+| a honeycomb a little taller than it is wide, for a phone held upright | `tallHexagonBoard(radius, extraRows)` |
+| any outline; a hole in the middle reads as blocked cells | `shapedBoard(size, keep, { hex })` |
+
+| Option | What it does |
+| --- | --- |
+| `warps` | how many marked warps (portals) to plant; not on a honeycomb |
+| `bridges` | how many bridges to plant; not on a honeycomb, nor with warps |
+| `waypoints` | how many waypoints to plant |
+| `longest` | the longest a line may grow, in cells; default three times the board's longer side |
+| `most` | the most lines the board may end with, else that path is dropped for another |
+| `budget` | what one proof may spend before that path is dropped; default 20,000 |
+| `mends`, `tries` | how many times a board is mended, default 60, and how many paths are tried, default 30 |
+
+It does four things:
+
+1. **Fill the board with one winding path, cut as it grows** (`windingLines`). The path takes the tightest way on; when the line it is drawing would touch itself or has run long enough, it is cut there and goes on from a cell beside its tip as the next line. A piece too short to be a line is handed to a line beside it, or the last few lines are taken back and grown again.
+2. **Plant what was asked for** on those lines: warps, bridges, waypoints.
+3. **Prove** the board has one answer, with `countSolutions`, the solver every level is proved by, and put it through `checkTsunagiAnswer`, the check every solve is put through.
+4. **Mend a second answer by adding a pair**: the line through a cell the two answers disagree on is cut there, which adds a pair of stones the second answer cannot honour, and the board is proved again. A cut never falls beside a warp, a bridge or a waypoint.
+
+**Why the path is cut as it grows, and not filled first and cut after.** A path made first through every cell runs beside itself almost everywhere, and a line may not, since a solve of it could not be read back. On 15×15 boards a whole path cut afterwards made about 33 lines however much it was shaken; a path cut as it grows makes about 15, and mending takes those to between 19 and 28.
+
+**A board that is not a whole square** is still a square of cells in its code, with what is off it written `#` and the word `shape` (`A…#|shape`), so a 9×13 board is `decodeLayout(code, 13)`. What reads, solves and checks a level has not had to change, and no code written before shapes means anything new. `onTheBoard(layout, cell)` says whether a cell is on the board, and `tsunagiGeometry` and `drawTsunagi` draw it as big as it is, with `geometry.width` and `geometry.height` (a whole square's are the same).
+
+**What it takes**, measured 2026-10-31 in Chromium on a desk, eleven seeds each, and with the processor slowed four times as a phone's is:
+
+| Board | Median | Slowest | Median, slowed | Slowest, slowed | Lines |
+| --- | --- | --- | --- | --- | --- |
+| 3×3 | under 1 ms | 2 ms | under 1 ms | 1 ms | 2–3 |
+| 7×7 | 1 ms | 5 ms | 2 ms | 19 ms | 5–8 |
+| 10×10 | 42 ms | 177 ms | 177 ms | 769 ms | 9–15 |
+| 13×13 | 27 ms | 181 ms | 114 ms | 777 ms | 13–19 |
+| 14×14 | 56 ms | 359 ms | 287 ms | 1.8 s | 17–24 |
+| 15×15 | 187 ms | 595 ms | 905 ms | 2.7 s | 19–28 |
+| 9×13 | 11 ms | 26 ms | 61 ms | 149 ms | 10–16 |
+| hexagon, radius 5 | 17 ms | 77 ms | 101 ms | 503 ms | 10–15 |
+| hexagon, radius 7 | 186 ms | 537 ms | 1.0 s | 3.6 s | 14–25 |
+| taller honeycomb, radius 5 | 32 ms | 157 ms | 174 ms | 1.0 s | 12–21 |
+| 13×13, edges joined | 303 ms | 1.6 s | 1.5 s | 7.7 s | 17–23 |
+
+Asked for at most sixteen lines (`most: 16`), a 13×13 is still made every time, and a 15×15 often is not within its tries, so a level script asking that keeps going with the next seed. Every seed in that table made a board.
+
+The fixed levels stay as they are: every level keeps its number, its board and its answer, and the generator is not how they were made. A level of the ladder is still chosen from a pool by its measured difficulty.

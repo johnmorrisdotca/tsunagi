@@ -1,4 +1,4 @@
-import { inHex, type LinkLayout, stepBetween } from "./code.ts";
+import { type LinkLayout, onTheBoard, stepBetween } from "./code.ts";
 
 /**
  * WHERE EVERYTHING IS ON A DRAWN BOARD, in the drawing's own units: a square
@@ -93,8 +93,16 @@ export type TsunagiGeometry = {
   ring: number;
   /** Whether the drawing has the board's coordinates down its sides. */
   coordinates: boolean;
-  /** The drawing's width and height, the same, in its units. */
+  /** The drawing's longer side, in its units: its width and height on any board of a whole square or a plain hexagon. */
   side: number;
+  /** The drawing's width and height, in its units: unlike each other only on a board with a shape. */
+  width: number;
+  height: number;
+  /** The first column and row of the square that are on the board: not 0 only where a shape leaves the square's first columns or rows off. */
+  first: { col: number; row: number };
+  /** How many columns and rows of the square are on the board. */
+  cols: number;
+  rows: number;
   /** Where the playing surface starts and how far it goes, inside the frame and the coordinates. */
   paper: { x: number; y: number; width: number; height: number };
   /** The middle of a cell, in the drawing; for a hexagon, only of the cells on the board. */
@@ -142,20 +150,35 @@ export function tsunagiGeometry(layout: LinkLayout, options: GeometryOptions = {
   const surface = options.surface === true;
   const coordinates = options.coordinates === true && !layout.wrap && !hex && !surface;
   const room = surface ? 0 : FRAME + (coordinates ? COORDINATE_ROOM : 0);
-  const onBoard = (cell: number): boolean => !hex || inHex(size, cell);
+  const onBoard = (cell: number): boolean => onTheBoard(layout, cell);
+  // On a board with a shape the drawing is as big as what is on the board, and no bigger.
+  const shaped = layout.off !== undefined && layout.off.size > 0;
   if (!hex) {
+    const kept = shaped ? Array.from({ length: size * size }, (_, cell) => cell).filter(onBoard) : [0, size * size - 1];
+    const first = {
+      col: shaped ? Math.min(...kept.map((cell) => cell % size)) : 0,
+      row: shaped ? Math.min(...kept.map((cell) => Math.floor(cell / size))) : 0,
+    };
+    const cols = shaped ? Math.max(...kept.map((cell) => cell % size)) - first.col + 1 : size;
+    const rows = shaped ? Math.max(...kept.map((cell) => Math.floor(cell / size))) - first.row + 1 : size;
     const origin = room + ring * CELL;
-    const across = size * CELL;
+    const width = 2 * origin + cols * CELL;
+    const height = 2 * origin + rows * CELL;
     return {
       size,
       hex,
       ring,
       coordinates,
-      side: 2 * origin + across,
-      paper: { x: room, y: room, width: across + 2 * ring * CELL, height: across + 2 * ring * CELL },
+      side: Math.max(width, height),
+      width,
+      height,
+      first,
+      cols,
+      rows,
+      paper: { x: room, y: room, width: (cols + 2 * ring) * CELL, height: (rows + 2 * ring) * CELL },
       centre: (cell) => ({
-        x: origin + ((cell % size) + 0.5) * CELL,
-        y: origin + (Math.floor(cell / size) + 0.5) * CELL,
+        x: origin + ((cell % size) - first.col + 0.5) * CELL,
+        y: origin + (Math.floor(cell / size) - first.row + 0.5) * CELL,
       }),
       onBoard,
     };
@@ -171,16 +194,23 @@ export function tsunagiGeometry(layout: LinkLayout, options: GeometryOptions = {
   const bottom = Math.max(...used.map((p) => p.y)) + HEX_RADIUS;
   const wide = (right - left) * CELL;
   const tall = (bottom - top) * CELL;
-  const inner = Math.max(wide, tall);
-  const x0 = room + (inner - wide) / 2 - left * CELL;
-  const y0 = room + (inner - tall) / 2 - top * CELL;
+  // A plain hexagon sits in the same square box as every board; one with a shape is as big as it is.
+  const innerWide = shaped ? wide : Math.max(wide, tall);
+  const innerTall = shaped ? tall : Math.max(wide, tall);
+  const x0 = room + (innerWide - wide) / 2 - left * CELL;
+  const y0 = room + (innerTall - tall) / 2 - top * CELL;
   return {
     size,
     hex,
     ring: 0,
     coordinates: false,
-    side: 2 * room + inner,
-    paper: { x: room, y: room, width: inner, height: inner },
+    side: 2 * room + Math.max(innerWide, innerTall),
+    width: 2 * room + innerWide,
+    height: 2 * room + innerTall,
+    first: { col: 0, row: 0 },
+    cols: size,
+    rows: size,
+    paper: { x: room, y: room, width: innerWide, height: innerTall },
     centre: (cell) => ({ x: x0 + at(cell).x * CELL, y: y0 + at(cell).y * CELL }),
     onBoard,
   };
@@ -248,9 +278,10 @@ export function cellAtPoint(geometry: TsunagiGeometry, x: number, y: number): nu
   if (!geometry.hex) {
     const across = Math.floor((x - geometry.paper.x) / CELL);
     const down = Math.floor((y - geometry.paper.y) / CELL);
-    const span = size + 2 * ring;
-    if (across < 0 || down < 0 || across >= span || down >= span) return null;
-    return ((down - ring + size) % size) * size + ((across - ring + size) % size);
+    if (across < 0 || down < 0 || across >= geometry.cols + 2 * ring || down >= geometry.rows + 2 * ring) return null;
+    const cell =
+      ((down - ring + geometry.first.row + size) % size) * size + ((across - ring + geometry.first.col + size) % size);
+    return geometry.onBoard(cell) ? cell : null;
   }
   let best: number | null = null;
   let nearest = Infinity;

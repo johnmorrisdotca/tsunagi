@@ -302,6 +302,29 @@ export function beadSvg(geometry: TsunagiGeometry, cell: number, pair: number): 
   return `<g class="tsu-bead" data-pair="${pair}" data-cell="${cell}"><circle cx="${round(x)}" cy="${round(y + 2)}" r="${BEAD}" fill="#000" opacity=".3"/><circle cx="${round(x)}" cy="${round(y)}" r="${BEAD}" fill="url(#__ID__-b${pair})"/></g>`;
 }
 
+/** The rules and the edge of a board with a shape, cell by cell: a rule where two cells on the board meet, the edge where one meets what is off it. */
+function shapeRules(layout: LinkLayout, geometry: TsunagiGeometry): string[] {
+  const { size } = layout;
+  const half = CELL / 2;
+  let grid = "";
+  let edge = "";
+  const on = (col: number, row: number): boolean =>
+    col >= 0 && row >= 0 && col < size && row < size && geometry.onBoard(row * size + col);
+  for (let cell = 0; cell < size * size; cell += 1) {
+    if (!geometry.onBoard(cell)) continue;
+    const { x, y } = geometry.centre(cell);
+    const [col, row] = [cell % size, Math.floor(cell / size)];
+    const [left, right, top, bottom] = [round(x - half), round(x + half), round(y - half), round(y + half)];
+    if (on(col + 1, row)) grid += `M${right} ${top}V${bottom}`;
+    else edge += `M${right} ${top}V${bottom}`;
+    if (on(col, row + 1)) grid += `M${left} ${bottom}H${right}`;
+    else edge += `M${left} ${bottom}H${right}`;
+    if (!on(col - 1, row)) edge += `M${left} ${top}V${bottom}`;
+    if (!on(col, row - 1)) edge += `M${left} ${top}H${right}`;
+  }
+  return [`<path class="tsu-grid" d="${grid}"/>`, `<path class="tsu-border" d="${edge}"/>`];
+}
+
 /**
  * A board as pieces, for a page that keeps its drawing in a framework's tree and writes only what changed: the same
  * drawing as `drawTsunagi`, which is this written out.
@@ -335,7 +358,7 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
   const bridges = layout.cells.flatMap((cell, at) => (cell === CELL_BRIDGE ? [at] : []));
   const boardName =
     typeof options.board === "string" ? options.board : options.board === undefined ? "paper" : "custom";
-  const { side, paper } = geometry;
+  const { width, height, paper } = geometry;
   const pairColour = (pair: number): TsunagiColour => colourOfPair(colours, pair);
   const wash = (pair: number): string => washColour(pairColour(pair), marks);
   const stroke = (pair: number): string => lineColour(pairColour(pair), marks);
@@ -363,7 +386,7 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
   // The paper and its frame: a page with a board of its own draws these itself.
   const ground: string[] = [];
   if (!surface) {
-    ground.push(`<rect class="tsu-frame" width="${round(side)}" height="${round(side)}" rx="22"/>`);
+    ground.push(`<rect class="tsu-frame" width="${round(width)}" height="${round(height)}" rx="22"/>`);
     ground.push(
       `<rect class="tsu-paper" x="${paper.x}" y="${paper.y}" width="${round(paper.width)}" height="${round(paper.height)}" rx="6" fill="url(#__ID__-paper)"/>`,
     );
@@ -376,13 +399,15 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
   // Row numbers and column letters, on the frame.
   if (geometry.coordinates) {
     const room = (paper.x - 0) / 2;
-    for (let at = 0; at < size; at += 1) {
-      const middle = geometry.centre(at);
+    for (let at = 0; at < geometry.cols; at += 1) {
+      const middle = geometry.centre(at + geometry.first.col);
       const letter = String.fromCharCode(65 + (at % 26));
       ground.push(
         `<text class="tsu-coordinate" x="${round(middle.x)}" y="${round(room)}" dy=".35em" aria-hidden="true">${letter}</text>`,
       );
-      const row = geometry.centre(at * size);
+    }
+    for (let at = 0; at < geometry.rows; at += 1) {
+      const row = geometry.centre((at + geometry.first.row) * size);
       ground.push(
         `<text class="tsu-coordinate" x="${round(room)}" y="${round(row.y)}" dy=".35em" aria-hidden="true">${at + 1}</text>`,
       );
@@ -429,16 +454,19 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
 
   const rules: string[] = [...blocked];
   if (!hex) {
-    const left = geometry.centre(0).x - CELL / 2;
-    const top = geometry.centre(0).y - CELL / 2;
-    const across = size * CELL;
-    let grid = "";
-    for (let at = 1; at < size; at += 1)
-      grid += `M${round(left + at * CELL)} ${round(top)}v${across}M${round(left)} ${round(top + at * CELL)}h${across}`;
-    rules.push(`<path class="tsu-grid" d="${grid}"/>`);
-    rules.push(
-      `<rect class="${layout.wrap ? "tsu-rim" : "tsu-border"}" x="${round(left)}" y="${round(top)}" width="${across}" height="${across}"/>`,
-    );
+    if (layout.off !== undefined && layout.off.size > 0) rules.push(...shapeRules(layout, geometry));
+    else {
+      const left = geometry.centre(0).x - CELL / 2;
+      const top = geometry.centre(0).y - CELL / 2;
+      const across = size * CELL;
+      let grid = "";
+      for (let at = 1; at < size; at += 1)
+        grid += `M${round(left + at * CELL)} ${round(top)}v${across}M${round(left)} ${round(top + at * CELL)}h${across}`;
+      rules.push(`<path class="tsu-grid" d="${grid}"/>`);
+      rules.push(
+        `<rect class="${layout.wrap ? "tsu-rim" : "tsu-border"}" x="${round(left)}" y="${round(top)}" width="${across}" height="${across}"/>`,
+      );
+    }
     // Walls: a thick bar on the edge between two square cells.
     for (const wall of layout.walls) {
       const [a, b] = wall.split("-").map(Number) as [number, number];
@@ -471,7 +499,7 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
       })
       .join("");
     add("under", [
-      `<defs><mask id="__ID__-under" maskUnits="userSpaceOnUse" x="-100" y="-100" width="${round(side + 200)}" height="${round(side + 200)}"><rect x="-100" y="-100" width="${round(side + 200)}" height="${round(side + 200)}" fill="white"/>${holes}</mask></defs>`,
+      `<defs><mask id="__ID__-under" maskUnits="userSpaceOnUse" x="-100" y="-100" width="${round(width + 200)}" height="${round(height + 200)}"><rect x="-100" y="-100" width="${round(width + 200)}" height="${round(height + 200)}" fill="white"/>${holes}</mask></defs>`,
     ]);
     pieces.push({
       key: "lines",
@@ -584,7 +612,14 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
     });
   }
 
-  const label = options.label ?? tsunagiSay(language, hex ? "boardHex" : "board", { size });
+  const shaped = layout.off !== undefined && layout.off.size > 0;
+  const label =
+    options.label ??
+    tsunagiSay(language, `${hex ? "boardHex" : "board"}${shaped ? "Shape" : ""}`, {
+      size,
+      cols: geometry.cols,
+      rows: geometry.rows,
+    });
   const solved = options.done === true;
   // The ids are made from the drawing as it is, or given, and only then written in.
   const id =
@@ -592,7 +627,7 @@ export function tsunagiDrawing(layout: LinkLayout, options: TsunagiDrawOptions =
   const attributes: Record<string, string> = {
     xmlns: "http://www.w3.org/2000/svg",
     class: "tsunagi",
-    viewBox: `0 0 ${round(side)} ${round(side)}`,
+    viewBox: `0 0 ${round(width)} ${round(height)}`,
     role: "group",
     "aria-label": escapeXml(label),
     "data-size": String(size),

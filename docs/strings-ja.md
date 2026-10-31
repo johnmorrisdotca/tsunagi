@@ -9,7 +9,9 @@ with `One` at the end of its name is the singular, said in English when the coun
 | Name | English | Japanese |
 | --- | --- | --- |
 | `board` | Tsunagi board, {size} by {size} | つなぎの盤、{size}×{size} |
+| `boardShape` | Tsunagi board, {cols} by {rows} | つなぎの盤、{cols}×{rows} |
 | `boardHex` | Tsunagi board of hexagons, {size} across | 六角形の盤、一辺{size}マス |
+| `boardHexShape` | Tsunagi board of hexagons, {rows} rows | 六角形の盤、{rows}段 |
 | `marble` | marble {n}, row {row}, column {col} | 玉{n}、{row}行{col}列 |
 | `portal` | portal {mark}, between row {row}, column {col} and row {row2}, column {col2} | ワープ{mark}、{row}行{col}列と{row2}行{col2}列のあいだ |
 | `undo` | Undo | 元に戻す |

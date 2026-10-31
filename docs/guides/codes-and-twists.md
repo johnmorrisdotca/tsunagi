@@ -9,6 +9,8 @@ description: Read and write board codes, keep twist rules in their own suffixes,
 
 Layout codes start with row-major cells, then ordered native suffixes. Pairs have two endpoints; blocked cells cannot hold a line. Walls block edges, bridges carry two straight different lines, waypoints require their own pair and wrapping joins opposite edges. Hex boards have native six-neighbour geometry. Portals step through a paired cell and continue in the same direction.
 
+A board that is not a whole square says `shape`: each `#` that reaches the square's edge through other `#` cells is off the board and not a cell at all, and a `#` inside is still a blocked cell. onTheBoard says which is which.
+
 ## One spelling preserves one board
 
 Use decodeLayout/encodeLayout, layoutStep, stepTable and layoutNeighbours. Portal travel can cover cells beyond a simple adjacency pair, and bridges require special crossing ownership. Sparse, stroke and explosion suffixes constrain native gameplay. A hand-written generic four-neighbour walker would lose these rules.

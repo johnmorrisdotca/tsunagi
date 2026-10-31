@@ -5,6 +5,7 @@ import {
   LINK_BRIDGE,
   LINK_WALLS,
   layoutCells,
+  offBoardCells,
   stoneLetters,
   tailWord,
 } from "./code.ts";
@@ -66,7 +67,11 @@ export function challengesOf(layout: string): Challenge[] {
   const hex = words.some((word) => word?.word === "hex");
   // A hexagon's corners are off the board, not blocked: only a `#` inside it is a wall.
   const size = Math.round(Math.sqrt(cells.length));
-  const blocked = [...cells].some((cell, at) => cell === LINK_BLOCKED && (!hex || inHex(size, at)));
+  const shaped = words.some((word) => word?.word === "shape");
+  const off = shaped ? offBoardCells(cells, size, hex) : null;
+  const blocked = [...cells].some(
+    (cell, at) => cell === LINK_BLOCKED && (off !== null ? !off.has(at) : !hex || inHex(size, at)),
+  );
   if (words.some((word) => word === null) || blocked) out.push("walls");
   if (stoneLetters(cells).length === CAPITAL_PAIRS && /[a-z]/.test(cells)) out.push("waypoints");
   if (words.some((word) => word?.word === "wrap")) out.push("wrap");
