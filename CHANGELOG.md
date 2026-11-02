@@ -7,6 +7,8 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-11-02
+
 ### Added
 
 - `surface: true` draws only the playing surface, for a page with a board of its own: no frame, paper or coordinates, and the drawing's box is exactly the cells. `tsunagiGeometry` and `drawTsunagiPair` take it too.
@@ -307,7 +309,8 @@ its own package.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.7.1...v1.8.0
 [1.7.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.3...v1.7.0
 [1.6.1]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.5.0...v1.6.0
