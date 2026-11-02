@@ -15,6 +15,7 @@ board and its answer, so a solve kept by any version is still the same solve.
 - `generateTsunagi(board, random, options)` is one generator for every board: `squareBoard` from 3×3 up, `oblongBoard`, `hexagonBoard` at any radius, `tallHexagonBoard` (a honeycomb a little taller than it is wide), `shapedBoard` (any outline) and boards whose edges join, with warps, bridges and waypoints planted on what it fills. Each board is filled by one winding path cut as it grows, proved by `countSolutions` and `checkTsunagiAnswer`, and a second answer is mended by adding a pair. A 15×15 board takes well under a second. `windingLines` is the filling on its own.
 - A layout may say `shape`: each `#` that reaches its square's edge through other `#` cells is off the board. `onTheBoard` and `offBoardCells` say which cells those are, and `tsunagiGeometry` (`width`, `height`, `first`, `cols`, `rows`), `drawTsunagi` and `mountTsunagi` draw and play a board as big as it is. No code written before shapes changes.
 - `withBridges` plants bridges on any lines, and `absorb` is exported for a filling of your own.
+- The demo's header patches lay the board in the family's cloths, and the embed takes `cloth=` for the same choice as `board=`; a `board=` in the address wins. The demo keeps its place when the language changes.
 
 ## [1.7.1] - 2026-10-31
 
