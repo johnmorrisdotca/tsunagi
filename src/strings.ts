@@ -106,7 +106,7 @@ export const TSUNAGI_STRINGS: Record<TsunagiLanguage, Record<string, string>> = 
     board: "つなぎの盤、{size}×{size}",
     boardShape: "つなぎの盤、{cols}×{rows}",
     boardHex: "六角形の盤、一辺{size}マス",
-    boardHexShape: "六角形の盤、{rows}段",
+    boardHexShape: "六角形の盤、{rows}行",
     marble: "玉{n}、{row}行{col}列",
     portal: "ワープ{mark}、{row}行{col}列と{row2}行{col2}列のあいだ",
     undo: "元に戻す",
