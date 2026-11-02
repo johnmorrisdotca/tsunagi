@@ -66,7 +66,8 @@ describe("the generator at 13×13 to 15×15, where it was asked for first", () =
   });
 });
 
-describe("the same generator on every other board", () => {
+// Each board is proved to have one answer; a CI machine has taken more than the default five seconds over the squares.
+describe("the same generator on every other board", { timeout: 60_000 }, () => {
   it("makes every square from 3×3 up", () => {
     for (let size = 3; size <= 12; size += 1) proves(squareBoard(size));
   });
