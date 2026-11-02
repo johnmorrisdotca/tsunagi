@@ -8,7 +8,7 @@ Join each pair of marbles with a line, every line its own, until the board is fu
   <a href="https://www.npmjs.com/package/@johnmorrisdotca/tsunagi"><img alt="npm" src="https://img.shields.io/npm/v/@johnmorrisdotca/tsunagi?color=2f5d4a"></a>
   <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-2f5d4a"></a>
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
-  <a href="https://johnmorrisdotca.github.io/tsunagi/docs/api/main/index.html"><img alt="22.6 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-22.6%20kB-2f5d4a"></a>
+  <a href="https://johnmorrisdotca.github.io/tsunagi/docs/api/main/index.html"><img alt="24.3 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-24.3%20kB-2f5d4a"></a>
   <a href="https://www.npmjs.com/package/@johnmorrisdotca/tsunagi#provenance"><img alt="Published with npm provenance" src="https://img.shields.io/badge/npm-provenance-2f5d4a"></a>
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
 </p>

@@ -9,7 +9,8 @@ import { type GeneratorOptions, generateTsunagi, windingLines } from "./generato
 import { cellAtPoint, tsunagiGeometry } from "./geometry.ts";
 import { challengesOf } from "./ladder.ts";
 import { seededRandom } from "./random.ts";
-import { countSolutions } from "./solve.ts";
+import { countSolutions, SAT_BINARY_FROM_SIZE, SAT_FROM_SIZE } from "./solve.ts";
+import { countSolutionsSat } from "./solveSat.ts";
 import { keptView, zoomedAbout } from "./viewport.ts";
 
 /**
@@ -29,7 +30,12 @@ function proves(board: TsunagiBoard, options: GeneratorOptions = {}, seeds = SEE
     expect(made, `seed ${seed} made a board`).not.toBeNull();
     const layout = decodeLayout(made!.layout, board.size);
     expect(layout, "its code reads").not.toBeNull();
-    const solved = countSolutions(layout!, 2);
+    // Proved again here without being told the answer, by the solver that suits the board: a honeycomb's six ways and a big
+    // square's four lose the plain search (which runs for hours on them), so those are proved by the one that learns.
+    const learns = layout!.hex || board.size >= SAT_FROM_SIZE;
+    const solved = learns
+      ? countSolutionsSat(layout!, 2, 200_000, null, board.size >= SAT_BINARY_FROM_SIZE ? "binary" : "one-hot")
+      : countSolutions(layout!, 2);
     expect(solved.count, "it has exactly one answer").toBe(1);
     expect(encodeAnswer(solved.solution!), "and it is the one it was made from").toBe(made!.answer);
     expect(checkTsunagiAnswer(board.size, made!.layout, made!.answer)).toEqual({ ok: true });

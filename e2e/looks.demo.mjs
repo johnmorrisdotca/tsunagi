@@ -221,7 +221,10 @@ test("a level with a bridge hides the line going down under the deck and draws t
     const all = [...document.querySelectorAll('[data-testid="board"] svg.tsunagi > *')];
     return [
       all.findIndex((element) => element.classList.contains("tsu-lines")),
-      all.findIndex((element) => element.classList.contains("tsu-bridge")),
+      // The decks are drawn in a group of their own (the drawing keeps its groups apart, so a move writes only the ones it changed).
+      all.findIndex(
+        (element) => element.classList.contains("tsu-bridge") || element.querySelector(":scope > .tsu-bridge") !== null,
+      ),
     ];
   });
   expect(order[1]).toBeGreaterThan(order[0]);
