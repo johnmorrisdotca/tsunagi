@@ -12,14 +12,21 @@ src/
 ├── index.ts          the main entry: everything but the levels, the drawing and the page
 ├── keyboard.ts       drawing a line from the keyboard, and keeping that cell on screen
 ├── code.ts           layouts and answers as short codes, and the board each stands for
+├── code-letters.ts   the letters a layout code is written in
+├── code-decode.ts    reading a layout code back into a board
+├── code-encode.ts    writing a board as a layout code, and an answer as a code
+├── code-graph.ts     the cells of a layout and which are next to which
 ├── steps.ts          where a line may go next on a board: walls, bridges, portals, wrap, hexagons
 ├── lines.ts          the lines a player has drawn, and what a press and a drag do to them
+├── lines-code.ts     the lines a player has drawn, as a short code and back
+├── lines-drag.ts     what a press, a drag and a lift do to the lines
 ├── check.ts          whether an answer joins every pair as the rules allow
 ├── chrome.ts         the chips, the buttons and the words under a mounted board
 ├── solve.ts          the solver, which counts a board's answers up to a limit (4×4 to 12×12)
 ├── solveSat.ts       the same count by SAT, for 13×13 and above and for portals: the board written as clauses
 ├── sat.ts            a small SAT solver: clause learning, restarts, clauses added between solves
 ├── generate.ts       new boards from a seed: lines laid at random, cut back to their ends
+├── generate-symmetry.ts turning, flipping and re-lettering a candidate board
 ├── reduce.ts         big boards made by taking clues away, with portals, wrap, waypoints and blocked cells
 ├── board.ts          a board as a graph, for the generator: squares, oblongs, honeycombs, any outline
 ├── generator.ts      one generator for every board: one winding path cut into lines, proved, mended
@@ -31,6 +38,7 @@ src/
 ├── ladder.types.ts   the challenges a board can have
 ├── cheat.ts          one line of the answer drawn in, for a player who asks for help
 ├── game.ts           a game in play as pure functions: strokes, Undo, explosions, Check, Cheat, help
+├── game-help.ts      the help a player may ask for, and the progress a game has made
 ├── levels.ts         the "/levels" entry: each size's levels, loaded when asked
 ├── levelCounts.ts    how many levels each size has
 ├── daily.ts          the level of the day at a size, from the date alone
@@ -40,6 +48,7 @@ src/
 ├── random.ts         the seeded random numbers every board is made from
 ├── draw-entry.ts     the "/draw" entry: the drawing, its colours and boards, and where everything sits
 ├── drawing.ts        a board as keyed groups of SVG: marbles, lines, walls, bridges under and over, wrap, hexagons
+├── drawing-pieces.ts the SVG for one marble, line, portal or bead, and the shared styles
 ├── draw.ts           that drawing as one string, one pair's parts, one marble
 ├── geometry.ts       where every cell is in the drawing, and which cell a point is over
 ├── colours.ts        the colour sets, and how a colour is shaded for a marble, a line and a wash
@@ -49,10 +58,12 @@ src/
 ├── play-entry.ts     the "/play" entry: a level played in any element
 ├── pointer.ts        a press and a drag on the board, including a zoomed board's edge
 ├── mount.ts          mountTsunagi: draws a level into an element and plays it by touch and mouse
+├── mount-types.ts    the options, events and handle of a mounted board
 ├── viewport.ts       the arithmetic of zooming and moving a big board through its box
 ├── playStyle.ts      the style of a playable board: its box, buttons, words and zoom pad
 ├── embed-day.ts       shared UTC date parsing and deterministic date seeds
 ├── element.ts        the "/element" entry: the <tsunagi-board> class
+├── element-options.ts the attributes a board element reads
 ├── element-define.ts the "/element/define" entry: defines the tag on the page
 ├── version.ts        the package's version
 └── levels/

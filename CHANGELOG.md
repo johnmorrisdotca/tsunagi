@@ -7,6 +7,7 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+- Source files over 500 lines are split by what they do (the layout code, lines, drawing, board generation, game, mount and element, and the portals tests), with the same exports and no change to the package. `pnpm check` now runs `scripts/check-max-lines.mjs`, which fails a file over 500 lines.
 - The README opens with the package's thumbnail, and the demo carries it as its link preview (og:image) and publishes the card, a dark card and an icon on Pages at `thumbnail.png`, `thumbnail-dark.png` and `icon.png`.
 
 ## [1.8.0] - 2026-11-02
