@@ -9,6 +9,7 @@ import { tsunagiGeometry } from "../dist/draw-entry.js";
 import { challengesOf, decodeLayout, linesOfAnswer } from "../dist/index.js";
 import { loadEveryTsunagiLevel, loadTsunagiLevels, tsunagiLevelsOf } from "../dist/levels.js";
 
+import { captureDrawing } from "./family-thumbnail.mjs";
 import { takePictures } from "./readme-pictures-lib.mjs";
 
 await loadEveryTsunagiLevel();
@@ -107,4 +108,36 @@ await takePictures({
     // A 30×30 board, with its one answer drawn.
     finished("big", { size: 30, level: 1, look: "&marks=colours&fill=lines&board=paper" }),
   ],
+  // The family's thumbnail, dark thumbnail and icon (scripts/family-thumbnail.mjs): three finished boards as their own
+  // pictures show them, dots in colours on paper, the hexagon on wood and bridges on blue, each taken from the page
+  // where it is drawn; the icon is the first alone.
+  thumbnail: {
+    url: "/?lang=en&size=7&level=2",
+    ready: READY,
+    target: "#thumbnail-stage",
+    icon: { target: "#thumbnail-icon" },
+    label: "Tsunagi 繋ぎ",
+    async prepare(page) {
+      const boards = [];
+      for (const { size, level, look } of [
+        { size: 7, level: 2, look: "" },
+        { size: 7, level: withChallenge("hexagon", 7), look: "&board=wood" },
+        { size: 6, level: withChallenge("bridges", 6), look: "&board=blue" },
+      ]) {
+        await page.evaluate(keepSolved, { size, level, set: "classic" });
+        await page.goto(`http://tsunagi.test/?lang=en&size=${size}&level=${level}&set=classic${look}`);
+        await page.waitForSelector('#board[data-ready="true"] svg.tsunagi[data-solved="true"]');
+        await page.mouse.move(0, 0);
+        boards.push((await captureDrawing(page, "#board svg.tsunagi", { margin: 4 })).toString("base64"));
+      }
+      await page.evaluate((drawn) => {
+        const picture = (base64, width) =>
+          `<img src="data:image/png;base64,${base64}" alt="" style="display:block;width:${width}px">`;
+        const stage = `<div id="thumbnail-stage" style="display:flex;gap:40px;align-items:center;padding:8px;width:max-content">${drawn.map((one) => picture(one, 340)).join("")}</div>`;
+        const icon = `<div id="thumbnail-icon" style="width:max-content;padding:8px">${picture(drawn[0], 420)}</div>`;
+        document.body.replaceChildren();
+        document.body.insertAdjacentHTML("afterbegin", stage + icon);
+      }, boards);
+    },
+  },
 });

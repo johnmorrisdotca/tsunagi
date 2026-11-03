@@ -1,3 +1,5 @@
+<p align="center"><a href="https://johnmorrisdotca.github.io/tsunagi/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/thumbnail-dark.png"><img src="https://raw.githubusercontent.com/johnmorrisdotca/tsunagi/main/docs/images/thumbnail.png" alt="Tsunagi: three finished boards, every pair of marbles joined by a line, a square grid on paper, a hexagon on wood and bridges on blue." width="1200"></picture></a></p>
+
 <h1 align="center">Tsunagi <sub>繋ぎ</sub> — Connect-the-pairs line puzzle</h1>
 
 <p align="center"><strong>A line-joining logic puzzle for JavaScript and TypeScript.</strong><br>
