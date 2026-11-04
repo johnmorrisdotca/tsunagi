@@ -282,6 +282,8 @@ defineProps({ size: Number, level: Number });
 <tsunagi-board bind:this={board} size={size} level={level}></tsunagi-board>
 ```
 
+Each way of using it is a file in [`examples/`](./examples), built, type-checked or run against the package as npm packs it (`pnpm test:usage`), and its guide holds the same text word for word: [script tag](./docs/guides/html-and-cdn.md), [iframe](./docs/guides/embed-in-an-iframe.md), [Vite and webpack](./docs/guides/bundlers.md), [React, Vue, Svelte and Angular](./docs/guides/frameworks.md), [TypeScript and Node](./docs/guides/typescript-and-node.md).
+
 Angular (a standalone component with `CUSTOM_ELEMENTS_SCHEMA`), Next.js and other server-rendering frameworks (import the define entry from a client component, or call `mountTsunagi` in an effect) are in [docs/FRAMEWORKS.md](docs/FRAMEWORKS.md); `pnpm test:frameworks` builds all of these recipes from the packed tarball, for each of the five, in Chromium and WebKit.
 
 ### What a developer gets
@@ -834,7 +836,7 @@ Using Tsunagi in something? Open an *Add my project* issue and we will add you.
 ### The family
 
 <!-- family:start (made by scripts/family-readme.mjs from scripts/family-template.mjs; change those, not this) -->
-Tsunagi is one of thirty-two packages, each made for the same site, each at
+Tsunagi is one of thirty-three packages, each made for the same site, each at
 [github.com/johnmorrisdotca](https://github.com/johnmorrisdotca) or [github.com/spxis](https://github.com/spxis). The code of every one is MIT.
 
 **Games — board**
@@ -878,6 +880,7 @@ Tsunagi is one of thirty-two packages, each made for the same site, each at
 **Geography & data**
 
 - [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada, Japan, Australia, France, Germany and the United Kingdom. [Demo](https://johnmorrisdotca.github.io/address-plus/).
+- [Chikyu Earth](https://github.com/johnmorrisdotca/chikyu-earth) (地球): a line-drawn globe that turns at the Earth's own rate, with an optional realistic Earth from space and markers for any place. [Demo](https://johnmorrisdotca.github.io/chikyu-earth/).
 - [Chizu](https://github.com/johnmorrisdotca/chizu) (地図): maps of the world and of countries' regions, in English and Japanese, with a quiz and callouts. [Demo](https://johnmorrisdotca.github.io/chizu/).
 - [Hata](https://github.com/johnmorrisdotca/hata) (旗): country and regional flags as SVG, at their true proportions and keyed by ISO code. [Demo](https://johnmorrisdotca.github.io/hata/).
 - [Kuni](https://github.com/johnmorrisdotca/kuni) (国): countries and their regions, with ISO codes and names in English and Japanese. [Demo](https://johnmorrisdotca.github.io/kuni/).
@@ -894,7 +897,7 @@ Tsunagi is one of thirty-two packages, each made for the same site, each at
 - [REST in Pieces](https://github.com/spxis/rest-in-pieces) (レスト・イン・ピーシーズ): seeded test data and REST APIs for frontend development, with latency and error drills. [Demo](https://spxis.github.io/rest-in-pieces/).
 
 
-**This package is Tsunagi.** The demos of all thirty-two share one header and footer, so each links the rest.
+**This package is Tsunagi.** The demos of all thirty-three share one header and footer, so each links the rest.
 <!-- family:end -->
 
 ## Development

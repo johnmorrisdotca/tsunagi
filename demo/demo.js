@@ -82,6 +82,9 @@ const WORDS = {
     tagTitle: "As a tag",
     tagText:
       "The same board in one element, with no framework: numbers, lines only, and the level's challenges under it.",
+    embedTitle: "Put it in your page",
+    embedText:
+      "Choose a grid, a level and a board, a size, and how your page is made, then copy the code. The picture beside the code is made from the same choices.",
     foot: "Every level was made once and is proved on every build to have exactly one answer. Your progress stays on this device.",
   },
   ja: {
@@ -136,6 +139,9 @@ const WORDS = {
       "上の盤面は、このパッケージそのもの（ルール、描き方、すべてのレベル）で動いています。下の各行がそれぞれ必要なコードのすべてです。",
     tagTitle: "タグとして",
     tagText: "同じ盤面を、フレームワークなしの一つの要素で。数字、線だけ、盤の下にレベルの仕掛けも出ています。",
+    embedTitle: "自分のページに入れる",
+    embedText:
+      "盤の大きさ、レベル、盤の見た目、表示の大きさ、ページの作り方を選んで、コードをコピーします。コードの横の絵は、同じ選択からできています。",
     foot: "どのレベルも一度だけ作られ、ビルドのたびに答えがちょうど一つであることが確かめられています。進み具合はこの端末に残ります。",
   },
 };

@@ -74,3 +74,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: The README's TypeScript and JavaScript examples, type-checked and run against the built package
         run: pnpm test:readme
+  usage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Every way of using the package (a script tag, an iframe, Vite, webpack, React, Vue, Svelte, Angular, TypeScript, Node), built and opened as npm packs it
+        run: pnpm test:usage

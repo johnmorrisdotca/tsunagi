@@ -1,4 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["./scripts/biome-family.json"]
+  "extends": ["./scripts/biome-family.json"],
+  "files": {
+    "includes": ["!scripts/check-standard.mjs", "!examples", "!.usage", "!.docs-examples"]
+  }
 }

@@ -40,11 +40,13 @@ const places = (page) =>
       // The fonts are in and the page has drawn twice, so what is measured is what a reader sees.
       await globalThis.document.fonts.ready;
       await new Promise((done) => globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(done)));
+      // The header's buttons can wrap onto another row in Japanese, so a place is measured from the header's bottom edge.
+      const top = globalThis.document.querySelector("header").getBoundingClientRect().bottom + globalThis.scrollY;
       const box = (element) => {
         const found = element.getBoundingClientRect();
         return {
           x: Math.round(found.x),
-          y: Math.round(found.y + globalThis.scrollY),
+          y: Math.round(found.y + globalThis.scrollY - top),
           width: Math.round(found.width),
           height: Math.round(found.height),
         };
@@ -64,12 +66,12 @@ for (const width of [390, 828, 1280])
     await page.setViewportSize({ width, height: 900 });
     await page.goto(`http://steady.test/${PAGE}`);
     await expect(page.locator(BOARD).first()).toBeVisible();
-    await page.locator('[data-lang="en"]').first().click();
+    await page.locator('kazoku-language-picker [data-v="en"]').first().click();
     const english = await places(page);
-    await page.locator('[data-lang="ja"]').first().click();
+    await page.locator('kazoku-language-picker [data-v="ja"]').first().click();
     await expect(page.locator("html")).toHaveAttribute("lang", "ja");
     const japanese = await places(page);
-    await page.locator('[data-lang="en"]').first().click();
+    await page.locator('kazoku-language-picker [data-v="en"]').first().click();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     const back = await places(page);
     for (const [name, one] of [

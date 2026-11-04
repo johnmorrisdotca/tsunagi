@@ -176,6 +176,7 @@ describe("the README's promises", () => {
       "thirty",
       "thirty-one",
       "thirty-two",
+      "thirty-three",
     ];
     expect(block).toContain(`one of ${words[family.length]} packages`);
     expect([...block.matchAll(/^- \[/gm)]).toHaveLength(family.length);

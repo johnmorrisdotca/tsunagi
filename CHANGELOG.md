@@ -7,9 +7,21 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-11-03
+
+### Added
+
+- **Put it in your page.** The demo ends with the family's shared panel (kazoku-ui's `<kazoku-embed-panel>`): choose a grid, a level, the portals and a board, a size, then pick how your page is made (a script tag, an ES module, React, Vue, Angular, Svelte or an iframe) and copy the code. The picture beside the code is the board those choices make.
+- **Every way of using the package is tested.** `examples/` holds a file for each: a script tag from jsDelivr and from unpkg, an iframe of the embed page, Vite, webpack, React (and its server render), Vue, Svelte, Angular, TypeScript and Node. `pnpm test:usage` builds, type-checks or runs each against the package as npm packs it, opens the ones with a page in a browser, and checks that the guides hold the same text word for word. CI runs it.
+- Five guides, each with a Japanese twin: plain HTML and CDNs, embed in an iframe, Vite and webpack, React, Vue, Svelte and Angular, and TypeScript and Node.
+- `scripts/check-standard.mjs`, the family's must-have list, as a test (demo, embed page, documentation site in two languages, tested usage).
+
+### Changed
+
 - **The wheel over a big board zooms it and never traps the page.** A wheel that starts with the zoom already at its end (turned down at the whole board, or up at the closest), a sideways swipe and Shift with the wheel are now left to the page to scroll; a pinch (Ctrl or Command and the wheel) is always the board's. A wheel in lines (Firefox) zooms as far as one in pixels.
 - Source files over 500 lines are split by what they do (the layout code, lines, drawing, board generation, game, mount and element, and the portals tests), with the same exports and no change to the package. `pnpm check` now runs `scripts/check-max-lines.mjs`, which fails a file over 500 lines.
 - The README opens with the package's thumbnail, and the demo carries it as its link preview (og:image) and publishes the card, a dark card and an icon on Pages at `thumbnail.png`, `thumbnail-dark.png` and `icon.png`.
+- The header's language chooser and theme switch are kazoku-ui's, as in the rest of the family; the demo page is `demo/index.html`.
 
 ## [1.8.0] - 2026-11-02
 
@@ -313,7 +325,8 @@ its own package.
 - A difficulty measure, and 1,792 levels from 4×4 to 12×12, each its own
   import, every one proved on every build to have exactly one answer.
 
-[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.7.1...v1.8.0
 [1.7.0]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.3...v1.7.0
 [1.6.1]: https://github.com/johnmorrisdotca/tsunagi/compare/v1.6.0...v1.6.1

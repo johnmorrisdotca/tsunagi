@@ -28,7 +28,7 @@ const pkg = JSON.parse(read("package.json"));
 // every repository at once, with a new DOCS_SITE_VERSION and the new hashes here.
 const RECORDED = {
   version: "2026-11-03-guide-images",
-  "scripts/docs-site.mjs": "fe3f3b1676db277c51d7d72de2ed66121b7bec7a3b6397ef9285447b8b321955",
+  "scripts/docs-site.mjs": "8c827fce376b6a4622d610f325e0f92936208a68566d9abed8d96ccdace8096a",
   "e2e/docs-site.demo.mjs": "915d74e4017cf117f8322b712ab2f1fa55058d654ff0fca0e476af85bce5fbf6",
 };
 

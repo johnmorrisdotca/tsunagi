@@ -79,7 +79,7 @@ test("the shared builder covers options and writes host formats", async ({ page 
     await page.locator(`#bld-formats [data-format="${format}"]`).click();
     await expect(page.locator("#bld-code")).not.toHaveText("");
   }
-  await page.locator('[data-lang="ja"]').click();
+  await page.locator('kazoku-language-picker [data-v="ja"]').click();
   await expect(page.locator("#bld-maker-says")).toContainText("玉");
   expect(errors).toEqual([]);
 });

@@ -3,6 +3,8 @@
 // compiled library beside it.
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
+import { build } from "esbuild";
+
 import { API_CSS, apiPage } from "./api.mjs";
 import {
   FAMILY_EMBED_BUILDER_WORDS,
@@ -35,87 +37,36 @@ const uses = [
 ];
 const escapeHtml = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const page = `<!doctype html>
-<html lang="en">
-  <head>
-    ${familyHead({
-      id,
-      title: "Tsunagi 繋ぎ — Connect-the-pairs line puzzle",
-      description:
-        "Play Tsunagi, the line-joining logic puzzle: 2,368 levels from 4×4 to 30×30 and 256 more with portals, each with exactly one answer, with walls, bridges, waypoints, wrap and hexagon boards. Free and open source, in English and Japanese.",
-      ogTitle: "Tsunagi 繋ぎ — Connect-the-pairs line puzzle",
-      ogDescription:
-        "Join each pair of marbles with a line, and fill the board. 2,368 levels and 256 with portals, each with one answer.",
-    })}
-    ${thumbnailHead(JSON.parse(readFileSync("package.json", "utf8")), { alt: ALT })}
-    <link rel="icon" href="${ICON}" />
-    <link rel="stylesheet" href="family.css" />
-    <link rel="stylesheet" href="tsunagi.css" />
-  </head>
-  <body>
-    <main>
-      ${familyHeader({
-        id,
-        links: [
-          { href: "docs/index.html", say: "pageDocs" },
-          { href: "api.html", say: "pageApi" },
-        ],
-      })}
-      <div class="setup fam-row" data-help-en="Choose which levels: the classic ones, or the ones with portals, where a line goes into one ring and comes out of another." data-help-ja="どのレベルで遊ぶかを選びます。いつものレベルか、線が一方の輪に入ってもう一方から出てくる「ワープ」のレベルです。">
-        <span class="fam-label" data-say="set"></span>
-        <div class="fam-seg" role="group" data-say-label="set" id="set" data-testid="set"></div>
-      </div>
-      <div class="setup fam-row" data-help-en="Choose the board size. Each size has its own levels." data-help-ja="盤の大きさを選びます。大きさごとにレベルがあります。">
-        <span class="fam-label" data-say="size"></span>
-        <div class="fam-seg" role="group" data-say-label="size" id="sizes" data-testid="sizes"></div>
-      </div>
-      <div class="setup fam-row" data-help-en="Step to the next or the previous level, or jump to today's level, the same for everybody. Every level has exactly one answer." data-help-ja="矢印で前後のレベルに移るか、今日のレベル（だれにとっても同じ）に飛びます。どのレベルも、答えはひとつだけです。">
-        <span class="fam-label" data-say="level"></span>
-        <button type="button" class="fam-button" id="previous" data-testid="previous" data-say-label="previous">←</button>
-        <span class="fam-chip" data-lit="true" data-testid="level"><span id="level-number">1</span><span id="level-of" class="of"></span></span>
-        <button type="button" class="fam-button" id="next" data-testid="next" data-say-label="next">→</button>
-        <button type="button" class="fam-button" id="today" data-testid="today" data-say="today"></button>
-      </div>
-      <p class="open" id="open"></p>
-      <div class="table fam-felt" id="board" data-testid="board"></div>
-      <section class="settings" aria-labelledby="look-title">
-        <h2 id="look-title" data-say="look"></h2>
-        <div class="setup fam-row" data-help-en="Show the pairs of marbles by colour or by number. You join the two that match." data-help-ja="ビー玉の組を、色か数字で見分けます。同じ組の2つをつなぎます。"><span class="fam-label" data-say="marks"></span><div class="fam-seg" role="group" data-say-label="marks" id="marks" data-testid="marks"></div></div>
-        <div class="setup fam-row" data-help-en="Draw dots along each line as well, or the lines alone." data-help-ja="線に沿って点も描くか、線だけにするかを選びます。"><span class="fam-label" data-say="fill"></span><div class="fam-seg" role="group" data-say-label="fill" id="fill" data-testid="fill"></div></div>
-        <div class="setup fam-row" data-help-en="Choose the colours of the marbles. Colour-blind uses colours that are easier to tell apart." data-help-ja="ビー玉の色の組を選びます。「色覚にやさしい」は見分けやすい色です。"><span class="fam-label" data-say="colourSet"></span><div class="fam-seg" role="group" data-say-label="colourSet" id="colour-set" data-testid="colour-set"></div></div>
-        <div class="setup fam-row" data-help-en="Choose the look of the board: paper, wood, or a colour." data-help-ja="盤の見た目（紙、木目、色）を選びます。"><span class="fam-label" data-say="board"></span><div class="fam-seg" role="group" data-say-label="board" id="board-look" data-testid="board-look"></div></div>
-        <div class="setup fam-row" data-help-en="Show or hide the letters and numbers that name the cells." data-help-ja="セルを示す文字と数字を、表示するか隠します。"><span class="fam-label" data-say="coordinates"></span><div class="fam-seg" role="group" data-say-label="coordinates" id="coordinates" data-testid="coordinates"></div></div>
-        <h2 data-say="assists"></h2>
-        <div class="setup fam-row" data-help-en="What a mistake does: a full explosion, a softer one, or none. Softer or off counts as helped." data-help-ja="間違えたときの爆発の強さです（ふつう・弱め・なし）。弱めかなしで解くと「助けあり」になります。"><span class="fam-label" data-say="explosions"></span><div class="fam-seg" role="group" data-say-label="explosions" id="explosions" data-testid="explosions"></div></div>
-        <div class="setup fam-row" data-help-en="Allow the Cheat button, which shows part of the answer. A level solved with it counts as helped." data-help-ja="答えの一部を見せる「ヒント」ボタンを使えるようにします。使って解くと「助けあり」になります。"><span class="fam-label" data-say="cheating"></span><div class="fam-seg" role="group" data-say-label="cheating" id="cheats" data-testid="cheats"></div></div>
-        <p class="fam-fine" data-say="helpCosts"></p>
-      </section>
-      <section class="more blocks" aria-labelledby="block-title">
-        <h2 id="block-title"></h2>
-        <p data-say="blockText"></p>
-        <div class="block" id="block" data-testid="block"></div>
-      </section>
-      ${familyUnreviewed({ id })}
-      <section class="more" aria-labelledby="more-title">
-        <h2 id="more-title" data-say="moreTitle"></h2>
-        <p data-say="moreText"></p>
-        <ul class="uses">
-          ${uses.map((line) => `<li><code>${escapeHtml(line)}</code></li>`).join("\n          ")}
-        </ul>
-      </section>
-      <section class="more tag" aria-labelledby="tag-title">
-        <h2 id="tag-title" data-say="tagTitle"></h2>
-        <p data-say="tagText"></p>
-        <tsunagi-board id="tag" data-testid="tag" size="5" level="2" marks="numbers" fill="lines" chips></tsunagi-board>
-      </section>
-      ${familyFooter({ id })}
-    </main>
-    <script>${FAMILY_SCRIPT}</script>
-    <script type="module" src="dist/element-define.js"></script>
-    <script type="module" src="demo.js"></script>
-  </body>
-</html>
-`;
+// The page is demo/index.html; each <!-- family:key --> in it is replaced by the text below.
+const pageParts = {
+  head: familyHead({
+    id,
+    title: "Tsunagi 繋ぎ — Connect-the-pairs line puzzle",
+    description:
+      "Play Tsunagi, the line-joining logic puzzle: 2,368 levels from 4×4 to 30×30 and 256 more with portals, each with exactly one answer, with walls, bridges, waypoints, wrap and hexagon boards. Free and open source, in English and Japanese.",
+    ogTitle: "Tsunagi 繋ぎ — Connect-the-pairs line puzzle",
+    ogDescription:
+      "Join each pair of marbles with a line, and fill the board. 2,368 levels and 256 with portals, each with one answer.",
+  }),
+  thumbnail: thumbnailHead(JSON.parse(readFileSync("package.json", "utf8")), { alt: ALT }),
+  icon: ICON,
+
+  header: familyHeader({
+    id,
+    links: [
+      { href: "docs/index.html", say: "pageDocs" },
+      { href: "api.html", say: "pageApi" },
+    ],
+  }),
+  unreviewed: familyUnreviewed({ id }),
+  uses: uses.map((line) => `<li><code>${escapeHtml(line)}</code></li>`).join("\n          "),
+  footer: familyFooter({ id }),
+  script: `<script>${FAMILY_SCRIPT}</script>\n    <script type="module" src="kazoku-parts.js"></script>\n    <script type="module" src="embed-panel.js"></script>`,
+};
+const page = readFileSync("demo/index.html", "utf8").replace(
+  /<!-- family:([A-Za-z]+) -->/g,
+  (_match, key) => pageParts[key],
+);
 
 rmSync("site", { recursive: true, force: true });
 mkdirSync("site", { recursive: true });
@@ -124,6 +75,29 @@ cpSync("dist", "site/dist", { recursive: true });
 writeFileSync("site/index.html", page);
 // The family's card, dark card and icon, at <site>/thumbnail.png, thumbnail-dark.png and icon.png.
 publishThumbnails(".", "site");
+// The family header's language picker and theme switch, as one small module for every page of the site (the demo, the builder, the API reference and the docs).
+await build({
+  stdin: {
+    contents:
+      'import "@johnmorrisdotca/kazoku-ui/language-picker/define";\nimport "@johnmorrisdotca/kazoku-ui/theme-switch/define";\n',
+    resolveDir: process.cwd(),
+  },
+  outfile: "site/kazoku-parts.js",
+  bundle: true,
+  format: "esm",
+  minify: true,
+  logLevel: "silent",
+});
+// The demo's "Put it in your page": kazoku-ui's embed panel, filled with this package's choices and code.
+await build({
+  entryPoints: ["demo/embed-panel.js"],
+  outfile: "site/embed-panel.js",
+  external: ["./dist/*"],
+  bundle: true,
+  format: "esm",
+  minify: true,
+  logLevel: "silent",
+});
 // The API reference, made from the source: every export of every entry point.
 writeFileSync("site/api.css", API_CSS);
 writeFileSync("site/api.html", apiPage({ id, name: "Tsunagi", icon: ICON }));
@@ -151,7 +125,7 @@ const builderParts = {
   }),
   unreviewed: familyUnreviewed({ id }),
   footer: familyFooter({ id }),
-  script: `<script>${FAMILY_SCRIPT}</script>`,
+  script: `<script>${FAMILY_SCRIPT}</script>\n    <script type="module" src="kazoku-parts.js"></script>`,
 };
 writeFileSync(
   "site/builder.html",
