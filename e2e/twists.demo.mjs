@@ -182,7 +182,7 @@ test("a big board is looked at through a box: the pad zooms and moves it, Fit sh
   await expect(page.locator(`${at("board")} .tsp-pad`)).toBeHidden();
 });
 
-test("at 12×12 a level is solved by dragging at Fit, and the wheel zooms the board while the page stays where it is", async ({
+test("at 12×12 a level is solved by dragging at Fit, and the wheel zooms the board while the page stays where it is, until the zoom is at its end", async ({
   page,
 }) => {
   const level = findLevel((challenges) => challenges.length === 0, { sizes: [12] });
@@ -200,6 +200,15 @@ test("at 12×12 a level is solved by dragging at Fit, and the wheel zooms the bo
   await page.mouse.wheel(0, -400);
   await expect(box).not.toHaveAttribute("data-zoom", "1.00");
   expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
+  // Turned back out to the whole board, the next wheel down belongs to the page.
+  for (let turn = 0; turn < 3; turn += 1) {
+    await page.waitForTimeout(350);
+    await page.mouse.wheel(0, 400);
+  }
+  await expect(box).toHaveAttribute("data-zoom", "1.00");
+  await page.waitForTimeout(350);
+  await page.mouse.wheel(0, 400);
+  await page.waitForFunction((was) => window.scrollY > was, scroll);
   await noSidewaysScroll(page);
 });
 

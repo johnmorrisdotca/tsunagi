@@ -7,6 +7,7 @@ board and its answer, so a solve kept by any version is still the same solve.
 
 ## [Unreleased]
 
+- **The wheel over a big board zooms it and never traps the page.** A wheel that starts with the zoom already at its end (turned down at the whole board, or up at the closest), a sideways swipe and Shift with the wheel are now left to the page to scroll; a pinch (Ctrl or Command and the wheel) is always the board's. A wheel in lines (Firefox) zooms as far as one in pixels.
 - Source files over 500 lines are split by what they do (the layout code, lines, drawing, board generation, game, mount and element, and the portals tests), with the same exports and no change to the package. `pnpm check` now runs `scripts/check-max-lines.mjs`, which fails a file over 500 lines.
 - The README opens with the package's thumbnail, and the demo carries it as its link preview (og:image) and publishes the card, a dark card and an icon on Pages at `thumbnail.png`, `thumbnail-dark.png` and `icon.png`.
 

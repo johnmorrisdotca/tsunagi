@@ -21,10 +21,20 @@ import type { TsunagiEventDetail, TsunagiLook, TsunagiMount, TsunagiMountOptions
 import { BLAST_MS, ensureTsunagiPlayStyle, FLASH_MS } from "./mount-types.ts";
 import { attachTsunagiPointer, type TsunagiPointer } from "./pointer.ts";
 import { type TsunagiLanguage, tsunagiLanguageOf, tsunagiSay } from "./strings.ts";
-import { keptView, TSUNAGI_FITTED, TSUNAGI_ZOOM_FROM, type TsunagiView, zoomedAbout } from "./viewport.ts";
+import {
+  keptView,
+  TSUNAGI_FITTED,
+  TSUNAGI_MOST_ZOOM,
+  TSUNAGI_ZOOM_FROM,
+  type TsunagiView,
+  zoomedAbout,
+} from "./viewport.ts";
 
 export type { TsunagiEventDetail, TsunagiLook, TsunagiMount, TsunagiMountOptions } from "./mount-types.ts";
 export { ensureTsunagiPlayStyle } from "./mount-types.ts";
+
+/** Wheel steps closer together than this, in milliseconds, belong to one turn of the wheel, so a zoom that reaches its end part-way through does not hand the rest to the page. */
+const WHEEL_GESTURE_MS = 300;
 
 /** Draw a level into `host` and play it. Returns the handle that drives it, or null for a layout code that is no layout at that size.
  * @param host - The HTMLElement that owns the native interface.
@@ -229,11 +239,20 @@ export function mountTsunagi(host: HTMLElement, options: TsunagiMountOptions): T
       tell("tsunagi-solve", detail(), callbacks.onSolve);
     }
   }
+  let wheelTaken = Number.NEGATIVE_INFINITY;
   const onWheel = (event: WheelEvent): void => {
     if (!zooming()) return;
+    const pinch = event.ctrlKey || event.metaKey;
+    if (!pinch && (event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY))) return;
+    const lines = event.deltaMode === 1 ? 33 : event.deltaMode === 2 ? 800 : 1;
+    const factor = Math.exp(-event.deltaY * lines * (pinch ? 0.01 : 0.002));
+    // A wheel that starts with the zoom already at its end is left to the page, so the page is never trapped.
+    const atEnd = factor >= 1 ? view.zoom >= TSUNAGI_MOST_ZOOM : view.zoom <= 1;
+    const now = Number.isFinite(event.timeStamp) ? event.timeStamp : 0;
+    if (!pinch && atEnd && !(now >= wheelTaken && now - wheelTaken < WHEEL_GESTURE_MS)) return;
     event.preventDefault();
+    wheelTaken = now;
     const rect = box.getBoundingClientRect();
-    const factor = Math.exp(-event.deltaY * (event.ctrlKey ? 0.01 : 0.002));
     view = zoomedAbout(view, factor, event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height);
     chrome.applyView();
   };

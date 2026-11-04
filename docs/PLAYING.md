@@ -11,8 +11,8 @@ line moves a cell, where it now is; where that would take the finger off the boa
 the end of the line again. Drag back over the portal and the line is as it was before it. Pointer events,
 captured on the press so a drag that leaves the board still ends, with
 `touch-action: none` so a finger drawing a line never scrolls the page. A big
-board (10×10 up) is looked at through a box with a zoom and move pad, the wheel,
-and the box's edge, which moves the view while a line is dragged near it. The box
+board (10×10 up) is looked at through a box with a zoom and move pad, the wheel
+(it zooms; at the end of the zoom it leaves the page to scroll), and the box's edge, which moves the view while a line is dragged near it. The box
 keeps one steady square, and the lines of words under it keep the room they need,
 so nothing moves as lines are drawn or messages come and go.
 
