@@ -18,9 +18,9 @@ const id = pkg.name.replace(/^@[^/]+\//, "");
 // list of the family, are the same text.
 // The template of 2026-10-15d groups thirty-two packages by kind: the sports packages (Dougu Sports, Kyogijo Stadiums, Senshu Jerseys, Taisen Brackets) are a group of their own. The family's list is swept again, in every
 // repository at once, when a package is added to it, and this hash is then the new one.
-const TEMPLATE = { version: "2026-11-02b", sha256: "ba62baad076a3d2821c793fa2bf73184ea9b5d1b40721b0987b7cc459a27960d" };
+const TEMPLATE = { version: "2026-11-09", sha256: "75ca7e7da99092f360e5a539e34b109b14c92e9c04e7ad98f9e4b1e715c9240e" };
 const FILES = {
-  "scripts/family-readme.mjs": "ea87c4b45eaaa14cbd40eb40d9eccb38dbe7d45855f9eb0f1c75a4e3b0596306",
+  "scripts/family-readme.mjs": "dfd4c27b70fe5d7d5f82724180cc739812f0dd13d209c41c053dbdc61bf90188",
   "scripts/release-notes.mjs": "efab0fb78ad05973a8885624c0d2ce3b458b55799c11eabaa5176603ce8cd1e9",
   "scripts/community/SECURITY.md": "ff6f650be7789396233671d2558439736efe7f96a1d1d39115dd5cf94d29275c",
   "scripts/community/CODE_OF_CONDUCT.md": "34da1f56f004ce8f7f95d4449b64d2ecb5827dd9f0d4eea1da351a20713ebe70",
@@ -45,7 +45,7 @@ describe("the family template", () => {
   });
 
   it("lists every package of the family, in order, each with its Japanese name and a line on it", () => {
-    expect(FAMILY.map((one) => one.id)).toEqual(["domino", "gunjin", "narabe", "sugoroku", "tenka", "hitotsu", "jarajara", "kumimoji", "toranpu", "houseki", "jirai", "karakuri", "kazu", "kyuubu", "meikyuu", "suido", "tobiishi", "tsunagi", "korokoro", "tane", "bushu", "hikidashi", "kotoba", "address-plus", "chikyu-earth", "chizu", "hata", "kuni", "dougu-sports", "kyogijo-stadiums", "senshu-jerseys", "taisen-brackets", "rest-in-pieces"]);
+    expect(FAMILY.map((one) => one.id)).toEqual(["domino", "gunjin", "narabe", "sugoroku", "tenka", "fuda-cards", "hitotsu", "jarajara", "kumimoji", "toranpu", "houseki", "jirai", "karakuri", "kazu", "kyuubu", "meikyuu", "suido", "tobiishi", "tsunagi", "korokoro", "tane", "bushu", "hikidashi", "jisho", "kotoba", "chikyu-earth", "hoshi-stars", "uchusen-rockets", "wakusei-planets", "address-plus", "chizu", "hako-devices", "hata", "koyomi-calendars", "kuni", "dougu-sports", "kyogijo-stadiums", "meigen-sports", "senshu-jerseys", "taisen-brackets", "rest-in-pieces"]);
     for (const one of FAMILY) {
       expect(one.name, one.id).toBe(({ "address-plus": "address-plus", "rest-in-pieces": "REST in Pieces" })[one.id] ?? one.id.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" "));
       expect(one.kana, one.id).toMatch(/\S/);
