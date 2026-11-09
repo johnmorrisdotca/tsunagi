@@ -25,3 +25,17 @@ adds a row with the level's difficulty (1 to 5) and a chip for each challenge on
 pressed to say what it means. Everything a button does is also a method on the
 handle (`undo`, `restart`, `check`, `cheat`, `fit`, `load`, `set`, `destroy`).
 
+## The options of `mountTsunagi`
+
+Moved here from the README's "Playing it in a page".
+
+| Option | What it does |
+| --- | --- |
+| `size`, `givens`, `answer`, `level`, `set` | the level (`set`: `classic`, the default, or `portals`); `answer` is needed for Cheat and makes a solve the stored answer |
+| `lines` | lines to start from: a kept game (`decodeLines`) or a solved board to show |
+| `marks`, `fill`, `colours`, `board`, `coordinates` | the look, as for `drawTsunagi`; change them with `set` and they take effect at once |
+| `explosions` | `on` (default), `soft` (a boom for a blast, half as often) or `off`; a solve with either help is `helped` |
+| `cheats` | offer Cheat |
+| `controls`, `chips`, `zoom` | the buttons and words (default on), the chips (default off), and the pad: `auto` from 10×10, `on`, `off` |
+| `language` | `en` or `ja`; left out, the host's `lang` or the page's, and it follows the page's |
+| `onChange`, `onStroke`, `onExplosion`, `onSolve` | callbacks, and the same four as DOM events on the host: `tsunagi-change`, `tsunagi-stroke`, `tsunagi-explosion`, `tsunagi-solve`. Each `detail` has `lines`, `code` (to keep the game), `progress`, `answer` and `helped` |

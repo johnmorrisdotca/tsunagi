@@ -104,3 +104,18 @@ It does four things:
 Asked for at most sixteen lines (`most: 16`), a 13×13 is still made every time, and a 15×15 often is not within its tries, so a level script asking that keeps going with the next seed. Every seed in that table made a board.
 
 The fixed levels stay as they are: every level keeps its number, its board and its answer, and the generator is not how they were made. A level of the ladder is still chosen from a pool by its measured difficulty.
+
+## How the levels are made and proved
+
+Moved here from the README's "Levels".
+
+Every level was made once, by `scripts/tsunagi-levels.ts` (4×4 to 12×12),
+`scripts/tsunagi-levels-big.ts` (13×13 to 15×15) or `scripts/tsunagi-levels-huge.ts` (20×20 to
+30×30), and is proved again
+on every build: solved from scratch, it must have exactly one answer, the one
+stored, filling every cell, with no two levels the same board turned or
+mirrored. Levels come in blocks of sixteen, each block no easier on average
+than the one before, the fifteenth and sixteenth its twist; a block opens
+once every level of the one before is solved. `TSUNAGI_MARKS`
+(`@johnmorrisdotca/tsunagi/marks`) rates every level 1 to 5 from its measured
+difficulty.

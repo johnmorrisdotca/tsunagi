@@ -434,53 +434,11 @@ tsunagi-board, .tsunagi { --tsu-ink: #2b2118; --tsu-frame: #7a5b2e; }
 
 ### A game as pure functions
 
-The rules of play are functions over plain values: each takes a game and returns a new one, so a server can replay a game's strokes, a test can play one, and a page of your own can draw the result.
-
-```ts
-import { dragGame, liftGame, linesOfAnswer, newTsunagiGame, pressGame, tsunagiProgress, undoGame } from "@johnmorrisdotca/tsunagi";
-import type { TsunagiGame } from "@johnmorrisdotca/tsunagi";
-import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
-
-/** One stroke: a finger down on the line's first cell, drawn along it, and let go. */
-function stroke(game: TsunagiGame, line: readonly number[]): TsunagiGame {
-  let next = pressGame(game, line[0]);
-  for (const cell of line.slice(1)) next = dragGame(next, cell);
-  return liftGame(next);
-}
-
-const [givens, answer] = TSUNAGI_5[0];
-let game = newTsunagiGame(givens, 5, { answer })!;
-const lines = linesOfAnswer(game.layout, answer)!;
-
-game = stroke(game, lines[0]);
-console.log(tsunagiProgress(game).joined);               // 1: one pair joined
-console.log(tsunagiProgress(undoGame(game)).joined);     // 0: Undo takes the stroke back
-for (const line of lines.slice(1)) game = stroke(game, line);
-console.log(game.solved, tsunagiProgress(game).joined);  // true 6
-console.log(undoGame(game).solved);                       // true: a solved game is over, and takes nothing back
-```
+The rules of play are functions over plain values: `newTsunagiGame`, `pressGame`, `dragGame`, `liftGame`, `undoGame` and the rest each take a game and return a new one, so a server can replay a game's strokes, a test can play one, and a page of your own can draw the result. A worked game, stroke by stroke, is in [A game as pure functions](docs/GAME_AS_FUNCTIONS.md).
 
 ### Keep a game half drawn, and come back to it
 
-Lines have a short code, so a game can be kept in a database column or in a page's own storage, and carried on from it.
-
-```ts
-import { decodeLines, dragGame, encodeLines, liftGame, linesOfAnswer, newTsunagiGame, pressGame, tsunagiProgress } from "@johnmorrisdotca/tsunagi";
-import { TSUNAGI_5 } from "@johnmorrisdotca/tsunagi/levels-5";
-
-const [givens, answer] = TSUNAGI_5[0];
-let game = newTsunagiGame(givens, 5, { answer })!;
-const first = linesOfAnswer(game.layout, answer)![0];          // draw one pair, and stop
-game = pressGame(game, first[0]);
-for (const cell of first.slice(1)) game = dragGame(game, cell);
-game = liftGame(game);
-
-const code = encodeLines(game.layout, game.lines);             // a short string: keep it anywhere
-const back = newTsunagiGame(givens, 5, { answer, lines: decodeLines(game.layout, code)! })!;
-console.log(tsunagiProgress(back).joined === tsunagiProgress(game).joined, code.length); // true 25
-```
-
-The element and `mountTsunagi` hand the same code over in every event (`detail.code`) and take it back as `progress`, so a page keeps and resumes a game with one line each way.
+Lines have a short code (`encodeLines`, `decodeLines`), so a game can be kept in a database column or in a page's own storage, and carried on from it. The element and `mountTsunagi` hand the same code over in every event (`detail.code`) and take it back as `progress`. The example is in [Keep a game half drawn](docs/KEEP_A_GAME.md).
 
 ### Listen to the board
 
@@ -606,16 +564,7 @@ board?.undo(); board?.check(); board?.load({ size: 7, givens: other, answer: oth
 
 It plays the way the site does: press a marble (or the end of a line) and drag to its partner; drag back over a line to shorten it; tap a marble to clear its line; a line dragged into another cuts the other back, and a drag goes through a portal and comes out of the other ring. A big board (10×10 up) is looked at through a box with a zoom and move pad. Under the board are **Undo**, **Restart**, **Check** and, if `cheats` is on and the level has an `answer`, **Cheat**, then a line of progress and the lines a level's twists ask for. Everything a button does is also a method on the handle (`undo`, `restart`, `check`, `cheat`, `fit`, `load`, `set`, `destroy`). How a drag is read (pointer events, `dragFinger` and `Reach` through a portal), what the zoom pad does, and what each line under the board says are in [docs/PLAYING.md](docs/PLAYING.md).
 
-| Option | What it does |
-| --- | --- |
-| `size`, `givens`, `answer`, `level`, `set` | the level (`set`: `classic`, the default, or `portals`); `answer` is needed for Cheat and makes a solve the stored answer |
-| `lines` | lines to start from: a kept game (`decodeLines`) or a solved board to show |
-| `marks`, `fill`, `colours`, `board`, `coordinates` | the look, as for `drawTsunagi`; change them with `set` and they take effect at once |
-| `explosions` | `on` (default), `soft` (a boom for a blast, half as often) or `off`; a solve with either help is `helped` |
-| `cheats` | offer Cheat |
-| `controls`, `chips`, `zoom` | the buttons and words (default on), the chips (default off), and the pad: `auto` from 10×10, `on`, `off` |
-| `language` | `en` or `ja`; left out, the host's `lang` or the page's, and it follows the page's |
-| `onChange`, `onStroke`, `onExplosion`, `onSolve` | callbacks, and the same four as DOM events on the host: `tsunagi-change`, `tsunagi-stroke`, `tsunagi-explosion`, `tsunagi-solve`. Each `detail` has `lines`, `code` (to keep the game), `progress`, `answer` and `helped` |
+The options are `size`, `givens`, `answer`, `level` and `set` (the level), `lines`, `marks`, `fill`, `colours`, `board` and `coordinates` (the look), `explosions`, `cheats`, `controls`, `chips`, `zoom`, `language`, and the callbacks `onChange`, `onStroke`, `onExplosion` and `onSolve`, which are also DOM events on the host (`tsunagi-change`, `tsunagi-stroke`, `tsunagi-explosion`, `tsunagi-solve`). What each does is in [docs/PLAYING.md](docs/PLAYING.md).
 
 Ctrl or Cmd with Z undoes. The rules are `game.ts`'s, which are pure and need no
 page, so a server can replay a game's strokes.
@@ -656,16 +605,7 @@ const portals = await loadTsunagiLevels(7, "portals");   // the 32 levels with p
 | 13×13 | 128 | 14×14 | 128 | 15×15 | 128 |
 | 20×20 | 64 | 25×25 | 64 | 30×30 | 64 |
 
-Every level was made once, by `scripts/tsunagi-levels.ts` (4×4 to 12×12),
-`scripts/tsunagi-levels-big.ts` (13×13 to 15×15) or `scripts/tsunagi-levels-huge.ts` (20×20 to
-30×30), and is proved again
-on every build: solved from scratch, it must have exactly one answer, the one
-stored, filling every cell, with no two levels the same board turned or
-mirrored. Levels come in blocks of sixteen, each block no easier on average
-than the one before, the fifteenth and sixteenth its twist; a block opens
-once every level of the one before is solved. `TSUNAGI_MARKS`
-(`@johnmorrisdotca/tsunagi/marks`) rates every level 1 to 5 from its measured
-difficulty.
+Every level was made once by a script and is proved again on every build: it has exactly one answer, the one stored. Levels come in blocks of sixteen, each block no easier on average than the one before, and a block opens once every level of the one before is solved. `TSUNAGI_MARKS` (`@johnmorrisdotca/tsunagi/marks`) rates every level 1 to 5. How they are made and proved is in [docs/MAKING-LEVELS.md](docs/MAKING-LEVELS.md).
 
 The entry points, `@johnmorrisdotca/tsunagi/levels-4` to `/levels-30`, `/levels-portals`, `/layouts`, `/marks` and `/renumbered` among them, are listed under [Entry points](#entry-points) in the API section.
 
